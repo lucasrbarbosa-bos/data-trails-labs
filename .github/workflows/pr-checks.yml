@@ -1,0 +1,100 @@
+# Checks every pull request (and every push to main) must pass.
+# The "protect main" ruleset (docs/MAINTAINING.md) makes the three jobs below required checks,
+# so their names are part of that contract: rename them there too if you rename them here.
+name: PR checks
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  conventions:
+    name: Branch and title
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Branch name and PR title follow CONTRIBUTING.md
+        env:
+          # passed through env, never interpolated into the script: titles and branch names are user input
+          EVENT: ${{ github.event_name }}
+          BRANCH: ${{ github.head_ref }}
+          TITLE: ${{ github.event.pull_request.title }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          if [ "$EVENT" != "pull_request" ]; then echo "push to main: nothing to check"; exit 0; fi
+          fail=0
+          branch_re='^(feature|trail|content|i18n|fix|bug|docs|ci|refactor|chore)/[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9.-]*[a-z0-9])?)?$'
+          if [[ "$AUTHOR" == dependabot* ]]; then
+            echo "dependabot branch: name check skipped"
+          elif [[ ! "$BRANCH" =~ $branch_re ]]; then
+            echo "::error title=Branch name::'$BRANCH' does not follow <type>/<area>/<description>, e.g. feature/engine/sqlite-runner or fix/mobile-top-bar. Types: feature, trail, content, i18n, fix (or bug), docs, ci, refactor, chore. See CONTRIBUTING.md."
+            fail=1
+          fi
+          title_re='^(feat|fix|trail|content|i18n|docs|ci|refactor|test|chore|perf)(\([a-z0-9][a-z0-9-]*\))?!?: [^ ].{2,}$'
+          if [[ ! "$TITLE" =~ $title_re ]]; then
+            echo "::error title=PR title::'$TITLE' does not follow <type>(<scope>): <summary>, e.g. feat(engine): add a sqlite runner. See CONTRIBUTING.md."
+            fail=1
+          fi
+          [ $fail -eq 0 ] && echo "branch '$BRANCH' and title '$TITLE' are fine"
+          exit $fail
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: lab
+          POSTGRES_PASSWORD: lab
+          POSTGRES_DB: loja
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U lab -d loja"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: psql is available
+        run: psql --version
+      - name: Trail manifests are valid
+        run: python engine/hub.py --check
+      - name: Unit tests (engine, hub, translations, PostgreSQL)
+        env:
+          LAB_TEST_PG_URL: postgresql://lab:lab@localhost:5432/loja
+        run: python -m unittest discover -s tests -v
+      - name: Translations up to date (warning only)
+        run: |
+          if ! python tools/i18n.py status; then
+            echo "::warning title=Translations pending::Some content is not translated yet. Run 'python tools/i18n.py extract' (docs/TRANSLATING.md) or list what is pending in the PR."
+          fi
+
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the lab image
+        run: docker build --tag trails-lab-engine:ci .
+      - name: The image starts and serves the home page
+        run: |
+          docker run -d --name lab -p 8765:8765 trails-lab-engine:ci
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8765/ > /dev/null; then echo "home page served"; docker logs lab; exit 0; fi
+            sleep 1
+          done
+          docker logs lab
+          exit 1

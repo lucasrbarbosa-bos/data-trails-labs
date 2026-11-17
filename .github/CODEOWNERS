@@ -1,0 +1,12 @@
+# Code owners are asked for review automatically, and the "protect main" ruleset requires their
+# approval before a pull request can merge (see docs/MAINTAINING.md).
+# Later lines win. When a trail gets its own maintainer, add a line such as:
+#   /trails/window-functions/   @their-github-user
+
+*                       @lucasrbarbosa-bos
+
+# Repository guardrails stay with the owner even if other areas get maintainers.
+/.github/               @lucasrbarbosa-bos
+/LICENSE                @lucasrbarbosa-bos
+/LICENSE-CONTENT        @lucasrbarbosa-bos
+/CONTRIBUTING.md        @lucasrbarbosa-bos
