@@ -442,7 +442,7 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line-2)
   $('main').addEventListener('click', e => { if (!e.target.closest('#btnMenu')) $('menu').classList.remove('aberto'); });
 
   const conteudo = $('conteudo');
-  if (!TRAIL.lang || !window.LAB_TOKEN) {        // opened from disk, without the hub
+  if (!TRAIL.lang || (!window.LAB_TOKEN && !TRAIL.static)) {   // opened from disk; the static site (GitHub Pages) is read-only below
     conteudo.innerHTML = '<div class="aviso"><strong>' + esc(L.abrirHub) + '</strong>' + L.abrirHubTexto + '</div>';
     $('motor').querySelector('span').textContent = L.somenteLeitura;
     $('motor').className = 'motor falhou';

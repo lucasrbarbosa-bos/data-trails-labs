@@ -18,3 +18,6 @@ Thumbs.db
 
 # translation chunks (tools/i18n.py extract); i18n/ itself is committed
 i18n-work/
+
+# static site built by tools/build_static.py (GitHub Pages builds its own)
+_site/

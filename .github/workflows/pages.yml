@@ -1,0 +1,52 @@
+# Publishes the static site to GitHub Pages on every push to main (and on demand).
+# Settings -> Pages -> Source must be "GitHub Actions". Output: https://<owner>.github.io/<repo>/
+# The site is built by tools/build_static.py from the same trails the local lab serves; the local lab
+# (engine/hub.py, Docker) is not involved. See docs/MAINTAINING.md.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# one deployment at a time; a newer push waits instead of cancelling a deployment in progress
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build site
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build the static site
+        env:
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: python tools/build_static.py --out _site --base "/${REPO_NAME}/"
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pages: write        # publish the artifact
+      id-token: write     # prove the deployment comes from this workflow
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
