@@ -1,0 +1,29 @@
+name: Feature
+description: A new capability for the engine, the hub, the pages or the tools.
+title: "feat(<area>): "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is hard or impossible today, and for whom (learners, trail authors, maintainers)?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What you would build. Mention any change to the page contract, trail.json or the engine APIs.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I would like to work on this (branch `feature/<area>/<description>`)

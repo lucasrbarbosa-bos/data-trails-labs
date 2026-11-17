@@ -205,3 +205,29 @@ folder inside the container (it says so in `docker compose logs lab`). Fix with
 `sudo chown -R 1000 workspace`, or run the hub without Docker.
 
 **Fonts look different offline:** pages use Google Fonts when online and fall back to system fonts.
+
+## Contributing
+
+Every change reaches `main` through a pull request that passes the checks in
+`.github/workflows/pr-checks.yml`. Branch names (`feature/<area>/<description>`, `trail/…`,
+`content/…`, `i18n/…`, `fix/…`), PR titles (`feat(engine): …`) and the local checks are in
+[CONTRIBUTING.md](CONTRIBUTING.md). Maintainer settings are in [docs/MAINTAINING.md](docs/MAINTAINING.md).
+
+## License
+
+This repository has two licenses: one for the software, one for the course content.
+
+| What | License | File |
+|---|---|---|
+| **Software**: `engine/`, `tools/`, `tests/`, the trail pages (`trails/*/index.html`), `trails/_template/`, `.github/`, `Dockerfile`, `docker-compose.yml` | GNU Affero General Public License v3.0 only (**AGPL-3.0-only**) | [LICENSE](LICENSE) |
+| **Course content**: `trails/*/content/`, `trails/*/materials/` (PDF books), `trails/*/db/` (datasets), `trails/*/trail.json`, `docs/`, `i18n/` | Creative Commons Attribution-NonCommercial-ShareAlike 4.0 (**CC BY-NC-SA 4.0**) | [LICENSE-CONTENT](LICENSE-CONTENT) |
+
+In short: you may use, study, change and share the software, including commercially, as long as you
+publish your changes under the AGPL, also when you only run them as a website. You may use and adapt
+the course content for non-commercial purposes, with attribution and under the same license.
+Commercial use of the content, or of the software under other terms, needs permission from the
+copyright holder.
+
+Third-party components keep their own licenses: Brython (BSD-3-Clause) and the JetBrains Mono font
+(SIL Open Font License 1.1) are loaded from public CDNs at run time; the Docker images use the
+`python` and `postgres` official images.

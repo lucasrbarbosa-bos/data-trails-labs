@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: How to contribute
+    url: https://github.com/lucasrbarbosa-bos/data-trails-labs/blob/main/CONTRIBUTING.md
+    about: Branch names, pull request titles and the checks every change goes through.

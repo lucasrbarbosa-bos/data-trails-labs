@@ -1,0 +1,39 @@
+name: Content
+description: An error, gap or improvement in a chapter, exercise, quiz, dataset or translation.
+title: "content(<trail-id>): "
+labels: [content]
+body:
+  - type: dropdown
+    id: trail
+    attributes:
+      label: Trail
+      options: [python, sql, data-architecture, other]
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options: [factual error, outdated (version, syntax, product change), unclear explanation, broken exercise or quiz, translation, missing topic]
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where
+      description: Chapter and section, or the page URL with its #anchor.
+      placeholder: "Data Architecture, 22.5 — /t/data-architecture/#/iceberg-internals/22-5"
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language you were reading
+      options: [English, Spanish, Portuguese]
+  - type: textarea
+    id: details
+    attributes:
+      label: What should change
+      description: Include a source (documentation link) for factual or version corrections.
+    validations:
+      required: true

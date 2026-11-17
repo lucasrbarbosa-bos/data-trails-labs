@@ -1,0 +1,44 @@
+name: New trail
+description: Propose a new learning trail.
+title: "trail(<trail-id>): "
+labels: [new-trail]
+body:
+  - type: input
+    id: id
+    attributes:
+      label: Trail id
+      description: Lowercase letters, digits and dashes. Becomes the folder and the URL (/t/<id>/).
+      placeholder: window-functions
+    validations:
+      required: true
+  - type: dropdown
+    id: engine
+    attributes:
+      label: Engine
+      options: [python, postgres, none (reading only), a new engine (describe below)]
+    validations:
+      required: true
+  - type: textarea
+    id: outline
+    attributes:
+      label: Audience and outline
+      description: Who it is for, what they learn, and the chapters you plan.
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: Source language
+      description: The language you will write in. The other two are generated with tools/i18n.py.
+      options: [English, Spanish, Portuguese]
+    validations:
+      required: true
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: Checklist
+      options:
+        - label: I read docs/ADDING_A_TRAIL.md (page contract, theme tokens, EN | ES | PT)
+          required: true
+        - label: The content is my own work, or I have the right to publish it under CC BY-NC-SA 4.0
+          required: true

@@ -1,0 +1,36 @@
+name: Bug
+description: Something does not work as expected.
+title: "fix(<area>): "
+labels: [bug]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where
+      options: [python trail, sql trail, data-architecture trail, home page / top bar, engine / hub, tools, docker setup, other]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Open /t/sql/#cap-4  2. Click Check on challenge 3  3. ..."
+    validations:
+      required: true
+  - type: input
+    id: setup
+    attributes:
+      label: Setup
+      description: How you run it, browser, theme and language.
+      placeholder: docker compose, Chrome 131, dracula, ES
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: "`docker compose logs lab`, the browser console, or a screenshot. Remove personal data."
