@@ -1,0 +1,78 @@
+{
+  "title": "Data Architecture",
+  "subtitle": "From data engineering fundamentals to Iceberg lakehouses, Snowflake and semantic models",
+  "parts": [
+    {"id": "I", "title": "Foundations", "chapters": [
+      {"id": "what-is-data-architecture", "num": 1, "title": "What data architecture is"},
+      {"id": "data-engineering-lifecycle", "num": 2, "title": "The data engineering lifecycle"},
+      {"id": "sources-and-formats", "num": 3, "title": "Source systems and file formats"},
+      {"id": "storage-fundamentals", "num": 4, "title": "Storage fundamentals"},
+      {"id": "compute-fundamentals", "num": 5, "title": "Distributed compute fundamentals"},
+      {"id": "batch-streaming-time", "num": 6, "title": "Batch, streaming and time"}
+    ]},
+    {"id": "II", "title": "Data modelling", "chapters": [
+      {"id": "modelling-fundamentals", "num": 7, "title": "Modelling fundamentals"},
+      {"id": "dimensional-modelling", "num": 8, "title": "Dimensional modelling"},
+      {"id": "history-and-scd", "num": 9, "title": "History, SCDs and snapshots"},
+      {"id": "data-vault", "num": 10, "title": "Data Vault 2.0"},
+      {"id": "modelling-for-the-lakehouse", "num": 11, "title": "Wide tables, OBT and lakehouse modelling"}
+    ]},
+    {"id": "III", "title": "Data layers", "chapters": [
+      {"id": "layered-architectures", "num": 12, "title": "Layered architectures and the medallion model"},
+      {"id": "bronze-layer", "num": 13, "title": "The bronze (raw) layer"},
+      {"id": "silver-layer", "num": 14, "title": "The silver (conformed) layer"},
+      {"id": "gold-layer", "num": 15, "title": "The gold (serving) layer"}
+    ]},
+    {"id": "IV", "title": "Ingestion", "chapters": [
+      {"id": "batch-ingestion", "num": 16, "title": "Batch ingestion patterns"},
+      {"id": "change-data-capture", "num": 17, "title": "Change data capture (CDC)"},
+      {"id": "streaming-platforms", "num": 18, "title": "Real-time ingestion and streaming platforms"},
+      {"id": "micro-batching", "num": 19, "title": "Micro-batching"},
+      {"id": "stream-processing", "num": 20, "title": "Stream processing"}
+    ]},
+    {"id": "V", "title": "Apache Iceberg", "chapters": [
+      {"id": "open-table-formats", "num": 21, "title": "Why open table formats exist"},
+      {"id": "iceberg-internals", "num": 22, "title": "Iceberg internals: metadata, snapshots, commits"},
+      {"id": "iceberg-features", "num": 23, "title": "Iceberg features: evolution, time travel, row-level changes"},
+      {"id": "iceberg-catalogs", "num": 24, "title": "Catalogs and interoperability"},
+      {"id": "operating-iceberg", "num": 25, "title": "Operating Iceberg tables"}
+    ]},
+    {"id": "VI", "title": "Snowflake", "chapters": [
+      {"id": "snowflake-architecture", "num": 26, "title": "Snowflake architecture"},
+      {"id": "snowflake-loading-transforming", "num": 27, "title": "Loading and transforming in Snowflake"},
+      {"id": "snowflake-and-iceberg", "num": 28, "title": "Snowflake and Iceberg"},
+      {"id": "snowflake-governance-cost", "num": 29, "title": "Snowflake governance and cost"}
+    ]},
+    {"id": "VII", "title": "Platform and operations", "chapters": [
+      {"id": "orchestration", "num": 30, "title": "The orchestration layer"},
+      {"id": "transformation-frameworks", "num": 31, "title": "Transformation frameworks: dbt, SQLMesh, Spark"},
+      {"id": "open-source-stack", "num": 32, "title": "The open-source data stack"},
+      {"id": "quality-observability", "num": 33, "title": "Data quality, observability and contracts"},
+      {"id": "governance-privacy", "num": 34, "title": "Governance, security and privacy"}
+    ]},
+    {"id": "VIII", "title": "Semantic layer", "chapters": [
+      {"id": "semantic-layers", "num": 35, "title": "Semantic layers and metrics"},
+      {"id": "semantic-models-on-gold", "num": 36, "title": "Building semantic models on the gold layer"}
+    ]},
+    {"id": "IX", "title": "Ten reference architectures", "chapters": [
+      {"id": "arch-enterprise-warehouse", "num": 37, "title": "1. The enterprise data warehouse"},
+      {"id": "arch-data-lake", "num": 38, "title": "2. The data lake"},
+      {"id": "arch-lambda", "num": 39, "title": "3. Lambda architecture"},
+      {"id": "arch-kappa", "num": 40, "title": "4. Kappa architecture"},
+      {"id": "arch-modern-data-stack", "num": 41, "title": "5. The modern data stack (cloud ELT)"},
+      {"id": "arch-lakehouse", "num": 42, "title": "6. The open lakehouse"},
+      {"id": "arch-data-mesh", "num": 43, "title": "7. Data mesh"},
+      {"id": "arch-data-fabric", "num": 44, "title": "8. Data fabric and federation"},
+      {"id": "arch-streaming-first", "num": 45, "title": "9. Streaming-first, event-driven architecture"},
+      {"id": "arch-real-time-olap", "num": 46, "title": "10. Real-time analytics (OLAP serving)"}
+    ]},
+    {"id": "X", "title": "Case studies", "chapters": [
+      {"id": "case-ecommerce-cdc-lakehouse", "num": 47, "title": "Case: e-commerce CDC into an Iceberg lakehouse read by Snowflake"},
+      {"id": "case-iot-real-time", "num": 48, "title": "Case: IoT telemetry with streaming and micro-batches"},
+      {"id": "case-fintech-regulated", "num": 49, "title": "Case: a regulated fintech with PII erasure and governed metrics"}
+    ]},
+    {"id": "A", "title": "Annex", "chapters": [
+      {"id": "glossary-decision-guide", "num": 50, "title": "Glossary and decision guide"}
+    ]}
+  ]
+}

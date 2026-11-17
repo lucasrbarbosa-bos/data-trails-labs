@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Python Moderno — Laboratório interativo</title>
+<style>
+/* Colours, fonts and the top bar come from /hub/theme.css (themes: dark, light, dracula), injected by the hub. */
+html { height: 100%; -webkit-text-size-adjust: 100%; }
+* { box-sizing: border-box; }
+body { margin: 0; height: 100vh; height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
+  background: var(--th-main); color: var(--th-ink); font-family: var(--th-mono); font-size: 14.5px; line-height: 1.75; }
+button, input, textarea, select { font-family: inherit; }
+a { color: var(--th-link); }
+:focus-visible { outline: 2px solid var(--th-accent); outline-offset: 2px; }
+::selection { background: var(--th-select); }
+* { scrollbar-color: var(--th-line-2) transparent; scrollbar-width: thin; }
+
+/* ---------- layout: top bar (48px, from the hub) + sidebar | reading area, each scrolling on its own */
+.app { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: 300px minmax(0, 1fr); }
+aside { background: var(--th-side); border-right: 1px solid var(--th-line); overflow-y: auto; min-height: 0; padding: 20px 14px 40px; }
+main { overflow-y: auto; min-height: 0; background: var(--th-main); }
+.conteudo { max-width: 880px; margin: 0 auto; padding: 32px 36px 120px; }
+
+/* ---------- sidebar */
+.rotulo { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--th-ink-3); font-weight: 600; }
+aside h1 { font-size: 18px; line-height: 1.3; margin: 6px 0 2px; font-weight: 800; letter-spacing: -0.01em; }
+aside .sub { color: var(--th-ink-2); font-size: 12px; line-height: 1.5; margin-bottom: 16px; }
+.progresso { margin: 0 0 14px; }
+.prog-linha { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--th-ink-3); margin-bottom: 6px; }
+.barra { height: 3px; background: var(--th-line); border-radius: 2px; overflow: hidden; }
+.barra > div { height: 100%; background: var(--th-ok); width: 0; transition: width .4s; }
+.progresso small { display: block; color: var(--th-ink-2); font-size: 11.5px; margin-top: 6px; }
+.motor { margin: 0 0 18px; font-size: 11.5px; line-height: 1.5; color: var(--th-ink-2); display: flex; align-items: flex-start; gap: 8px;
+  border: 1px solid var(--th-line); border-radius: 8px; padding: 8px 10px; background: var(--th-main); }
+.motor i { flex: 0 0 7px; width: 7px; height: 7px; margin-top: 5px; border-radius: 50%; background: var(--th-warn); display: inline-block; }
+.motor.pronto i { background: var(--th-ok); box-shadow: 0 0 0 3px var(--th-ok-bg); }
+.motor.falhou i { background: var(--th-err); }
+.sec-nav { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; }
+.sec-nav::after { content: ""; flex: 1; height: 1px; background: var(--th-line); }
+nav a { display: block; color: var(--th-ink); text-decoration: none; padding: 4px 8px; border-radius: 6px; font-size: 12.5px; line-height: 1.45; }
+nav a:hover { background: var(--th-surface-2); }
+nav a.cap { font-weight: 600; margin-top: 6px; display: flex; justify-content: space-between; gap: 8px; }
+nav a.cap.ativo { background: var(--th-accent); color: var(--th-on-accent); }
+nav a.cap.ativo .cnt, nav a.cap.ativo .cnt.cheio { color: var(--th-on-accent); opacity: .8; }
+nav a.sec { margin-left: 12px; padding-left: 12px; border-left: 1px solid var(--th-line); border-radius: 0 6px 6px 0; color: var(--th-ink-2); font-size: 11.5px; }
+nav a.sec:hover { color: var(--th-ink); border-left-color: var(--th-line-2); }
+nav a code { font-family: inherit; }
+nav a .cnt { font-weight: 400; color: var(--th-ink-3); font-size: 11px; white-space: nowrap; }
+nav a .cnt.cheio { color: var(--th-ok); }
+
+/* ---------- mobile top line (inside the reading area) */
+.topo-mobile { display: none; position: sticky; top: 0; z-index: 5; background: var(--th-side); border-bottom: 1px solid var(--th-line); padding: 8px 16px; align-items: center; gap: 10px; font-size: 13px; }
+.topo-mobile b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.topo-mobile button { background: var(--th-surface); border: 1px solid var(--th-line); color: var(--th-ink); border-radius: 6px; padding: 2px 10px; font-size: 15px; cursor: pointer; }
+.veu { display: none; }
+
+/* ---------- prose */
+.carregando { color: var(--th-ink-3); font-size: 13px; }
+.carregando.erro { color: var(--th-err); }
+h2.cap { font-size: 25px; line-height: 1.3; margin: 4px 0 24px; font-weight: 800; letter-spacing: -0.02em; }
+h2.cap::before { content: "# "; color: var(--th-ink-3); font-weight: 400; }
+h3.sec { font-size: 18px; line-height: 1.4; margin: 40px 0 12px; font-weight: 700; padding-bottom: 6px; border-bottom: 1px solid var(--th-line); }
+h3.sec::before { content: "## "; color: var(--th-ink-3); font-weight: 400; }
+h4 { font-size: 15px; margin: 26px 0 8px; font-weight: 700; }
+h4::before { content: "### "; color: var(--th-ink-3); font-weight: 400; }
+p { margin: 0 0 14px; text-align: left; }
+ul.lista { margin: 0 0 16px; padding-left: 4px; list-style: none; }
+ul.lista li { margin-bottom: 6px; padding-left: 20px; position: relative; }
+ul.lista li::before { content: "-"; position: absolute; left: 4px; color: var(--th-accent); }
+code { font-family: var(--th-mono); font-size: .92em; background: var(--th-surface); border: 1px solid var(--th-line); padding: 0 5px; border-radius: 4px; }
+.ex code, .nota code, th code { background: var(--th-surface-2); }
+.tabela { overflow-x: auto; margin: 0 0 20px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; line-height: 1.55; }
+th, td { border: 1px solid var(--th-line); padding: 6px 10px; text-align: left; vertical-align: top; }
+th { background: var(--th-surface); font-weight: 700; }
+.ex th, .depurador th { background: var(--th-surface-2); }
+
+/* call-out notes: kind values (NOTA, ATENÇÃO, DICA, NOVO) are data keys; only the label is translated */
+.nota { margin: 22px 0; background: var(--th-surface); border: 1px solid var(--th-line); border-left: 3px solid var(--nota, var(--th-info)); border-radius: 8px; padding: 10px 14px 4px; }
+.nota .rot { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--nota, var(--th-info)); margin-bottom: 2px; }
+.nota .tx { margin-bottom: 8px; }
+.nota.NOTA { --nota: var(--th-info); } .nota.ATENÇÃO { --nota: var(--th-err); }
+.nota.DICA { --nota: var(--th-ok); } .nota.NOVO { --nota: var(--th-warn); }
+
+/* ---------- examples and challenges */
+.ex { position: relative; background: var(--th-surface); border: 1px solid var(--th-line); border-radius: 8px; padding: 14px 18px 16px; margin: 26px 0; }
+.ex.desafio { border-left: 3px solid var(--th-accent); }
+.ex .titulo { font-weight: 700; font-size: 15px; line-height: 1.45; margin-bottom: 2px; }
+.ex .meta { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 4px 0 8px; flex-wrap: wrap; font-size: 11.5px; color: var(--th-ink-3); }
+.ex .arquivo::before { content: "$ "; }
+.pill { display: inline-block; border: 1px solid var(--th-line-2); border-radius: 999px; padding: 0 9px; font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--th-accent); }
+.ex .feito { font-size: 11.5px; color: var(--th-ok); }
+.ex .enunciado { margin: 8px 0 12px; }
+.callouts { list-style: none; padding: 0; margin: 12px 0 0; font-size: 13.5px; }
+.callouts li { display: grid; grid-template-columns: 24px 1fr; gap: 6px; margin-bottom: 6px; }
+.callouts .n { color: var(--th-accent); }
+
+/* editor: textarea over a highlighted <pre> */
+.editor { position: relative; border: 1px solid var(--th-line); border-radius: 6px; background: var(--th-code); overflow: hidden; }
+.editor:focus-within { border-color: var(--th-accent); }
+.ed-wrap { display: grid; grid-template-columns: auto 1fr; overflow-x: auto; }
+.gutter { font-family: var(--th-mono); font-size: 13px; line-height: 21px; color: var(--th-ink-3); text-align: right; padding: 12px 8px 12px 10px; user-select: none; border-right: 1px solid var(--th-line); background: var(--th-code); white-space: pre; }
+.gutter .erro { color: var(--th-err); font-weight: 700; }
+.area { position: relative; min-width: 0; }
+.area pre, .area textarea { margin: 0; font-family: var(--th-mono); font-size: 13px; line-height: 21px; padding: 12px 14px; white-space: pre; tab-size: 4; border: 0; letter-spacing: 0; font-variant-ligatures: none; }
+.area pre { pointer-events: none; color: var(--th-ink); min-height: 100%; }
+.area textarea { position: absolute; inset: 0; width: 100%; height: 100%; resize: none; background: transparent; color: transparent; caret-color: var(--th-ink); outline: none; overflow: hidden; }
+.area textarea::selection { background: var(--th-select); color: transparent; }
+.estatico pre { margin: 0; font-family: var(--th-mono); font-size: 13px; line-height: 21px; padding: 12px 14px; overflow-x: auto; white-space: pre; color: var(--th-ink); }
+.tk-kw { color: var(--th-kw); } .tk-str { color: var(--th-str); } .tk-com { color: var(--th-com); font-style: italic; }
+.tk-num { color: var(--th-num); } .tk-bi { color: var(--th-bi); } .tk-fn { color: var(--th-fn); }
+.linha-erro { background: var(--th-err-bg); display: inline-block; width: 100%; }
+.linha-atual { background: var(--th-select); display: inline-block; width: 100%; }
+.gutter .atual { color: var(--th-accent); font-weight: 700; }
+
+.acoes { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; align-items: center; }
+.btn { border: 1px solid var(--th-line); background: var(--th-surface-2); color: var(--th-ink); border-radius: 6px; padding: 5px 12px; font-size: 12.5px; font-weight: 500; cursor: pointer; line-height: 1.4; }
+.btn:hover { border-color: var(--th-line-2); }
+.btn.prim { background: var(--th-accent); border-color: var(--th-accent); color: var(--th-on-accent); font-weight: 700; }
+.btn.prim:hover { filter: brightness(1.08); }
+.btn.ok { background: var(--th-ok-bg); border-color: var(--th-ok); color: var(--th-ok); font-weight: 700; }
+.btn:disabled { opacity: .5; cursor: progress; }
+.atalho { font-size: 11px; color: var(--th-ink-3); margin-left: auto; }
+.campo { display: flex; align-items: flex-start; gap: 10px; margin-top: 10px; font-size: 12.5px; flex-wrap: wrap; }
+.campo label { color: var(--th-ink-2); min-width: 90px; padding-top: 6px; text-transform: uppercase; font-size: 11px; letter-spacing: .06em; }
+.campo input, .campo textarea { flex: 1; min-width: 200px; font-family: var(--th-mono); font-size: 13px; padding: 6px 9px; border: 1px solid var(--th-line); border-radius: 6px; background: var(--th-code); color: var(--th-ink); }
+.campo textarea { min-height: 52px; resize: vertical; }
+.campo input::placeholder, .campo textarea::placeholder { color: var(--th-ink-3); }
+
+.saida { margin-top: 10px; border-radius: 6px; border: 1px solid var(--th-line); background: var(--th-code); font-family: var(--th-mono); font-size: 13px; line-height: 1.6; display: none; }
+.saida.vis { display: block; }
+.saida .cab, .dep-cab, .solucao .cab { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 5px 12px; border-bottom: 1px solid var(--th-line); font-size: 11px; color: var(--th-ink-3); }
+.saida .cab > span:first-child, .solucao .cab span, .dep-corpo h5 { text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+.saida .corpo { padding: 10px 12px; white-space: pre-wrap; word-break: break-word; max-height: 360px; overflow-y: auto; }
+.saida .err { color: var(--th-err); }
+.saida .tb { color: var(--th-err); background: var(--th-err-bg); border-radius: 4px; padding: 8px 10px; margin-top: 6px; }
+.saida .tb a { color: var(--th-err); font-weight: 700; cursor: pointer; text-decoration: underline; }
+.saida .dica-erro { font-size: 12.5px; color: var(--th-ink); margin-top: 8px; padding-left: 10px; border-left: 2px solid var(--th-warn); }
+.mudo { color: var(--th-ink-3); }
+.resultado { margin-top: 10px; padding: 8px 12px; border-radius: 6px; font-size: 13px; display: none; border: 1px solid transparent; }
+.resultado.vis { display: block; }
+.resultado.ok { background: var(--th-ok-bg); color: var(--th-ok); border-color: var(--th-ok); }
+.resultado.falha { background: var(--th-warn-bg); color: var(--th-warn); border-color: var(--th-warn); }
+.inspetor { margin-top: 10px; display: none; }
+.inspetor.vis { display: block; }
+.inspetor table { font-size: 12.5px; background: var(--th-code); }
+.inspetor td:nth-child(1) { font-weight: 700; white-space: nowrap; }
+.inspetor td:nth-child(2) { color: var(--th-bi); white-space: nowrap; }
+.inspetor td:nth-child(3) { word-break: break-all; }
+
+/* step-by-step debugger (local engine only) */
+.depurador { margin-top: 10px; border: 1px solid var(--th-line); border-radius: 6px; display: none; background: var(--th-code); }
+.depurador.vis { display: block; }
+.dep-cab { justify-content: flex-start; flex-wrap: wrap; padding: 8px 10px; font-size: 12px; color: var(--th-ink-2); }
+.dep-cab button { border: 1px solid var(--th-line); background: var(--th-surface-2); color: var(--th-ink); border-radius: 5px; padding: 1px 9px; cursor: pointer; font-size: 13px; }
+.dep-cab button:hover { border-color: var(--th-line-2); }
+.dep-cab input[type=range] { flex: 1; min-width: 120px; accent-color: var(--th-accent); }
+.dep-info { color: var(--th-ink-2); min-width: 220px; }
+.dep-evento { padding: 6px 12px; font-size: 12.5px; color: var(--th-warn); display: none; border-bottom: 1px solid var(--th-line); }
+.dep-evento.vis { display: block; }
+.dep-corpo { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.dep-corpo > div { padding: 8px 12px; min-width: 0; }
+.dep-corpo > div + div { border-left: 1px solid var(--th-line); }
+.dep-corpo h5 { margin: 0 0 6px; font-size: 11px; color: var(--th-ink-3); }
+.dep-corpo table { font-size: 12px; }
+.dep-corpo td { word-break: break-all; }
+.dep-corpo td:nth-child(2) { color: var(--th-bi); }
+.dep-corpo pre { margin: 0; font-family: var(--th-mono); font-size: 12.5px; white-space: pre-wrap; word-break: break-word; max-height: 220px; overflow-y: auto; }
+@media (max-width: 700px) { .dep-corpo { grid-template-columns: 1fr; } .dep-corpo > div + div { border-left: 0; border-top: 1px solid var(--th-line); } }
+
+.req { font-size: 12px; color: var(--th-warn); margin: 6px 0 18px; }
+.req::before { content: "! "; font-weight: 700; }
+.solucao { margin-top: 12px; display: none; }
+.solucao.vis { display: block; }
+.solucao .cab { border: 1px solid var(--th-line); border-bottom: 0; border-radius: 6px 6px 0 0; background: var(--th-code); }
+.solucao .cab + .editor { border-radius: 0 0 6px 6px; }
+
+.paginacao { display: flex; justify-content: space-between; margin-top: 50px; gap: 12px; }
+.paginacao a { color: var(--th-ink); text-decoration: none; border: 1px solid var(--th-line); border-radius: 8px; padding: 10px 16px; font-size: 13px; background: var(--th-surface); }
+.paginacao a:hover { border-color: var(--th-line-2); background: var(--th-surface-2); }
+.paginacao a:last-child { margin-left: auto; text-align: right; }
+
+/* ---------- trail home */
+.inicio { padding-top: 12px; }
+.inicio .prompt { color: var(--th-ink-3); font-size: 12.5px; }
+.inicio .prompt em { color: var(--th-ok); font-style: normal; }
+.inicio h2 { font-size: clamp(28px, 5vw, 40px); line-height: 1.15; letter-spacing: -0.03em; font-weight: 800; margin: 8px 0 8px; }
+.inicio .sub { color: var(--th-ink-2); margin: 0 0 8px; }
+.label { display: flex; align-items: center; gap: 14px; margin: 30px 0 16px; color: var(--th-ink-2); font-size: 12px; }
+.label::before, .label::after { content: ""; flex: 1; height: 1px; background: var(--th-line); }
+.label span { border: 1px solid var(--th-line); border-radius: 999px; padding: 2px 12px; background: var(--th-main); }
+.como { background: var(--th-surface); border: 1px solid var(--th-line); border-radius: 8px; padding: 12px 18px; font-size: 13.5px; }
+.como ul { margin: 0; padding: 0; list-style: none; }
+.como li { margin: 6px 0; padding-left: 20px; position: relative; }
+.como li::before { content: ">"; position: absolute; left: 2px; color: var(--th-accent); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 12px; }
+.card { position: relative; display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--th-line); border-radius: 8px; padding: 12px 14px 16px; text-decoration: none; color: var(--th-ink); background: var(--th-surface); overflow: hidden; min-height: 112px; transition: border-color .15s, background .15s; }
+.card:hover { border-color: var(--th-line-2); background: var(--th-surface-2); }
+.card .row { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--th-ink-3); }
+.card .row .cmd { color: var(--th-python); }
+.card .row .cmd::before { content: "$ "; color: var(--th-ink-3); }
+.card .row .ok { color: var(--th-ok); }
+.card b { font-size: 14px; line-height: 1.4; }
+.card small { color: var(--th-ink-2); font-size: 11.5px; margin-top: auto; }
+.card .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--th-line); }
+.card .bar div { height: 100%; background: var(--th-ok); }
+kbd { font-family: var(--th-mono); font-size: 11px; border: 1px solid var(--th-line-2); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--th-surface-2); color: var(--th-ink); }
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  aside { position: fixed; top: var(--th-bar-h); bottom: 0; left: 0; width: min(300px, 86vw); z-index: 25; transform: translateX(-100%); transition: transform .25s, visibility .25s; visibility: hidden; }
+  body:not(.th-has-bar) aside { top: 0; }
+  aside.aberto { transform: none; visibility: visible; box-shadow: 0 10px 40px rgba(0, 0, 0, .35); }
+  aside.aberto + main .veu { display: block; position: fixed; inset: var(--th-bar-h) 0 0 0; z-index: 24; background: rgba(0, 0, 0, .35); }
+  .topo-mobile { display: flex; }
+  .conteudo { padding: 20px 16px 100px; }
+  .ex { padding: 12px 12px 14px; }
+  h2.cap { font-size: 22px; }
+  .atalho { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { aside, .barra > div, .card { transition: none; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside id="menu">
+    <div class="rotulo">~/trails/python</div>
+    <h1 id="tituloTrilha">Python Moderno</h1>
+    <div class="sub" id="subTrilha">Laboratório interativo · Python 3.15</div>
+    <div class="progresso">
+      <div class="prog-linha"><span id="rotProgresso">progresso</span><span id="pctProgresso">0%</span></div>
+      <div class="barra"><div id="barra"></div></div>
+      <small id="txtProgresso"></small>
+    </div>
+    <div class="motor" id="motor"><i></i><span>…</span></div>
+    <div class="sec-nav rotulo" id="rotCapitulos">capítulos</div>
+    <nav id="nav"></nav>
+  </aside>
+  <main id="main">
+    <div class="topo-mobile"><button id="btnMenu" aria-label="Menu" aria-controls="menu" aria-expanded="false">☰</button><b id="tituloMobile">Python Moderno</b></div>
+    <div class="veu" id="veu"></div>
+    <div class="conteudo" id="conteudo"><p class="carregando">$ …</p></div>
+  </main>
+</div>
+
+<script type="text/python" id="motor_python">
+import sys
+import traceback
+import builtins
+from browser import window
+
+
+class _Saida:
+    def __init__(self, tipo):
+        self.tipo = tipo
+
+    def write(self, texto):
+        window.pyEmit(self.tipo, str(texto))
+        return len(str(texto))
+
+    def flush(self):
+        pass
+
+
+def executar(codigo, extra, entradas, argv):
+    ns = {'__name__': '__main__'}
+    fila = [str(x) for x in entradas]
+
+    def _input(msg=''):
+        sys.stdout.write(str(msg))
+        if fila:
+            valor = fila.pop(0)
+        else:
+            valor = window.prompt(str(msg) or str(window.pyRotuloEntrada))
+            valor = '' if valor is None else str(valor)
+        sys.stdout.write(valor + '\n')
+        return valor
+
+    antigos = (sys.stdout, sys.stderr, builtins.input, sys.argv)
+    sys.stdout, sys.stderr = _Saida('out'), _Saida('err')
+    builtins.input = _input
+    sys.argv = ['programa.py'] + [str(a) for a in argv]
+    status = 'ok'
+    try:
+        exec(compile(codigo, '<seu código>', 'exec'), ns)
+        if extra:
+            exec(compile(extra, '<verificação>', 'exec'), ns)
+    except SystemExit as e:
+        if e.code not in (0, None):
+            status = 'saida'
+    except AssertionError as e:
+        status = 'falhou'
+        window.pyEmit('assert', str(e) if str(e) else '')
+    except BaseException:
+        status = 'erro'
+        window.pyEmit('tb', traceback.format_exc())
+    finally:
+        sys.stdout, sys.stderr, builtins.input, sys.argv = antigos
+    variaveis = []
+    for nome, valor in list(ns.items()):
+        if nome.startswith('__') or type(valor).__name__ == 'module':
+            continue
+        try:
+            texto = repr(valor)
+        except Exception:
+            texto = '?'
+        if len(texto) > 160:
+            texto = texto[:157] + '...'
+        variaveis.append([nome, type(valor).__name__, texto])
+    window.pyVars(variaveis)
+    return status
+
+
+window.pyExecutar = executar
+window.pyPronto()
+</script>
+<script>
+(function () {
+  'use strict';
+
+  // ---------- textos da interface (pt / en / es) ----------
+  const UI = {
+    pt: {
+      docTitle: 'Python Moderno — Laboratório interativo',
+      trailName: 'Python Moderno',
+      trailSub: 'Laboratório interativo · Python 3.15',
+      progressLabel: 'progresso',
+      progress: '{f} de {t} atividades concluídas',
+      chapters: 'capítulos',
+      menu: 'Abrir menu',
+      loadingContent: '$ carregando o conteúdo…',
+      needHub: 'Não consegui carregar o conteúdo desta trilha. Abra a página pelo Trails Lab (docker compose up -d ou python engine/hub.py) em vez de abrir o arquivo direto do disco.',
+      loadingPy: 'Carregando o Python…',
+      loadingBrowserPy: 'Carregando o Python no navegador…',
+      brythonOk: 'Python no navegador (Brython {v})',
+      brythonFail: 'O Python do navegador não carregou. Para executar com o seu Python de verdade, abra pelo Trails Lab: python engine/hub.py (veja o README)',
+      localOk: 'Seu Python {v} (servidor local) · depurador ativo',
+      serverRefused: 'Servidor recusou: ',
+      serverDown: 'Não consegui falar com o servidor local. Ele ainda está rodando? ({m})',
+      internalErr: 'Erro interno do motor: ',
+      promptInput: 'Entrada:',
+      editorAria: 'Editor de código Python',
+      inputs: 'Entradas', inputsPh: 'Uma resposta por linha. Em branco, o navegador vai perguntar.',
+      args: 'Argumentos', argsPh: 'ex.: 1000 1 12 --detalhe',
+      run: '▶ Executar', verify: '✓ Verificar', debug: '🐞 Depurar', vars: 'Variáveis', reset: '↺ Restaurar', showSol: 'Ver solução',
+      shortcut: '<kbd>Ctrl</kbd>+<kbd>Enter</kbd> executa', shortcutVerify: ' · <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> verifica',
+      output: 'Saída', solution: 'Solução', copyToEditor: 'Copiar para o editor',
+      first: 'Primeiro passo', prev: 'Passo anterior', next: 'Próximo passo', last: 'Último passo', closeDbg: 'Fechar depurador', stepSlider: 'Passo do depurador',
+      varsStep: 'Variáveis neste passo', outSoFar: 'Saída até aqui', globals: 'Globais', none: '(nenhuma)',
+      stepInfo: 'Passo {i} de {n} · linha {l} · {onde}', moduleLevel: 'nível do módulo', returned: '↩ {fn}() devolveu {v}', exception: '⚠ exceção: ',
+      nothingYet: '(nada ainda)', truncated: 'Mostrando só os primeiros passos.',
+      running: 'executando…', line: 'linha', noOutput: '(sem saída)', endedErr: 'terminou com erro · ',
+      notPassed: 'Ainda não passou{m}. Ajuste o código e tente de novo.', passed: '✓ Tudo certo! Desafio concluído.',
+      errBeforeCheck: 'O código terminou com erro antes de ser verificado. Veja o traceback acima.',
+      runForVars: 'Execute o código para ver as variáveis criadas.', colName: 'Nome', colType: 'Tipo', colValue: 'Valor',
+      confirmSol: 'Mostrar a solução? Tente mais um pouco antes, se puder.',
+      challenge: 'desafio', done: '✓ concluído',
+      notes: { NOTA: 'Nota', 'ATENÇÃO': 'Atenção', DICA: 'Dica', NOVO: 'Novidade 3.15' },
+      reqCode: 'Este exemplo usa recursos do Python 3.14 ou superior e não roda no motor do navegador. Execute no seu Python 3.15 local.',
+      reqEx: 'Execute este exemplo no seu Python local: ele usa arquivos, banco de dados, vários módulos ou recursos do 3.14+, que o motor do navegador não oferece.',
+      home: 'Início', lab: 'Laboratório livre', labCard: 'Um editor em branco para experimentar',
+      labIntro: 'Um espaço para experimentar o que quiser. O código fica salvo neste navegador.',
+      labCode: "# Escreva seu código aqui\nnomes = ['Ana', 'Bia', 'Caio']\nfor i, nome in enumerate(nomes, start=1):\n    print(f'{i}. {nome}')\n",
+      activities: '{n} atividades', activity: '1 atividade', chapter: 'cap {n}', annex: 'anexo',
+      howTo: 'como usar',
+      howItems: [
+        'Todo exemplo da apostila é um editor: altere o código à vontade e clique em <b>▶ Executar</b> (ou <kbd>Ctrl</kbd>+<kbd>Enter</kbd>).',
+        'Em caso de erro, o traceback aparece com a <b>linha clicável</b>, que é destacada no editor, e uma dica sobre o tipo de erro.',
+        '<b>Variáveis</b> mostra tudo o que o seu código criou, com tipo e valor: é o seu depurador.',
+        'Nos <b>desafios</b>, <b>✓ Verificar</b> roda testes automáticos sobre a sua solução.',
+        'Seu código e seu progresso ficam salvos neste navegador.'
+      ],
+      howLocal: '<b>Você está usando o seu Python de verdade</b> pelo Trails Lab: todos os exemplos executam, inclusive arquivos, banco de dados e recursos do 3.14/3.15. Use <b>🐞 Depurar</b> para avançar linha a linha (<kbd>F10</kbd> no editor).',
+      howBrowser: 'Sem o servidor local, o código roda no navegador pelo Brython (compatível com o Python 3.12), e exemplos de arquivos, banco de dados e 3.14+ ficam só para leitura. Para executar tudo no seu Python e usar o depurador, abra pelo Trails Lab: <code>docker compose up -d</code> ou <code>python engine/hub.py</code> (veja o README).',
+      errHints: {
+        NameError: 'Um nome foi usado antes de ser definido. Confira a grafia (maiúsculas contam) e a ordem das linhas.',
+        TypeError: 'Uma operação recebeu um tipo que não esperava, como somar texto com número. Talvez falte uma conversão.',
+        ValueError: 'O tipo está certo, mas o valor não serve, como int(\'mil\').',
+        SyntaxError: 'O código não segue a gramática do Python: confira parênteses, aspas e dois-pontos.',
+        IndentationError: 'O recuo das linhas não bate. Use 4 espaços por nível.',
+        KeyError: 'A chave não existe no dicionário. Use .get() quando ela puder faltar.',
+        IndexError: 'O índice está fora da lista. Lembre que a contagem começa em 0.',
+        AttributeError: 'O objeto não tem esse atributo ou método. Use dir() para ver o que existe.',
+        ZeroDivisionError: 'Divisão por zero.'
+      }
+    },
+    en: {
+      docTitle: 'Modern Python — interactive lab',
+      trailName: 'Modern Python',
+      trailSub: 'Interactive lab · Python 3.15',
+      progressLabel: 'progress',
+      progress: '{f} of {t} activities done',
+      chapters: 'chapters',
+      menu: 'Open menu',
+      loadingContent: '$ loading content…',
+      needHub: 'Could not load this trail\'s content. Open the page through Trails Lab (docker compose up -d or python engine/hub.py) instead of opening the file straight from disk.',
+      loadingPy: 'Loading Python…',
+      loadingBrowserPy: 'Loading Python in the browser…',
+      brythonOk: 'Python in the browser (Brython {v})',
+      brythonFail: 'The in-browser Python did not load. To run your real Python, open the page through Trails Lab: python engine/hub.py (see the README)',
+      localOk: 'Your Python {v} (local server) · debugger on',
+      serverRefused: 'The server refused: ',
+      serverDown: 'Could not reach the local server. Is it still running? ({m})',
+      internalErr: 'Internal engine error: ',
+      promptInput: 'Input:',
+      editorAria: 'Python code editor',
+      inputs: 'Inputs', inputsPh: 'One answer per line. If empty, the browser will ask.',
+      args: 'Arguments', argsPh: 'e.g. 1000 1 12 --detalhe',
+      run: '▶ Run', verify: '✓ Check', debug: '🐞 Debug', vars: 'Variables', reset: '↺ Reset', showSol: 'Show solution',
+      shortcut: '<kbd>Ctrl</kbd>+<kbd>Enter</kbd> runs', shortcutVerify: ' · <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> checks',
+      output: 'Output', solution: 'Solution', copyToEditor: 'Copy to editor',
+      first: 'First step', prev: 'Previous step', next: 'Next step', last: 'Last step', closeDbg: 'Close debugger', stepSlider: 'Debugger step',
+      varsStep: 'Variables at this step', outSoFar: 'Output so far', globals: 'Globals', none: '(none)',
+      stepInfo: 'Step {i} of {n} · line {l} · {onde}', moduleLevel: 'module level', returned: '↩ {fn}() returned {v}', exception: '⚠ exception: ',
+      nothingYet: '(nothing yet)', truncated: 'Showing only the first steps.',
+      running: 'running…', line: 'line', noOutput: '(no output)', endedErr: 'ended with an error · ',
+      notPassed: 'Not passing yet{m}. Adjust the code and try again.', passed: '✓ All good! Challenge complete.',
+      errBeforeCheck: 'The code ended with an error before it could be checked. See the traceback above.',
+      runForVars: 'Run the code to see the variables it creates.', colName: 'Name', colType: 'Type', colValue: 'Value',
+      confirmSol: 'Show the solution? Try a little longer first, if you can.',
+      challenge: 'challenge', done: '✓ done',
+      notes: { NOTA: 'Note', 'ATENÇÃO': 'Warning', DICA: 'Tip', NOVO: 'New in 3.15' },
+      reqCode: 'This example uses Python 3.14+ features and does not run on the browser engine. Run it on your local Python 3.15.',
+      reqEx: 'Run this example on your local Python: it uses files, a database, several modules or 3.14+ features that the browser engine does not offer.',
+      home: 'Home', lab: 'Free lab', labCard: 'A blank editor to experiment in',
+      labIntro: 'A place to try anything you like. The code is saved in this browser.',
+      labCode: "# Write your code here\nnomes = ['Ana', 'Bia', 'Caio']\nfor i, nome in enumerate(nomes, start=1):\n    print(f'{i}. {nome}')\n",
+      activities: '{n} activities', activity: '1 activity', chapter: 'ch {n}', annex: 'annex',
+      howTo: 'how to use',
+      howItems: [
+        'Every example in the book is an editor: change the code freely and click <b>▶ Run</b> (or <kbd>Ctrl</kbd>+<kbd>Enter</kbd>).',
+        'When something fails, the traceback shows a <b>clickable line</b>, highlighted in the editor, plus a hint about the kind of error.',
+        '<b>Variables</b> lists everything your code created, with type and value: it is your debugger.',
+        'In the <b>challenges</b>, <b>✓ Check</b> runs automatic tests against your solution.',
+        'Your code and your progress are saved in this browser.'
+      ],
+      howLocal: '<b>You are using your real Python</b> through Trails Lab: every example runs, including files, databases and 3.14/3.15 features. Use <b>🐞 Debug</b> to step line by line (<kbd>F10</kbd> in the editor).',
+      howBrowser: 'Without the local server, code runs in the browser through Brython (compatible with Python 3.12), and the file, database and 3.14+ examples are read-only. To run everything on your Python and use the debugger, open the page through Trails Lab: <code>docker compose up -d</code> or <code>python engine/hub.py</code> (see the README).',
+      errHints: {
+        NameError: 'A name was used before it was defined. Check the spelling (case matters) and the order of the lines.',
+        TypeError: 'An operation got a type it did not expect, such as adding text to a number. A conversion may be missing.',
+        ValueError: 'The type is right but the value is not, as in int(\'thousand\').',
+        SyntaxError: 'The code does not follow Python\'s grammar: check parentheses, quotes and colons.',
+        IndentationError: 'The indentation of the lines does not match. Use 4 spaces per level.',
+        KeyError: 'The key is not in the dictionary. Use .get() when it may be missing.',
+        IndexError: 'The index is outside the list. Remember that counting starts at 0.',
+        AttributeError: 'The object has no such attribute or method. Use dir() to see what it has.',
+        ZeroDivisionError: 'Division by zero.'
+      }
+    },
+    es: {
+      docTitle: 'Python Moderno — laboratorio interactivo',
+      trailName: 'Python Moderno',
+      trailSub: 'Laboratorio interactivo · Python 3.15',
+      progressLabel: 'progreso',
+      progress: '{f} de {t} actividades completadas',
+      chapters: 'capítulos',
+      menu: 'Abrir menú',
+      loadingContent: '$ cargando el contenido…',
+      needHub: 'No se pudo cargar el contenido de esta ruta. Abre la página a través de Trails Lab (docker compose up -d o python engine/hub.py) en lugar de abrir el archivo directamente desde el disco.',
+      loadingPy: 'Cargando Python…',
+      loadingBrowserPy: 'Cargando Python en el navegador…',
+      brythonOk: 'Python en el navegador (Brython {v})',
+      brythonFail: 'El Python del navegador no se cargó. Para ejecutar con tu Python real, abre la página a través de Trails Lab: python engine/hub.py (consulta el README)',
+      localOk: 'Tu Python {v} (servidor local) · depurador activo',
+      serverRefused: 'El servidor rechazó la solicitud: ',
+      serverDown: 'No se pudo contactar con el servidor local. ¿Sigue en ejecución? ({m})',
+      internalErr: 'Error interno del motor: ',
+      promptInput: 'Entrada:',
+      editorAria: 'Editor de código Python',
+      inputs: 'Entradas', inputsPh: 'Una respuesta por línea. Si lo dejas vacío, el navegador preguntará.',
+      args: 'Argumentos', argsPh: 'p. ej.: 1000 1 12 --detalhe',
+      run: '▶ Ejecutar', verify: '✓ Verificar', debug: '🐞 Depurar', vars: 'Variables', reset: '↺ Restaurar', showSol: 'Ver solución',
+      shortcut: '<kbd>Ctrl</kbd>+<kbd>Enter</kbd> ejecuta', shortcutVerify: ' · <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> verifica',
+      output: 'Salida', solution: 'Solución', copyToEditor: 'Copiar al editor',
+      first: 'Primer paso', prev: 'Paso anterior', next: 'Paso siguiente', last: 'Último paso', closeDbg: 'Cerrar depurador', stepSlider: 'Paso del depurador',
+      varsStep: 'Variables en este paso', outSoFar: 'Salida hasta aquí', globals: 'Globales', none: '(ninguna)',
+      stepInfo: 'Paso {i} de {n} · línea {l} · {onde}', moduleLevel: 'nivel del módulo', returned: '↩ {fn}() devolvió {v}', exception: '⚠ excepción: ',
+      nothingYet: '(nada todavía)', truncated: 'Se muestran solo los primeros pasos.',
+      running: 'ejecutando…', line: 'línea', noOutput: '(sin salida)', endedErr: 'terminó con error · ',
+      notPassed: 'Todavía no pasa{m}. Ajusta el código e inténtalo de nuevo.', passed: '✓ ¡Todo correcto! Desafío completado.',
+      errBeforeCheck: 'El código terminó con un error antes de poder verificarse. Revisa el traceback de arriba.',
+      runForVars: 'Ejecuta el código para ver las variables que crea.', colName: 'Nombre', colType: 'Tipo', colValue: 'Valor',
+      confirmSol: '¿Mostrar la solución? Inténtalo un poco más antes, si puedes.',
+      challenge: 'desafío', done: '✓ completado',
+      notes: { NOTA: 'Nota', 'ATENÇÃO': 'Atención', DICA: 'Consejo', NOVO: 'Novedad 3.15' },
+      reqCode: 'Este ejemplo usa funciones de Python 3.14 o posterior y no se ejecuta en el motor del navegador. Ejecútalo en tu Python 3.15 local.',
+      reqEx: 'Ejecuta este ejemplo en tu Python local: usa archivos, bases de datos, varios módulos o funciones de 3.14+, que el motor del navegador no ofrece.',
+      home: 'Inicio', lab: 'Laboratorio libre', labCard: 'Un editor en blanco para experimentar',
+      labIntro: 'Un espacio para probar lo que quieras. El código se guarda en este navegador.',
+      labCode: "# Escribe tu código aquí\nnomes = ['Ana', 'Bia', 'Caio']\nfor i, nome in enumerate(nomes, start=1):\n    print(f'{i}. {nome}')\n",
+      activities: '{n} actividades', activity: '1 actividad', chapter: 'cap {n}', annex: 'anexo',
+      howTo: 'cómo usar',
+      howItems: [
+        'Cada ejemplo del libro es un editor: cambia el código libremente y haz clic en <b>▶ Ejecutar</b> (o <kbd>Ctrl</kbd>+<kbd>Enter</kbd>).',
+        'Si hay un error, el traceback muestra la <b>línea en la que se puede hacer clic</b>, resaltada en el editor, y una pista sobre el tipo de error.',
+        '<b>Variables</b> muestra todo lo que creó tu código, con tipo y valor: es tu depurador.',
+        'En los <b>desafíos</b>, <b>✓ Verificar</b> ejecuta pruebas automáticas sobre tu solución.',
+        'Tu código y tu progreso se guardan en este navegador.'
+      ],
+      howLocal: '<b>Estás usando tu Python real</b> a través de Trails Lab: todos los ejemplos se ejecutan, incluidos archivos, bases de datos y funciones de 3.14/3.15. Usa <b>🐞 Depurar</b> para avanzar línea por línea (<kbd>F10</kbd> en el editor).',
+      howBrowser: 'Sin el servidor local, el código se ejecuta en el navegador con Brython (compatible con Python 3.12), y los ejemplos de archivos, bases de datos y 3.14+ son solo de lectura. Para ejecutar todo en tu Python y usar el depurador, abre la página a través de Trails Lab: <code>docker compose up -d</code> o <code>python engine/hub.py</code> (consulta el README).',
+      errHints: {
+        NameError: 'Se usó un nombre antes de definirlo. Revisa la ortografía (las mayúsculas cuentan) y el orden de las líneas.',
+        TypeError: 'Una operación recibió un tipo que no esperaba, como sumar texto con un número. Tal vez falte una conversión.',
+        ValueError: 'El tipo es correcto, pero el valor no sirve, como en int(\'mil\').',
+        SyntaxError: 'El código no sigue la gramática de Python: revisa paréntesis, comillas y dos puntos.',
+        IndentationError: 'La sangría de las líneas no coincide. Usa 4 espacios por nivel.',
+        KeyError: 'La clave no existe en el diccionario. Usa .get() cuando pueda faltar.',
+        IndexError: 'El índice está fuera de la lista. Recuerda que el conteo empieza en 0.',
+        AttributeError: 'El objeto no tiene ese atributo o método. Usa dir() para ver lo que tiene.',
+        ZeroDivisionError: 'División por cero.'
+      }
+    }
+  };
+  const LANG = window.TRAIL && UI[window.TRAIL.lang] ? window.TRAIL.lang : 'pt';
+  const L = UI[LANG];
+  const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (m, k) => (o[k] != null ? o[k] : m));
+
+  // textos fixos do HTML
+  document.title = L.docTitle;
+  document.getElementById('tituloTrilha').textContent = L.trailName;
+  document.getElementById('subTrilha').textContent = L.trailSub;
+  document.getElementById('rotProgresso').textContent = L.progressLabel;
+  document.getElementById('rotCapitulos').textContent = L.chapters;
+  document.getElementById('btnMenu').setAttribute('aria-label', L.menu);
+  document.getElementById('tituloMobile').textContent = L.trailName;
+  window.pyRotuloEntrada = L.promptInput;
+
+  // ---------- armazenamento (por visitante) ----------
+  const CHAVE = 'python-moderno-v1';
+  let estado = { feitos: {}, codigos: {} };
+  try { const s = localStorage.getItem(CHAVE); if (s) estado = Object.assign(estado, JSON.parse(s)); } catch (e) {}
+  function salvar() { try { localStorage.setItem(CHAVE, JSON.stringify(estado)); } catch (e) {} }
+
+  // conteúdo da trilha (content/<idioma>.json), carregado na inicialização
+  let DADOS = null;
+
+  // ---------- utilidades ----------
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const escAttr = s => esc(s).replace(/"/g, '&quot;');
+  function inline(t) {
+    const codes = [];
+    t = t.replace(/`([^`]+)`/g, (_, c) => { codes.push(c); return '\u0000' + (codes.length - 1) + '\u0000'; });
+    t = esc(t).replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(/(^|[^\w*])\*([^*\s][^*]*?)\*(?![\w*])/g, '$1<i>$2</i>');
+    return t.replace(/\u0000(\d+)\u0000/g, (_, i) => '<code>' + esc(codes[+i]) + '</code>');
+  }
+  const CIRC = '❶❷❸❹❺❻❼❽❾❿';
+
+  // ---------- realce de sintaxe ----------
+  const KW = new Set('False None True and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield match case type lazy'.split(' '));
+  const BI = new Set('print len range int float str bool list dict set tuple type input sum min max sorted reversed isinstance enumerate zip map filter open round abs any all repr help dir id iter next super object frozenset frozendict sentinel breakpoint format divmod pow hash chr ord'.split(' '));
+  const TOKEN = /(#[^\n]*)|([rRbBfFtTuU]{0,2}("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'))|(\b\d[\d_]*(?:\.\d+)?(?:[eE][+-]?\d+)?\b)|([A-Za-z_À-ÿ][\wÀ-ÿ]*)/g;
+  function realce(code, lang) {
+    if (lang !== 'python') return esc(code);
+    let out = '', ultimo = 0, anterior = '';
+    code.replace(TOKEN, (m, com, str, _q, num, nome, pos) => {
+      out += esc(code.slice(ultimo, pos));
+      let cls = null;
+      if (com) cls = 'com'; else if (str) cls = 'str'; else if (num) cls = 'num';
+      else if (nome) {
+        if (KW.has(nome)) cls = 'kw';
+        else if (anterior === 'def' || anterior === 'class') cls = 'fn';
+        else if (BI.has(nome)) cls = 'bi';
+        anterior = nome;
+      }
+      out += cls ? '<span class="tk-' + cls + '">' + esc(m) + '</span>' : esc(m);
+      ultimo = pos + m.length;
+      return m;
+    });
+    return out + esc(code.slice(ultimo));
+  }
+
+  // ---------- motor Python ----------
+  let pronto = false, modoLocal = false, emissor = null, coletorVars = null;
+  const motorEl = document.getElementById('motor');
+  function statusMotor(classe, texto) { motorEl.className = 'motor ' + classe; motorEl.querySelector('span').textContent = texto; }
+  statusMotor('', L.loadingPy);
+  function habilitar() { pronto = true; document.querySelectorAll('.btn-run').forEach(b => b.disabled = false); }
+  window.pyEmit = (tipo, texto) => { if (emissor) emissor(tipo, texto); };
+  window.pyVars = v => { if (coletorVars) coletorVars(v); };
+  window.pyPronto = () => {
+    if (modoLocal) return;
+    statusMotor('pronto', fmt(L.brythonOk, { v: (window.__BRYTHON__ && __BRYTHON__.implementation) ? __BRYTHON__.implementation.slice(0, 3).join('.') : '' }));
+    habilitar();
+  };
+  function carregarScript(src) {
+    return new Promise((ok, erro) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => erro(new Error(src)); document.head.appendChild(s); });
+  }
+  async function iniciarBrython() {
+    statusMotor('', L.loadingBrowserPy);
+    const falhou = () => statusMotor('falhou', L.brythonFail);
+    const limite = setTimeout(() => { if (!pronto) falhou(); }, 30000);
+    try {
+      await carregarScript('https://cdn.jsdelivr.net/npm/brython@3.12.4/brython.min.js');
+      await carregarScript('https://cdn.jsdelivr.net/npm/brython@3.12.4/brython_stdlib.js');
+      window.brython({ debug: 1 });
+    } catch (e) { clearTimeout(limite); falhou(); }
+  }
+  async function iniciarMotor() {
+    if (window.LAB_TOKEN) {
+      try {
+        const r = await fetch('api/status', { headers: { 'X-Lab-Token': window.LAB_TOKEN } });
+        if (r.ok) {
+          const info = await r.json();
+          modoLocal = true;
+          statusMotor('pronto', fmt(L.localOk, { v: info.versao }));
+          habilitar();
+          rotear();
+          return;
+        }
+      } catch (e) {}
+    }
+    iniciarBrython();
+  }
+
+  async function rodar(codigo, extra, entradas, argv, aoEmitir, aoVars, depurar) {
+    if (modoLocal) {
+      try {
+        const r = await fetch('api/executar', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Lab-Token': window.LAB_TOKEN },
+          body: JSON.stringify({ codigo, verificacao: extra || '', entradas, argv, depurar: !!depurar })
+        });
+        const res = await r.json();
+        if (!r.ok) { aoEmitir('tb', L.serverRefused + (res.erro || r.status)); return { status: 'erro', passos: [] }; }
+        (res.saida || []).forEach(([tipo, texto]) => aoEmitir(tipo, texto));
+        if (res.status === 'falhou') aoEmitir('assert', res.assercao || '');
+        aoVars(res.vars || []);
+        return { status: res.status, passos: res.passos || [], saida: res.saida || [], cortado: res.cortado };
+      } catch (e) {
+        aoEmitir('tb', fmt(L.serverDown, { m: e.message }));
+        return { status: 'erro', passos: [] };
+      }
+    }
+    emissor = aoEmitir; coletorVars = aoVars;
+    try { return { status: window.pyExecutar(codigo, extra || '', entradas, argv), passos: [] }; }
+    catch (e) { aoEmitir('tb', L.internalErr + (e && e.message ? e.message : e)); return { status: 'erro', passos: [] }; }
+    finally { emissor = null; coletorVars = null; }
+  }
+
+  // ---------- progresso ----------
+  const atividades = [];
+  function atualizarProgresso() {
+    const total = atividades.length, feitos = atividades.filter(id => estado.feitos[id]).length;
+    const pct = total ? 100 * feitos / total : 0;
+    document.getElementById('barra').style.width = pct + '%';
+    document.getElementById('pctProgresso').textContent = Math.round(pct) + '%';
+    document.getElementById('txtProgresso').textContent = fmt(L.progress, { f: feitos, t: total });
+    if (window.TRAIL && window.TRAIL.progress) window.TRAIL.progress(feitos, total);
+    DADOS.capitulos.forEach((cap, i) => {
+      const ids = cap.atividades, f = ids.filter(id => estado.feitos[id]).length;
+      const el = document.querySelector('#nav a[data-cap="' + i + '"] .cnt');
+      if (el) { el.textContent = f + '/' + ids.length; el.classList.toggle('cheio', f === ids.length && ids.length > 0); }
+    });
+  }
+  function marcar(id) {
+    if (!estado.feitos[id]) { estado.feitos[id] = true; salvar(); atualizarProgresso(); }
+    document.querySelectorAll('.feito[data-feito]').forEach(el => { if (el.dataset.feito === id) el.textContent = L.done; });
+  }
+  const feitoHtml = id => '<span class="feito" data-feito="' + escAttr(id) + '">' + (estado.feitos[id] ? L.done : '') + '</span>';
+
+  // ---------- editor ----------
+  function criarEditor(id, inicial) {
+    const salvo = estado.codigos[id];
+    const box = document.createElement('div');
+    box.className = 'editor';
+    box.innerHTML = '<div class="ed-wrap"><div class="gutter"></div><div class="area"><pre aria-hidden="true"></pre><textarea spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="' + escAttr(L.editorAria) + '"></textarea></div></div>';
+    const ta = box.querySelector('textarea'), pre = box.querySelector('pre'), gut = box.querySelector('.gutter');
+    ta.value = salvo != null ? salvo : inicial;
+    let erroLinha = 0, linhaAtual = 0;
+    function pintar() {
+      const linhas = ta.value.split('\n');
+      let html = realce(ta.value, 'python');
+      const marcada = linhaAtual || erroLinha, classe = linhaAtual ? 'linha-atual' : 'linha-erro';
+      if (marcada) {
+        const partes = html.split('\n');
+        if (partes[marcada - 1] !== undefined) partes[marcada - 1] = '<span class="' + classe + '">' + (partes[marcada - 1] || ' ') + '</span>';
+        html = partes.join('\n');
+      }
+      pre.innerHTML = html + '\n';
+      gut.innerHTML = linhas.map((_, i) => i + 1 === marcada ? '<span class="' + (linhaAtual ? 'atual' : 'erro') + '">' + (i + 1) + '</span>' : (i + 1)).join('\n');
+      const largura = Math.max(...linhas.map(l => l.length)) + 2;
+      pre.style.minWidth = 'calc(' + largura + 'ch + 28px)';
+    }
+    ta.addEventListener('input', () => { erroLinha = 0; linhaAtual = 0; pintar(); estado.codigos[id] = ta.value; salvar(); });
+    ta.addEventListener('keydown', e => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const s = ta.selectionStart, f = ta.selectionEnd;
+        if (e.shiftKey) {
+          const ini = ta.value.lastIndexOf('\n', s - 1) + 1;
+          if (ta.value.slice(ini, ini + 4) === '    ') { ta.value = ta.value.slice(0, ini) + ta.value.slice(ini + 4); ta.selectionStart = ta.selectionEnd = Math.max(ini, s - 4); }
+        } else { ta.setRangeText('    ', s, f, 'end'); }
+        ta.dispatchEvent(new Event('input'));
+      } else if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+        const s = ta.selectionStart, ini = ta.value.lastIndexOf('\n', s - 1) + 1;
+        const linha = ta.value.slice(ini, s);
+        let recuo = (linha.match(/^\s*/) || [''])[0];
+        if (/:\s*(#.*)?$/.test(linha)) recuo += '    ';
+        e.preventDefault();
+        ta.setRangeText('\n' + recuo, s, ta.selectionEnd, 'end');
+        ta.dispatchEvent(new Event('input'));
+      }
+    });
+    pintar();
+    return {
+      el: box, ta,
+      valor: () => ta.value,
+      definir: v => { ta.value = v; erroLinha = 0; pintar(); estado.codigos[id] = v; salvar(); },
+      marcarErro: n => { erroLinha = n; linhaAtual = 0; pintar(); },
+      marcarAtual: n => { linhaAtual = n; pintar(); },
+      irPara: n => {
+        const linhas = ta.value.split('\n'); let pos = 0;
+        for (let i = 0; i < n - 1 && i < linhas.length; i++) pos += linhas[i].length + 1;
+        ta.focus(); ta.setSelectionRange(pos, pos + (linhas[n - 1] || '').length);
+      }
+    };
+  }
+
+  const DICAS_ERRO = L.errHints;
+
+  // ---------- célula executável ----------
+  function celula(opts) {
+    // opts: id, codigo, verificacao, solucao, desafio(bool)
+    const frag = document.createElement('div');
+    const ed = criarEditor(opts.id, opts.codigo);
+    frag.appendChild(ed.el);
+    const usaInput = /\binput\s*\(/.test(opts.codigo);
+    const usaArgv = /sys\.argv|parse_args\(argv\)|argparse/.test(opts.codigo) && !opts.desafio;
+    let campoIn = null, campoArgv = null;
+    if (usaInput) {
+      const c = document.createElement('div'); c.className = 'campo';
+      c.innerHTML = '<label>' + esc(L.inputs) + '</label><textarea aria-label="' + escAttr(L.inputs) + '" placeholder="' + escAttr(L.inputsPh) + '"></textarea>';
+      campoIn = c.querySelector('textarea'); campoIn.value = opts.entradas || '';
+      frag.appendChild(c);
+    }
+    if (usaArgv) {
+      const c = document.createElement('div'); c.className = 'campo';
+      c.innerHTML = '<label>' + esc(L.args) + '</label><input type="text" aria-label="' + escAttr(L.args) + '" placeholder="' + escAttr(L.argsPh) + '">';
+      campoArgv = c.querySelector('input'); campoArgv.value = opts.argv || '';
+      frag.appendChild(c);
+    }
+    const acoes = document.createElement('div'); acoes.className = 'acoes';
+    acoes.innerHTML =
+      '<button class="btn prim btn-run"' + (pronto ? '' : ' disabled') + '>' + esc(L.run) + '</button>' +
+      (opts.desafio ? '<button class="btn ok btn-run btn-verif"' + (pronto ? '' : ' disabled') + '>' + esc(L.verify) + '</button>' : '') +
+      (modoLocal ? '<button class="btn btn-run btn-dep">' + esc(L.debug) + '</button>' : '') +
+      '<button class="btn btn-insp">' + esc(L.vars) + '</button>' +
+      '<button class="btn btn-reset">' + esc(L.reset) + '</button>' +
+      (opts.desafio ? '<button class="btn btn-sol">' + esc(L.showSol) + '</button>' : '') +
+      '<span class="atalho">' + L.shortcut + (opts.desafio ? L.shortcutVerify : '') + '</span>';
+    frag.appendChild(acoes);
+    const saida = document.createElement('div'); saida.className = 'saida';
+    saida.innerHTML = '<div class="cab"><span>' + esc(L.output) + '</span><span class="tempo"></span></div><div class="corpo"></div>';
+    frag.appendChild(saida);
+    const resultado = document.createElement('div'); resultado.className = 'resultado'; resultado.setAttribute('role', 'status'); frag.appendChild(resultado);
+    const insp = document.createElement('div'); insp.className = 'inspetor tabela'; frag.appendChild(insp);
+    const dep = document.createElement('div'); dep.className = 'depurador';
+    const bt = (a, rot, txt) => '<button data-a="' + a + '" title="' + escAttr(rot) + '" aria-label="' + escAttr(rot) + '">' + txt + '</button>';
+    dep.innerHTML = '<div class="dep-cab">' + bt('ini', L.first, '⏮') + bt('ant', L.prev, '◀') + bt('prox', L.next, '▶') + bt('fim', L.last, '⏭') +
+      '<input type="range" min="0" value="0" aria-label="' + escAttr(L.stepSlider) + '"><span class="dep-info"></span>' + bt('fechar', L.closeDbg, '✕') + '</div>' +
+      '<div class="dep-evento"></div><div class="dep-corpo"><div><h5>' + esc(L.varsStep) + '</h5><div class="dep-vars"></div></div><div><h5>' + esc(L.outSoFar) + '</h5><pre class="dep-saida"></pre></div></div>';
+    frag.appendChild(dep);
+    let solDiv = null;
+    if (opts.desafio) {
+      solDiv = document.createElement('div'); solDiv.className = 'solucao';
+      solDiv.innerHTML = '<div class="cab"><span>' + esc(L.solution) + '</span></div><div class="estatico editor"><pre>' + realce(opts.solucao, 'python') + '</pre></div><div class="acoes"><button class="btn btn-usar">' + esc(L.copyToEditor) + '</button></div>';
+      frag.appendChild(solDiv);
+      solDiv.querySelector('.btn-usar').onclick = () => ed.definir(opts.solucao);
+    }
+    const corpo = saida.querySelector('.corpo');
+    let ultimasVars = [];
+
+    let passos = [], saidaTotal = [], passoAtual = 0;
+    function tabelaVars(lista) {
+      if (!lista || !lista.length) return '<small class="mudo">' + esc(L.none) + '</small>';
+      return '<table>' + lista.map(([n, t, r]) => '<tr><td><b>' + esc(n) + '</b></td><td>' + esc(t) + '</td><td>' + esc(r) + '</td></tr>').join('') + '</table>';
+    }
+    function mostrarPasso(i) {
+      if (!passos.length) return;
+      passoAtual = Math.max(0, Math.min(passos.length - 1, i));
+      const p = passos[passoAtual];
+      ed.marcarAtual(p.linha);
+      dep.querySelector('input').value = passoAtual;
+      const onde = p.pilha.length > 1 ? p.pilha.slice(1).join(' → ') + '()' : L.moduleLevel;
+      dep.querySelector('.dep-info').textContent = fmt(L.stepInfo, { i: passoAtual + 1, n: passos.length, l: p.linha, onde });
+      const ev = dep.querySelector('.dep-evento');
+      if (p.evento === 'return' && p.pilha.length > 1) { ev.textContent = fmt(L.returned, { fn: p.pilha[p.pilha.length - 1], v: p.retorno }); ev.className = 'dep-evento vis'; }
+      else if (p.evento === 'exception') { ev.textContent = L.exception + p.excecao; ev.className = 'dep-evento vis'; }
+      else { ev.className = 'dep-evento'; ev.textContent = ''; }
+      dep.querySelector('.dep-vars').innerHTML = tabelaVars(p.vars) + (p.globais ? '<h5 style="margin-top:10px">' + esc(L.globals) + '</h5>' + tabelaVars(p.globais) : '');
+      let texto = '', resta = p.saida;
+      for (const [tipo, t] of saidaTotal) { if (tipo === 'tb' || resta <= 0) continue; texto += t.slice(0, resta); resta -= t.length; }
+      dep.querySelector('.dep-saida').textContent = texto || L.nothingYet;
+      const sd = dep.querySelector('.dep-saida'); sd.scrollTop = sd.scrollHeight;
+    }
+    dep.querySelector('.dep-cab').addEventListener('click', e => {
+      const b = e.target.closest('button'); const a = b && b.dataset.a; if (!a) return;
+      if (a === 'fechar') { dep.classList.remove('vis'); ed.marcarAtual(0); return; }
+      mostrarPasso({ ini: 0, ant: passoAtual - 1, prox: passoAtual + 1, fim: passos.length - 1 }[a]);
+    });
+    dep.querySelector('input').addEventListener('input', e => mostrarPasso(+e.target.value));
+
+    async function executar(comVerificacao, depurar) {
+      if (!pronto) return;
+      const botoes = acoes.querySelectorAll('.btn-run');
+      botoes.forEach(b => b.disabled = true);
+      corpo.innerHTML = '<span class="mudo">' + esc(L.running) + '</span>'; saida.classList.add('vis'); resultado.className = 'resultado';
+      ed.marcarErro(0);
+      if (!depurar) dep.classList.remove('vis');
+      const entradas = campoIn ? campoIn.value.split('\n').filter((l, i, a) => i < a.length - 1 || l !== '') : [];
+      const argv = campoArgv ? campoArgv.value.trim().split(/\s+/).filter(Boolean) : [];
+      let buffer = '';
+      const t0 = performance.now();
+      const res = await rodar(ed.valor(), comVerificacao ? opts.verificacao : '', entradas, argv, (tipo, texto) => {
+        if (tipo === 'out') { buffer += esc(texto); }
+        else if (tipo === 'err') { buffer += '<span class="err">' + esc(texto) + '</span>'; }
+        else if (tipo === 'tb') {
+          let tb = esc(texto);
+          let linhaErro = 0;
+          tb = tb.replace(/File &quot;&lt;seu código&gt;&quot;, line (\d+)|File "&lt;seu código&gt;", line (\d+)/g, (m, a, b) => {
+            const n = +(a || b); linhaErro = n;
+            return m.replace(/line \d+/, '<a data-l="' + n + '">' + esc(L.line) + ' ' + n + '</a>');
+          });
+          const tipoErro = (texto.trim().split('\n').pop().match(/^(\w+)/) || [])[1];
+          buffer += '<div class="tb">' + tb + '</div>' + (DICAS_ERRO[tipoErro] ? '<div class="dica-erro">💡 ' + esc(DICAS_ERRO[tipoErro]) + '</div>' : '');
+          if (linhaErro) ed.marcarErro(linhaErro);
+        } else if (tipo === 'assert') {
+          resultado.className = 'resultado vis falha';
+          resultado.textContent = fmt(L.notPassed, { m: texto ? ' — ' + texto : '' });
+        }
+      }, v => { ultimasVars = v; }, depurar);
+      const status = res.status;
+      botoes.forEach(b => b.disabled = false);
+      corpo.innerHTML = buffer || '<span class="mudo">' + esc(L.noOutput) + '</span>';
+      corpo.querySelectorAll('a[data-l]').forEach(a => a.onclick = () => ed.irPara(+a.dataset.l));
+      saida.querySelector('.tempo').textContent = (status === 'erro' ? L.endedErr : '') + Math.round(performance.now() - t0) + ' ms';
+      if (insp.classList.contains('vis')) mostrarVars();
+      if (depurar) {
+        passos = res.passos || []; saidaTotal = res.saida || [];
+        if (passos.length) {
+          dep.classList.add('vis');
+          dep.querySelector('input').max = passos.length - 1;
+          if (res.cortado) dep.querySelector('.dep-info').title = L.truncated;
+          mostrarPasso(0);
+        }
+      }
+      if (comVerificacao) {
+        if (status === 'ok') {
+          resultado.className = 'resultado vis ok';
+          resultado.textContent = L.passed;
+          marcar(opts.id);
+        } else if (status === 'erro' && !resultado.classList.contains('vis')) {
+          resultado.className = 'resultado vis falha';
+          resultado.textContent = L.errBeforeCheck;
+        }
+      } else if (!opts.desafio && (status !== 'erro' || opts.erroEsperado)) {
+        marcar(opts.id);
+      }
+    }
+    function mostrarVars() {
+      if (!ultimasVars.length) { insp.innerHTML = '<small class="mudo">' + esc(L.runForVars) + '</small>'; return; }
+      insp.innerHTML = '<table><tr><th>' + esc(L.colName) + '</th><th>' + esc(L.colType) + '</th><th>' + esc(L.colValue) + '</th></tr>' +
+        ultimasVars.map(([n, t, r]) => '<tr><td>' + esc(n) + '</td><td>' + esc(t) + '</td><td>' + esc(r) + '</td></tr>').join('') + '</table>';
+    }
+    acoes.querySelector('.btn-run').onclick = () => executar(false);
+    if (modoLocal) acoes.querySelector('.btn-dep').onclick = () => executar(false, true);
+    if (opts.desafio) acoes.querySelector('.btn-verif').onclick = () => executar(true);
+    acoes.querySelector('.btn-insp').onclick = () => { insp.classList.toggle('vis'); mostrarVars(); };
+    acoes.querySelector('.btn-reset').onclick = () => { ed.definir(opts.codigo); corpo.innerHTML = ''; saida.classList.remove('vis'); resultado.className = 'resultado'; };
+    if (solDiv) acoes.querySelector('.btn-sol').onclick = () => {
+      if (solDiv.classList.contains('vis') || confirm(L.confirmSol)) solDiv.classList.toggle('vis');
+    };
+    ed.ta.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); executar(opts.desafio && e.shiftKey); } });
+    ed.ta.addEventListener('keydown', e => { if (e.key === 'F10' && dep.classList.contains('vis')) { e.preventDefault(); mostrarPasso(passoAtual + (e.shiftKey ? -1 : 1)); } });
+    return frag;
+  }
+
+  // ---------- renderização ----------
+  const conteudo = document.getElementById('conteudo');
+  conteudo.innerHTML = '<p class="carregando">' + esc(L.loadingContent) + '</p>';
+  function estatico(code, lang) {
+    const d = document.createElement('div'); d.className = 'estatico editor';
+    d.innerHTML = '<pre>' + realce(code, lang) + '</pre>';
+    return d;
+  }
+  const NOTA_IC = { NOTA: 'i', 'ATENÇÃO': '!', DICA: '✓', NOVO: '★' };
+  function renderCapitulo(ci) {
+    const cap = DADOS.capitulos[ci];
+    conteudo.innerHTML = '';
+    const h = document.createElement('h2'); h.className = 'cap'; h.textContent = cap.titulo; conteudo.appendChild(h);
+    let lista = null;
+    cap.blocos.forEach(b => {
+      if (b.t !== 'bullet') lista = null;
+      let el = null;
+      switch (b.t) {
+        case 'h2': el = document.createElement('h3'); el.className = 'sec'; el.id = b.ancora; el.innerHTML = inline(b.text); break;
+        case 'h3': el = document.createElement('h4'); el.innerHTML = inline(b.text); break;
+        case 'p': el = document.createElement('p'); el.innerHTML = inline(b.text); break;
+        case 'bullet':
+          if (!lista) { lista = document.createElement('ul'); lista.className = 'lista'; conteudo.appendChild(lista); }
+          const li = document.createElement('li'); li.innerHTML = inline(b.text); lista.appendChild(li); return;
+        case 'note':
+          el = document.createElement('div'); el.className = 'nota ' + b.kind;
+          el.innerHTML = '<div class="rot">' + esc((NOTA_IC[b.kind] || 'i') + ' ' + (L.notes[b.kind] || b.kind)) + '</div><div class="tx">' + inline(b.text) + '</div>';
+          break;
+        case 'table':
+          el = document.createElement('div'); el.className = 'tabela';
+          el.innerHTML = '<table>' + b.rows.map((r, i) => '<tr>' + r.map(c => (i ? '<td>' : '<th>') + inline(c) + (i ? '</td>' : '</th>')).join('') + '</tr>').join('') + '</table>';
+          break;
+        case 'code':
+          if (b.run || (modoLocal && b.lang === 'python')) { el = document.createElement('div'); el.style.margin = '18px 0'; el.appendChild(celula({ id: b.id || ('local-' + ci + '-' + b.code.length), codigo: b.code })); }
+          else {
+            el = document.createElement('div'); el.appendChild(estatico(b.code, b.lang));
+            if (b.lang === 'python') { const r = document.createElement('div'); r.className = 'req'; r.textContent = L.reqCode; el.appendChild(r); }
+            else el.style.margin = '0 0 18px';
+          }
+          break;
+        case 'ex': {
+          el = document.createElement('div'); el.className = 'ex';
+          el.innerHTML = '<div class="titulo">' + inline(b.titulo) + '</div><div class="meta"><span class="arquivo">' + esc(b.arquivo) + '</span>' + (b.run ? feitoHtml(b.id) : '') + '</div>';
+          if (b.run || (modoLocal && b.lang === 'python')) el.appendChild(celula({ id: b.id || ('local-' + ci + '-' + b.code.length), codigo: b.code, entradas: b.entradas, argv: b.argv, erroEsperado: b.erroEsperado }));
+          else {
+            el.appendChild(estatico(b.code, b.lang));
+            if (b.lang === 'python') { const r = document.createElement('div'); r.className = 'req'; r.style.margin = '8px 0 0'; r.textContent = L.reqEx; el.appendChild(r); }
+          }
+          if (b.callouts.length) {
+            const ul = document.createElement('ul'); ul.className = 'callouts';
+            ul.innerHTML = b.callouts.map((c, i) => '<li><span class="n">' + CIRC[i] + '</span><span>' + inline(c) + '</span></li>').join('');
+            el.appendChild(ul);
+          }
+          break;
+        }
+        case 'desafio': {
+          el = document.createElement('div'); el.className = 'ex desafio';
+          el.innerHTML = '<div class="meta"><span class="pill">' + esc(L.challenge) + '</span>' + feitoHtml(b.id) + '</div><div class="titulo">' + inline(b.titulo) + '</div><div class="enunciado">' + inline(b.enunciado) + '</div>';
+          el.appendChild(celula({ id: b.id, codigo: b.inicial, verificacao: b.verificacao, solucao: b.solucao, desafio: true }));
+          break;
+        }
+      }
+      if (el) conteudo.appendChild(el);
+    });
+    const pag = document.createElement('div'); pag.className = 'paginacao';
+    pag.innerHTML = (ci > 0 ? '<a href="#cap-' + ci + '">← ' + esc(DADOS.capitulos[ci - 1].titulo) + '</a>' : '<a href="#inicio">← ' + esc(L.home) + '</a>') +
+      (ci < DADOS.capitulos.length - 1 ? '<a href="#cap-' + (ci + 2) + '">' + esc(DADOS.capitulos[ci + 1].titulo) + ' →</a>' : '<a href="#laboratorio">' + esc(L.lab) + ' →</a>');
+    conteudo.appendChild(pag);
+    document.getElementById('tituloMobile').textContent = cap.titulo;
+  }
+  function renderInicio() {
+    const items = L.howItems.concat(modoLocal ? L.howLocal : L.howBrowser);
+    conteudo.innerHTML = '<div class="inicio"><div class="prompt">$ python3 --version <em>→ 3.15</em></div><h2>' + esc(L.trailName) + '</h2><p class="sub">' + esc(DADOS.subtitulo) + '</p>' +
+      '<div class="label"><span>' + esc(L.howTo) + '</span></div>' +
+      '<div class="como"><ul>' + items.map(t => '<li>' + t + '</li>').join('') + '</ul></div>' +
+      '<div class="label"><span>' + esc(L.chapters) + '</span></div><div class="cards">' +
+      DADOS.capitulos.map((c, i) => {
+        const n = c.atividades.length, f = c.atividades.filter(id => estado.feitos[id]).length;
+        const num = (c.titulo.match(/^(\d+)\./) || [])[1];
+        return '<a class="card" href="#cap-' + (i + 1) + '"><span class="row"><span class="cmd">' + esc(num ? fmt(L.chapter, { n: num.padStart(2, '0') }) : L.annex) + '</span>' +
+          '<span class="' + (n && f === n ? 'ok' : '') + '">' + f + '/' + n + '</span></span><b>' + esc(c.titulo) + '</b><small>' + esc(n === 1 ? L.activity : fmt(L.activities, { n })) + '</small>' +
+          '<span class="bar"><div style="width:' + (n ? 100 * f / n : 0) + '%"></div></span></a>';
+      }).join('') +
+      '<a class="card" href="#laboratorio"><span class="row"><span class="cmd">python3</span></span><b>' + esc(L.lab) + '</b><small>' + esc(L.labCard) + '</small></a></div></div>';
+    document.getElementById('tituloMobile').textContent = L.trailName;
+  }
+  function renderLaboratorio() {
+    conteudo.innerHTML = '<h2 class="cap">' + esc(L.lab) + '</h2><p>' + esc(L.labIntro) + '</p>';
+    const d = document.createElement('div'); d.className = 'ex';
+    d.appendChild(celula({ id: 'laboratorio', codigo: L.labCode }));
+    conteudo.appendChild(d);
+    document.getElementById('tituloMobile').textContent = L.lab;
+  }
+
+  // ---------- navegação ----------
+  const nav = document.getElementById('nav');
+  const menu = document.getElementById('menu'), btnMenu = document.getElementById('btnMenu');
+  function abrirMenu(aberto) { menu.classList.toggle('aberto', aberto); btnMenu.setAttribute('aria-expanded', String(aberto)); }
+  let ancoraPendente = null;
+  function rotear() {
+    if (!DADOS) return;
+    const h = location.hash.slice(1) || 'inicio';
+    const m = h.match(/^cap-(\d+)$/);
+    nav.querySelectorAll('a.cap').forEach(a => a.classList.toggle('ativo', a.getAttribute('href') === '#' + h));
+    if (m && DADOS.capitulos[+m[1] - 1]) renderCapitulo(+m[1] - 1);
+    else if (h === 'laboratorio') renderLaboratorio();
+    else renderInicio();
+    const alvo = ancoraPendente && document.getElementById(ancoraPendente);
+    if (alvo) alvo.scrollIntoView(); else document.getElementById('main').scrollTop = 0;
+    ancoraPendente = null;
+  }
+  function iniciar(dados) {
+    DADOS = dados;
+    nav.innerHTML = '<a href="#inicio" class="cap">' + esc(L.home) + '</a>' + DADOS.capitulos.map((c, i) =>
+      '<a class="cap" data-cap="' + i + '" href="#cap-' + (i + 1) + '"><span>' + esc(c.titulo) + '</span><span class="cnt"></span></a>' +
+      c.secoes.map(s => '<a class="sec" href="#cap-' + (i + 1) + '" data-ancora="' + escAttr(s.ancora) + '">' + inline(s.titulo) + '</a>').join('')).join('') +
+      '<a class="cap" href="#laboratorio">' + esc(L.lab) + '</a>';
+    DADOS.capitulos.forEach(c => atividades.push(...c.atividades));
+    nav.addEventListener('click', e => {
+      const a = e.target.closest('a'); if (!a) return;
+      ancoraPendente = a.dataset.ancora || null;
+      abrirMenu(false);
+      if (a.getAttribute('href') === location.hash) { e.preventDefault(); rotear(); }
+    });
+    window.addEventListener('hashchange', rotear);
+    rotear();
+    atualizarProgresso();
+    iniciarMotor();
+  }
+  btnMenu.onclick = () => abrirMenu(!menu.classList.contains('aberto'));
+  document.getElementById('veu').onclick = () => abrirMenu(false);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && menu.classList.contains('aberto')) abrirMenu(false); });
+
+  async function carregarConteudo(lang) {
+    const r = await fetch('content/' + lang + '.json');
+    if (!r.ok) throw new Error(r.status);
+    return r.json();
+  }
+  (async () => {
+    let dados = null;
+    try { dados = await carregarConteudo(LANG); }
+    catch (e) { try { dados = await carregarConteudo('pt'); } catch (e2) {} }
+    if (!dados || !Array.isArray(dados.capitulos)) {
+      conteudo.innerHTML = '<p class="carregando erro">' + esc(L.needHub) + '</p>';
+      statusMotor('falhou', '—');
+      return;
+    }
+    iniciar(dados);
+  })();
+})();
+</script>
+</body>
+</html>

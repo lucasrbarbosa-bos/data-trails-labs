@@ -1,0 +1,8 @@
+.git
+workspace
+**/__pycache__
+**/*.pyc
+tests
+docs
+*.md
+!trails/**/*.md

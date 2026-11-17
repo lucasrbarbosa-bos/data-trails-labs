@@ -1,0 +1,55 @@
+{
+  "id": "python",
+  "title": "Python Moderno",
+  "subtitle": "Do primeiro print ao Python 3.15",
+  "description": "Fundamentos, paradigmas, orientação a objetos, pacotes, ambientes e banco de dados. O código roda no Python de verdade, com depurador passo a passo.",
+  "language": "pt-BR",
+  "order": 10,
+  "engine": "python",
+  "entry": "index.html",
+  "tags": [
+    "17 capítulos + 2 anexos",
+    "89 exemplos",
+    "12 desafios",
+    "Depurador passo a passo"
+  ],
+  "materials": [
+    {
+      "label": "Apostila (PDF)",
+      "file": "materials/python-moderno-apostila.pdf"
+    }
+  ],
+  "i18n": {
+    "en": {
+      "title": "Modern Python",
+      "subtitle": "From the first print to Python 3.15",
+      "description": "Fundamentals, paradigms, object orientation, packages, environments and databases. The code runs on real Python, with a step-by-step debugger.",
+      "tags": [
+        "17 chapters + 2 annexes",
+        "89 examples",
+        "12 challenges",
+        "Step-by-step debugger"
+      ],
+      "materials": [
+        "Book (PDF, Portuguese)"
+      ]
+    },
+    "es": {
+      "title": "Python Moderno",
+      "subtitle": "Del primer print a Python 3.15",
+      "description": "Fundamentos, paradigmas, orientación a objetos, paquetes, entornos y bases de datos. El código se ejecuta en Python real, con depurador paso a paso.",
+      "tags": [
+        "17 capítulos + 2 anexos",
+        "89 ejemplos",
+        "12 desafíos",
+        "Depurador paso a paso"
+      ],
+      "materials": [
+        "Libro (PDF, portugués)"
+      ]
+    },
+    "pt": {
+      "title": "Python Moderno"
+    }
+  }
+}

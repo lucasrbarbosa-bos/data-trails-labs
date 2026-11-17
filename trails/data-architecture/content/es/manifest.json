@@ -1,0 +1,322 @@
+{
+  "title": "Arquitectura de datos",
+  "subtitle": "De los fundamentos de ingeniería de datos a los lakehouses con Iceberg, Snowflake y los modelos semánticos",
+  "parts": [
+    {
+      "id": "I",
+      "title": "Fundamentos",
+      "chapters": [
+        {
+          "id": "what-is-data-architecture",
+          "num": 1,
+          "title": "Qué es la arquitectura de datos"
+        },
+        {
+          "id": "data-engineering-lifecycle",
+          "num": 2,
+          "title": "El ciclo de vida de la ingeniería de datos"
+        },
+        {
+          "id": "sources-and-formats",
+          "num": 3,
+          "title": "Sistemas de origen y formatos de archivo"
+        },
+        {
+          "id": "storage-fundamentals",
+          "num": 4,
+          "title": "Fundamentos de almacenamiento"
+        },
+        {
+          "id": "compute-fundamentals",
+          "num": 5,
+          "title": "Fundamentos de cómputo distribuido"
+        },
+        {
+          "id": "batch-streaming-time",
+          "num": 6,
+          "title": "Batch, streaming y tiempo"
+        }
+      ]
+    },
+    {
+      "id": "II",
+      "title": "Modelado de datos",
+      "chapters": [
+        {
+          "id": "modelling-fundamentals",
+          "num": 7,
+          "title": "Fundamentos de modelado"
+        },
+        {
+          "id": "dimensional-modelling",
+          "num": 8,
+          "title": "Modelado dimensional"
+        },
+        {
+          "id": "history-and-scd",
+          "num": 9,
+          "title": "Historial, SCD y snapshots"
+        },
+        {
+          "id": "data-vault",
+          "num": 10,
+          "title": "Data Vault 2.0"
+        },
+        {
+          "id": "modelling-for-the-lakehouse",
+          "num": 11,
+          "title": "Tablas anchas, OBT y modelado en lakehouse"
+        }
+      ]
+    },
+    {
+      "id": "III",
+      "title": "Capas de datos",
+      "chapters": [
+        {
+          "id": "layered-architectures",
+          "num": 12,
+          "title": "Arquitecturas en capas y el modelo medallion"
+        },
+        {
+          "id": "bronze-layer",
+          "num": 13,
+          "title": "La capa bronze (raw)"
+        },
+        {
+          "id": "silver-layer",
+          "num": 14,
+          "title": "La capa silver (conformada)"
+        },
+        {
+          "id": "gold-layer",
+          "num": 15,
+          "title": "La capa gold (de consumo)"
+        }
+      ]
+    },
+    {
+      "id": "IV",
+      "title": "Ingesta",
+      "chapters": [
+        {
+          "id": "batch-ingestion",
+          "num": 16,
+          "title": "Patrones de ingesta batch"
+        },
+        {
+          "id": "change-data-capture",
+          "num": 17,
+          "title": "Captura de cambios de datos (CDC)"
+        },
+        {
+          "id": "streaming-platforms",
+          "num": 18,
+          "title": "Ingesta en tiempo real y plataformas de streaming"
+        },
+        {
+          "id": "micro-batching",
+          "num": 19,
+          "title": "Micro-batching"
+        },
+        {
+          "id": "stream-processing",
+          "num": 20,
+          "title": "Procesamiento de streams"
+        }
+      ]
+    },
+    {
+      "id": "V",
+      "title": "Apache Iceberg",
+      "chapters": [
+        {
+          "id": "open-table-formats",
+          "num": 21,
+          "title": "Por qué existen los formatos de tabla abiertos"
+        },
+        {
+          "id": "iceberg-internals",
+          "num": 22,
+          "title": "Funcionamiento interno de Iceberg: metadatos, snapshots, commits"
+        },
+        {
+          "id": "iceberg-features",
+          "num": 23,
+          "title": "Funcionalidades de Iceberg: evolución, time travel, cambios a nivel de fila"
+        },
+        {
+          "id": "iceberg-catalogs",
+          "num": 24,
+          "title": "Catálogos e interoperabilidad"
+        },
+        {
+          "id": "operating-iceberg",
+          "num": 25,
+          "title": "Operación de tablas Iceberg"
+        }
+      ]
+    },
+    {
+      "id": "VI",
+      "title": "Snowflake",
+      "chapters": [
+        {
+          "id": "snowflake-architecture",
+          "num": 26,
+          "title": "Arquitectura de Snowflake"
+        },
+        {
+          "id": "snowflake-loading-transforming",
+          "num": 27,
+          "title": "Carga y transformación en Snowflake"
+        },
+        {
+          "id": "snowflake-and-iceberg",
+          "num": 28,
+          "title": "Snowflake e Iceberg"
+        },
+        {
+          "id": "snowflake-governance-cost",
+          "num": 29,
+          "title": "Gobierno y costos en Snowflake"
+        }
+      ]
+    },
+    {
+      "id": "VII",
+      "title": "Plataforma y operaciones",
+      "chapters": [
+        {
+          "id": "orchestration",
+          "num": 30,
+          "title": "La capa de orquestación"
+        },
+        {
+          "id": "transformation-frameworks",
+          "num": 31,
+          "title": "Frameworks de transformación: dbt, SQLMesh, Spark"
+        },
+        {
+          "id": "open-source-stack",
+          "num": 32,
+          "title": "El stack de datos open source"
+        },
+        {
+          "id": "quality-observability",
+          "num": 33,
+          "title": "Calidad de datos, observabilidad y contratos"
+        },
+        {
+          "id": "governance-privacy",
+          "num": 34,
+          "title": "Gobierno, seguridad y privacidad"
+        }
+      ]
+    },
+    {
+      "id": "VIII",
+      "title": "Capa semántica",
+      "chapters": [
+        {
+          "id": "semantic-layers",
+          "num": 35,
+          "title": "Capas semánticas y métricas"
+        },
+        {
+          "id": "semantic-models-on-gold",
+          "num": 36,
+          "title": "Construir modelos semánticos sobre la capa gold"
+        }
+      ]
+    },
+    {
+      "id": "IX",
+      "title": "Diez arquitecturas de referencia",
+      "chapters": [
+        {
+          "id": "arch-enterprise-warehouse",
+          "num": 37,
+          "title": "1. El data warehouse empresarial"
+        },
+        {
+          "id": "arch-data-lake",
+          "num": 38,
+          "title": "2. El data lake"
+        },
+        {
+          "id": "arch-lambda",
+          "num": 39,
+          "title": "3. Arquitectura Lambda"
+        },
+        {
+          "id": "arch-kappa",
+          "num": 40,
+          "title": "4. Arquitectura Kappa"
+        },
+        {
+          "id": "arch-modern-data-stack",
+          "num": 41,
+          "title": "5. El modern data stack (ELT en la nube)"
+        },
+        {
+          "id": "arch-lakehouse",
+          "num": 42,
+          "title": "6. El lakehouse abierto"
+        },
+        {
+          "id": "arch-data-mesh",
+          "num": 43,
+          "title": "7. Data mesh"
+        },
+        {
+          "id": "arch-data-fabric",
+          "num": 44,
+          "title": "8. Data fabric y federación"
+        },
+        {
+          "id": "arch-streaming-first",
+          "num": 45,
+          "title": "9. Arquitectura streaming-first orientada a eventos"
+        },
+        {
+          "id": "arch-real-time-olap",
+          "num": 46,
+          "title": "10. Analítica en tiempo real (consumo OLAP)"
+        }
+      ]
+    },
+    {
+      "id": "X",
+      "title": "Casos de estudio",
+      "chapters": [
+        {
+          "id": "case-ecommerce-cdc-lakehouse",
+          "num": 47,
+          "title": "Caso: CDC de e-commerce hacia un lakehouse Iceberg leído por Snowflake"
+        },
+        {
+          "id": "case-iot-real-time",
+          "num": 48,
+          "title": "Caso: telemetría IoT con streaming y micro-batches"
+        },
+        {
+          "id": "case-fintech-regulated",
+          "num": 49,
+          "title": "Caso: una fintech regulada con borrado de PII y métricas gobernadas"
+        }
+      ]
+    },
+    {
+      "id": "A",
+      "title": "Anexo",
+      "chapters": [
+        {
+          "id": "glossary-decision-guide",
+          "num": 50,
+          "title": "Glosario y guía de decisión"
+        }
+      ]
+    }
+  ]
+}

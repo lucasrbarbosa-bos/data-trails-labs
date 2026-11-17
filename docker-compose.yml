@@ -1,0 +1,44 @@
+# Trails Lab: one engine for every trail.
+#
+#   docker compose up -d --build     ->  http://127.0.0.1:8765
+#
+# lab       the hub + runners (Python, psql). Serves the home page and every trail.
+# postgres  the database used by trails with "engine": "postgres". The lab service
+#           loads each trail's datasets (trails/<id>/db/*.sql) when they are missing.
+name: trails-lab
+
+services:
+  lab:
+    build: .
+    image: trails-lab-engine
+    container_name: trails-lab
+    environment:
+      LAB_PG_URL: postgresql://lab:lab@postgres:5432/loja
+    ports:
+      - "127.0.0.1:${LAB_PORT:-8765}:8765"       # only reachable from this computer
+    volumes:
+      - ./engine:/app/engine:ro                   # edit the engine or a trail without rebuilding;
+      - ./trails:/app/trails:ro                   # restart the lab service to pick up NEW trails
+      - ./workspace:/app/workspace                # files created by exercises
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17
+    container_name: sql-lab-postgres              # the SQL trail's chapter 1 uses this name with docker exec
+    environment:
+      POSTGRES_USER: lab
+      POSTGRES_PASSWORD: lab
+      POSTGRES_DB: loja
+    ports:
+      - "127.0.0.1:${PG_PORT:-5433}:5432"         # optional: DBeaver, a local psql, VS Code
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lab -d loja"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  pgdata:

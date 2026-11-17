@@ -1,0 +1,10 @@
+{
+  "title": "My new trail",
+  "subtitle": "One line that says what the learner gets",
+  "description": "Two or three sentences for the card on the home page.",
+  "language": "en",
+  "order": 100,
+  "engine": "python",
+  "entry": "index.html",
+  "tags": ["2 exercises"]
+}

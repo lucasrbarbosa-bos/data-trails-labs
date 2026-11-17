@@ -1,0 +1,40 @@
+{
+  "id": "data-architecture",
+  "title": "Data Architecture",
+  "subtitle": "From data engineering fundamentals to Iceberg lakehouses, Snowflake and semantic models",
+  "description": "Modelling, data layers, storage, ingestion (batch, CDC, micro-batching, real time), orchestration, open-source frameworks, Apache Iceberg, Snowflake and semantic models, then ten reference architectures and three end-to-end case studies. Reading trail with checkpoint quizzes.",
+  "language": "en",
+  "order": 30,
+  "engine": "none",
+  "entry": "index.html",
+  "tags": [
+    "10 parts, 50 chapters",
+    "10 reference architectures",
+    "3 case studies",
+    "Checkpoint quizzes"
+  ],
+  "i18n": {
+    "es": {
+      "title": "Arquitectura de Datos",
+      "subtitle": "De los fundamentos de ingeniería de datos a lakehouses con Iceberg, Snowflake y modelos semánticos",
+      "description": "Modelado, capas de datos, almacenamiento, ingesta (batch, CDC, micro-batching, tiempo real), orquestación, frameworks open source, Apache Iceberg, Snowflake y modelos semánticos; luego diez arquitecturas de referencia y tres casos de estudio. Ruta de lectura con cuestionarios.",
+      "tags": [
+        "10 partes, 50 capítulos",
+        "10 arquitecturas de referencia",
+        "3 casos de estudio",
+        "Cuestionarios de control"
+      ]
+    },
+    "pt": {
+      "title": "Arquitetura de Dados",
+      "subtitle": "Dos fundamentos de engenharia de dados a lakehouses com Iceberg, Snowflake e modelos semânticos",
+      "description": "Modelagem, camadas de dados, armazenamento, ingestão (batch, CDC, micro-batching, tempo real), orquestração, frameworks open source, Apache Iceberg, Snowflake e modelos semânticos; depois dez arquiteturas de referência e três estudos de caso. Trilha de leitura com quizzes.",
+      "tags": [
+        "10 partes, 50 capítulos",
+        "10 arquiteturas de referência",
+        "3 estudos de caso",
+        "Quizzes de verificação"
+      ]
+    }
+  }
+}

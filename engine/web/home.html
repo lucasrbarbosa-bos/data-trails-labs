@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trails Lab</title>
+<link rel="icon" href="/hub/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/hub/theme.css">
+<script>window.TRAIL = { home: '/' };</script>
+<script src="/hub/trail-hub.js"></script>
+<style>
+/* Colours, fonts and the top bar come from /hub/theme.css (themes: dark, light, dracula). */
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--th-main); color: var(--th-ink); font-family: var(--th-mono); font-size: 14px; line-height: 1.55; min-height: 100vh; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--th-accent); outline-offset: 2px; border-radius: 4px; }
+
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+/* hero */
+.hero { text-align: center; padding: 64px 0 40px; }
+.hero h1 { font-size: clamp(30px, 6vw, 52px); line-height: 1.1; letter-spacing: -0.03em; font-weight: 800; margin: 0 0 14px; }
+.hero h1 span { background: linear-gradient(90deg, var(--th-python), var(--th-postgres), var(--th-none)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p { margin: 0 auto; max-width: 580px; color: var(--th-ink-2); }
+.hero .prompt { display: inline-block; margin-top: 22px; color: var(--th-ink-3); font-size: 12.5px; }
+.hero .prompt em { color: var(--th-ok); font-style: normal; }
+
+/* section label, the roadmap.sh "pill on a line" */
+.label { display: flex; align-items: center; gap: 14px; margin: 18px 0 18px; color: var(--th-ink-2); font-size: 12px; }
+.label::before, .label::after { content: ""; flex: 1; height: 1px; background: var(--th-line); }
+.label span { border: 1px solid var(--th-line); border-radius: 999px; padding: 3px 12px; background: var(--th-main); }
+
+/* cards */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap: 12px; }
+.card { position: relative; background: var(--th-surface); border: 1px solid var(--th-line); border-radius: 8px; padding: 14px 16px 18px; overflow: hidden;
+  transition: border-color .15s, background .15s; display: flex; flex-direction: column; min-height: 168px; }
+.card:hover { border-color: var(--th-line-2); background: var(--th-surface-2); }
+.card[data-engine="python"] { --engine: var(--th-python); }
+.card[data-engine="postgres"] { --engine: var(--th-postgres); }
+.card[data-engine="none"] { --engine: var(--th-none); }
+.card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--engine); opacity: .8; }
+
+.row { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 11.5px; color: var(--th-ink-3); }
+.cmd { color: var(--engine); }
+.cmd::before { content: "$ "; color: var(--th-ink-3); }
+.dot { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.dot i { width: 7px; height: 7px; border-radius: 50%; background: var(--th-ink-3); }
+.dot.ok i { background: var(--th-ok); box-shadow: 0 0 0 3px var(--th-ok-bg); }
+.dot.off i { background: var(--th-warn); }
+
+.card h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; margin: 10px 0 4px; line-height: 1.3; }
+.card h2 a { text-decoration: none; }
+.card h2 a::after { content: ""; position: absolute; inset: 0; z-index: 1; }   /* whole card is the link */
+.sub { margin: 0 0 10px; color: var(--th-ink-2); font-size: 12.5px; }
+.tags { margin: 0 0 12px; color: var(--th-ink-3); font-size: 11.5px; }
+.hint { margin: 0 0 12px; color: var(--th-warn); font-size: 12px; }
+.hint::before { content: "! "; font-weight: 700; }
+.hint code { font-family: inherit; color: var(--th-ink); }
+
+.foot-row { margin-top: auto; display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 11.5px; color: var(--th-ink-3); }
+.links { display: flex; gap: 12px; position: relative; z-index: 2; }          /* above the card link */
+.links a { color: var(--th-ink-2); text-decoration: none; }
+.links a:hover { color: var(--th-accent); text-decoration: underline; }
+.state.go { color: var(--th-accent); }
+
+.bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--th-line); }
+.bar div { height: 100%; background: var(--th-ok); width: 0; transition: width .4s; }
+
+/* "create your own" card */
+.new { border-style: dashed; background: transparent; justify-content: center; align-items: center; text-align: center; color: var(--th-ink-2); cursor: pointer; font: inherit; }
+.new::before { display: none; }
+.new:hover { background: var(--th-surface); color: var(--th-ink); }
+.new strong { display: block; font-size: 15px; color: var(--th-ink); margin-bottom: 6px; }
+.new code { font-family: inherit; font-size: 11.5px; color: var(--th-ink-3); display: inline-block; background: var(--th-code); border: 1px solid var(--th-line); border-radius: 5px; padding: 3px 8px; margin-bottom: 6px; }
+.new .copied { color: var(--th-ok); }
+
+.notice { border: 1px dashed var(--th-line-2); border-radius: 8px; padding: 18px 20px; color: var(--th-ink-2); }
+.notice strong { color: var(--th-ink); display: block; margin-bottom: 4px; }
+.notice code { color: var(--th-accent); }
+
+.skeleton { min-height: 168px; background: linear-gradient(90deg, var(--th-surface) 0%, var(--th-surface-2) 50%, var(--th-surface) 100%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+footer { border-top: 1px solid var(--th-line); margin-top: 56px; padding: 18px 0 40px; color: var(--th-ink-3); font-size: 12px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+footer b { color: var(--th-ink-2); font-weight: 500; }
+
+@media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } .bar div, .card { transition: none; } }
+@media (max-width: 600px) { .wrap { padding: 0 16px; } .hero { padding: 44px 0 28px; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="hero">
+    <h1 id="heroTitle">Learning <span>Trails</span></h1>
+    <p id="heroText"></p>
+    <span class="prompt" id="prompt">$ …</span>
+  </header>
+
+  <div class="label"><span id="lblTrails">Trails</span></div>
+  <section class="grid" id="trails" aria-live="polite">
+    <div class="card skeleton" aria-hidden="true"></div>
+    <div class="card skeleton" aria-hidden="true"></div>
+    <div class="card skeleton" aria-hidden="true"></div>
+  </section>
+
+  <footer>
+    <span id="engineLine">engines: …</span>
+    <span id="footNote"></span>
+  </footer>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var TRAIL = window.TRAIL || {};
+  var lang = TRAIL.lang || 'en';
+  var t = TRAIL.t || function (m) { return m.en; };
+
+  var S = {
+    title: { en: 'Learning <span>Trails</span>', es: 'Rutas de <span>Aprendizaje</span>', pt: 'Trilhas de <span>Aprendizado</span>' },
+    hero: {
+      en: 'Independent, hands-on trails that run on a real engine. Pick one, switch whenever you want, and resume where you left off.',
+      es: 'Rutas prácticas e independientes que se ejecutan en un motor real. Elige una, cambia cuando quieras y continúa donde lo dejaste.',
+      pt: 'Trilhas práticas e independentes que rodam num motor de verdade. Escolha uma, troque quando quiser e continue de onde parou.'
+    },
+    trails: { en: 'Trails', es: 'Rutas', pt: 'Trilhas' },
+    connecting: { en: '$ connecting to engine…', es: '$ conectando con el motor…', pt: '$ conectando ao motor…' },
+    found: { en: '{n} found, {r} ready', es: '{n} encontradas, {r} listas', pt: '{n} encontradas, {r} prontas' },
+    offline: { en: '$ engine offline', es: '$ motor desconectado', pt: '$ motor desconectado' },
+    engines: { en: 'engines', es: 'motores', pt: 'motores' },
+    stored: { en: 'progress is stored in this browser', es: 'el progreso se guarda en este navegador', pt: 'o progresso fica salvo neste navegador' },
+    start: { en: 'start →', es: 'empezar →', pt: 'começar →' },
+    opened: { en: 'opened', es: 'abierta', pt: 'aberta' },
+    restart: { en: 'restart', es: 'reiniciar', pt: 'recomeçar' },
+    done: { en: 'done', es: 'completado', pt: 'concluído' },
+    today: { en: 'today', es: 'hoy', pt: 'hoje' },
+    yesterday: { en: 'yesterday', es: 'ayer', pt: 'ontem' },
+    daysAgo: { en: '{n}d ago', es: 'hace {n} d', pt: 'há {n} d' },
+    monthsAgo: { en: '{n}mo ago', es: 'hace {n} m', pt: 'há {n} m' },
+    create: { en: '+ Create a trail', es: '+ Crear una ruta', pt: '+ Criar uma trilha' },
+    copyHint: { en: 'click to copy · docs/ADDING_A_TRAIL.md', es: 'clic para copiar · docs/ADDING_A_TRAIL.md', pt: 'clique para copiar · docs/ADDING_A_TRAIL.md' },
+    copied: { en: 'copied ✓', es: 'copiado ✓', pt: 'copiado ✓' },
+    startFirst: { en: 'Start the engine first', es: 'Primero inicia el motor', pt: 'Inicie o motor primeiro' },
+    startBody: {
+      en: 'Run <code>docker compose up -d</code> or <code>python engine/hub.py</code> in the repository, then open <a href="http://127.0.0.1:8765/">http://127.0.0.1:8765/</a>.',
+      es: 'Ejecuta <code>docker compose up -d</code> o <code>python engine/hub.py</code> en el repositorio y abre <a href="http://127.0.0.1:8765/">http://127.0.0.1:8765/</a>.',
+      pt: 'Rode <code>docker compose up -d</code> ou <code>python engine/hub.py</code> no repositório e abra <a href="http://127.0.0.1:8765/">http://127.0.0.1:8765/</a>.'
+    },
+    noAnswer: { en: 'The engine did not answer', es: 'El motor no respondió', pt: 'O motor não respondeu' },
+    noAnswerBody: {
+      en: 'Reload the page. If the engine restarted, the page needs the new session',
+      es: 'Recarga la página. Si el motor se reinició, la página necesita la nueva sesión',
+      pt: 'Recarregue a página. Se o motor reiniciou, a página precisa da nova sessão'
+    }
+  };
+  function fmt(s, v) { return s.replace(/\{(\w+)\}/g, function (_, k) { return v[k]; }); }
+
+  document.getElementById('heroTitle').innerHTML = t(S.title);
+  document.getElementById('heroText').textContent = t(S.hero);
+  document.getElementById('lblTrails').textContent = t(S.trails);
+  document.getElementById('prompt').textContent = t(S.connecting);
+  document.getElementById('footNote').textContent = t(S.stored);
+  document.getElementById('engineLine').textContent = t(S.engines) + ': …';
+
+  var grid = document.getElementById('trails');
+  var NEW_CMD = 'python tools/new_trail.py my-trail';
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function load(kind, id) {
+    try { return JSON.parse(localStorage.getItem('trails-hub:' + kind + ':' + id) || 'null'); } catch (e) { return null; }
+  }
+  function ago(ms) {
+    var d = Math.floor((Date.now() - ms) / 86400000);
+    return d <= 0 ? t(S.today) : d === 1 ? t(S.yesterday) : d < 30 ? fmt(t(S.daysAgo), { n: d }) : fmt(t(S.monthsAgo), { n: Math.floor(d / 30) });
+  }
+  function hintHtml(text) {
+    return esc(text).replace(/(docker compose [a-z -]+|LAB_PG_URL|psql)/g, '<code>$1</code>');
+  }
+  function local(trail) {                       // card text in the chosen language, from trail.json "i18n"
+    var tr = (trail.i18n && trail.i18n[lang]) || {};
+    return {
+      title: tr.title || trail.title, subtitle: tr.subtitle || trail.subtitle, tags: tr.tags || trail.tags,
+      materials: (trail.materials || []).map(function (m, i) { return { url: m.url, label: (tr.materials && tr.materials[i]) || m.label }; })
+    };
+  }
+
+  function card(tr) {
+    var L = local(tr);
+    var progress = load('progress', tr.id), last = load('last', tr.id);
+    var h = tr.health || { ready: false, label: 'unknown' };
+    var pct = progress && progress.total ? Math.round(100 * progress.done / progress.total) : 0;
+    var resume = tr.url + (last && last.hash ? last.hash : '');
+    var state = last
+      ? (progress && progress.total ? progress.done + '/' + progress.total + ' ' + t(S.done) : t(S.opened)) + ' · ' + ago(last.at)
+      : '<span class="state go">' + t(S.start) + '</span>';
+    var links = L.materials.map(function (m) {
+      return '<a href="' + esc(m.url) + '" target="_blank" rel="noopener">' + esc(m.label) + '</a>';
+    });
+    if (last && last.hash) links.unshift('<a href="' + esc(tr.url) + '">' + t(S.restart) + '</a>');
+    return '<article class="card" data-engine="' + esc(tr.engine) + '" data-trail="' + esc(tr.id) + '">' +
+      '<div class="row"><span class="cmd">' + esc(tr.id) + '</span>' +
+      '<span class="dot ' + (h.ready ? 'ok' : 'off') + '"><i></i>' + esc(h.label.toLowerCase()) + '</span></div>' +
+      '<h2><a href="' + esc(resume) + '">' + esc(L.title) + '</a></h2>' +
+      (L.subtitle ? '<p class="sub">' + esc(L.subtitle) + '</p>' : '') +
+      (L.tags && L.tags.length ? '<p class="tags">' + L.tags.map(esc).join(' · ') + '</p>' : '') +
+      (!h.ready && h.hint ? '<p class="hint">' + hintHtml(h.hint) + '</p>' : '') +
+      '<div class="foot-row"><span>' + state + '</span><span class="links">' + links.join('') + '</span></div>' +
+      '<div class="bar" title="' + pct + '%"><div style="width:' + pct + '%"></div></div>' +
+      '</article>';
+  }
+
+  function newCard() {
+    return '<button class="card new" type="button" id="newTrail"><span><strong>' + t(S.create) + '</strong>' +
+      '<code>' + esc(NEW_CMD) + '</code><br><small id="copyNote">' + t(S.copyHint) + '</small></span></button>';
+  }
+
+  function notice(title, body) {
+    grid.outerHTML = '<div class="notice"><strong>' + title + '</strong>' + body + '</div>';
+    document.getElementById('prompt').textContent = t(S.offline);
+    document.getElementById('engineLine').textContent = t(S.engines) + ': offline';
+  }
+
+  if (!window.LAB_TOKEN) {
+    notice(t(S.startFirst), t(S.startBody));
+    return;
+  }
+
+  fetch('/api/trails', { headers: { 'X-Lab-Token': window.LAB_TOKEN } })
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function (data) {
+      var trails = data.trails || [];
+      grid.innerHTML = trails.map(card).join('') + newCard();
+      document.getElementById('newTrail').addEventListener('click', function () {
+        var note = document.getElementById('copyNote');
+        var done = function () { note.textContent = t(S.copied); note.className = 'copied'; };
+        if (navigator.clipboard) navigator.clipboard.writeText(NEW_CMD).then(done, function () {});
+      });
+      var ready = trails.filter(function (x) { return x.health && x.health.ready; }).length;
+      document.getElementById('prompt').innerHTML = '$ trails --list <em>' + esc(fmt(t(S.found), { n: trails.length, r: ready })) + '</em>';
+      var engines = {};
+      trails.forEach(function (x) { if (x.health) engines[x.health.label.toLowerCase()] = x.health.ready; });
+      document.getElementById('engineLine').innerHTML = t(S.engines) + ': ' + Object.keys(engines).map(function (k) {
+        return '<span class="dot ' + (engines[k] ? 'ok' : 'off') + '"><i></i><b>' + esc(k) + '</b></span>';
+      }).join(' · ');
+    })
+    .catch(function (e) {
+      notice(t(S.noAnswer), t(S.noAnswerBody) + ' (' + esc(e.message) + ').');
+    });
+})();
+</script>
+</body>
+</html>

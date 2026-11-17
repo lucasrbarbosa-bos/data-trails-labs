@@ -1,0 +1,78 @@
+{
+  "id": "sql",
+  "title": "SQL Moderno",
+  "subtitle": "PostgreSQL na prática, com Snowflake e BigQuery lado a lado",
+  "description": "Consultas, joins, CTEs, window functions, datas, o case de entrevista do marketplace e SQL em produção com dbt e SQLMesh. Roda num PostgreSQL 17 real.",
+  "language": "pt-BR",
+  "order": 20,
+  "engine": "postgres",
+  "entry": "index.html",
+  "tags": [
+    "9 capítulos",
+    "51 exemplos",
+    "19 desafios",
+    "Plano de execução"
+  ],
+  "materials": [
+    {
+      "label": "Apostila (PDF)",
+      "file": "materials/sql-moderno-parte-1.pdf"
+    }
+  ],
+  "database": {
+    "schemas": [
+      "public",
+      "marketplace"
+    ],
+    "datasets": [
+      {
+        "name": "loja",
+        "check": "public.itens_pedido",
+        "scripts": [
+          "db/01_esquema.sql",
+          "db/02_dados.sql"
+        ]
+      },
+      {
+        "name": "marketplace",
+        "check": "marketplace.creator_payouts",
+        "scripts": [
+          "db/03_marketplace.sql"
+        ]
+      }
+    ]
+  },
+  "i18n": {
+    "en": {
+      "title": "Modern SQL",
+      "subtitle": "Hands-on PostgreSQL, with Snowflake and BigQuery side by side",
+      "description": "Queries, joins, CTEs, window functions, dates, the marketplace interview case and production SQL with dbt and SQLMesh. Runs on a real PostgreSQL 17.",
+      "tags": [
+        "9 chapters",
+        "51 examples",
+        "19 challenges",
+        "Query plans"
+      ],
+      "materials": [
+        "Book (PDF, Portuguese)"
+      ]
+    },
+    "es": {
+      "title": "SQL Moderno",
+      "subtitle": "PostgreSQL en la práctica, con Snowflake y BigQuery lado a lado",
+      "description": "Consultas, joins, CTEs, window functions, fechas, el caso de entrevista del marketplace y SQL en producción con dbt y SQLMesh. Se ejecuta en un PostgreSQL 17 real.",
+      "tags": [
+        "9 capítulos",
+        "51 ejemplos",
+        "19 desafíos",
+        "Plan de ejecución"
+      ],
+      "materials": [
+        "Libro (PDF, portugués)"
+      ]
+    },
+    "pt": {
+      "title": "SQL Moderno"
+    }
+  }
+}
