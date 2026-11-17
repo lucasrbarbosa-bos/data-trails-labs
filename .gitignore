@@ -15,3 +15,6 @@ Thumbs.db
 
 # local overrides
 .env
+
+# translation chunks (tools/i18n.py extract); i18n/ itself is committed
+i18n-work/

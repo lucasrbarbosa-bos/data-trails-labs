@@ -13,7 +13,8 @@ trail, and come back to where you left off.
 Every page shares one top bar with a **theme picker** (dark, light, dracula) and an **EN | ES | PT**
 language toggle; both are remembered in the browser and apply to the home page and every trail.
 Translated content lives in each trail's `content/` folder; code, exercise ids and checks are the same
-in every language, so progress carries over when you switch. The Python and SQL trails also ship their
+in every language, so progress carries over when you switch. To translate content you changed, see
+[`docs/TRANSLATING.md`](docs/TRANSLATING.md) (`python tools/i18n.py status`). The Python and SQL trails also ship their
 book as a PDF in Portuguese (link on each card). The Data Architecture
 chapters live in `trails/data-architecture/content/` as one JSON file per chapter.
 
@@ -138,6 +139,8 @@ says what to start.
 │   ├── sql/                  trail.json, index.html, materials/, db/*.sql
 │   └── _template/            starting point for new trails (hidden from the home page)
 ├── tools/new_trail.py        creates a trail from the template
+├── tools/i18n.py             keeps the translated content in step (docs/TRANSLATING.md)
+├── i18n/                     which source text each translation was made from
 ├── tests/test_engine.py      python -m unittest discover -s tests
 ├── docs/ADDING_A_TRAIL.md    how to add trails and engines
 └── workspace/                files created by exercises (git-ignored)

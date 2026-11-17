@@ -116,6 +116,7 @@ the end of its head element: the shared stylesheet `/hub/theme.css`, `window.LAB
    and show the UI and content in that language; `TRAIL.t({en, es, pt})` picks a string. Changing the
    language reloads the page. The shipped trails keep content per language in `content/`
    (`content/<lang>.json`, or `content/<lang>/` for the Data Architecture chapters).
+   [`TRANSLATING.md`](TRANSLATING.md) explains how those files are produced and kept up to date.
 5. **Prefix your own `localStorage` keys** with the trail id. Every trail shares one origin
    (`127.0.0.1:8765`), so a generic key like `progress` would collide. The hub's own keys start with
    `trails-hub:`.

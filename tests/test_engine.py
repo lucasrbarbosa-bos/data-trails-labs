@@ -9,6 +9,8 @@ write to (the datasets are loaded into it), for example the one from Docker Comp
 """
 from __future__ import annotations
 
+import contextlib
+import io
 import json
 import os
 import shutil
@@ -26,6 +28,7 @@ sys.path.insert(0, str(ROOT / 'engine'))
 sys.path.insert(0, str(ROOT / 'tools'))
 
 import hub  # noqa: E402
+import i18n  # noqa: E402
 import new_trail  # noqa: E402
 from runners import RUNNERS, Settings  # noqa: E402
 from runners.postgres_runner import PostgresRunner, compare_results, split_statements  # noqa: E402
@@ -80,6 +83,47 @@ class ManifestTests(unittest.TestCase):
                 (folder / 'trail.json').write_text(json.dumps(dict(manifest, i18n=bad)))
                 with self.assertRaisesRegex(Exception, message):
                     load_trail(folder, set(RUNNERS))
+
+
+class TranslationTests(unittest.TestCase):
+    """tools/i18n.py: generated languages are reproducible, and an edit is re-translated alone."""
+
+    def test_generated_content_matches_a_rebuild(self):
+        for trail, cfg in i18n.CONFIG.items():
+            for lang in cfg['targets']:
+                doc, _ = i18n.build(trail, lang)
+                for path, text in doc.rendered().items():
+                    self.assertEqual(path.read_text(encoding='utf-8'), text, f'{path} was edited by hand or is stale')
+
+    def test_edit_extract_merge_cycle(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            shutil.copytree(TRAILS / 'data-architecture' / 'content', tmp / 'trails' / 'data-architecture' / 'content')
+            shutil.copytree(ROOT / 'i18n', tmp / 'i18n')
+            saved = i18n.TRAILS, i18n.STATE, i18n.WORK, i18n.ROOT
+            i18n.TRAILS, i18n.STATE, i18n.WORK, i18n.ROOT = tmp / 'trails', tmp / 'i18n', tmp / 'i18n-work', tmp
+            try:
+                src = tmp / 'trails' / 'data-architecture' / 'content' / 'en' / '01-what-is-data-architecture.json'
+                ch = json.loads(src.read_text(encoding='utf-8'))
+                key = next(f'{ch["id"]}.b{i}.text' for i, b in enumerate(ch['blocks']) if b['t'] == 'p')
+                ch['blocks'][int(key.split('.b')[1].split('.')[0])]['text'] = 'A new paragraph with 1,440 rows and `code`.'
+                src.write_text(json.dumps(ch), encoding='utf-8')
+                with contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(i18n.main(['status', 'data-architecture']), 1)
+                    i18n.main(['extract', 'data-architecture'])
+                    chunk = json.loads((tmp / 'i18n-work/data-architecture/pt/chunk00.src.json').read_text(encoding='utf-8'))
+                    self.assertEqual(list(chunk), [key])                     # only the edited string
+                    for lang in ('pt', 'es'):
+                        (tmp / f'i18n-work/data-architecture/{lang}/chunk00.out.json').write_text(
+                            json.dumps({key: 'Um novo parágrafo com 1,440 linhas e `code`.'}), encoding='utf-8')
+                    self.assertEqual(i18n.main(['check', 'data-architecture']), 0)
+                    i18n.main(['merge', 'data-architecture'])
+                    self.assertEqual(i18n.main(['status', 'data-architecture']), 0)
+                pt = json.loads((tmp / 'trails/data-architecture/content/pt/01-what-is-data-architecture.json').read_text(encoding='utf-8'))
+                texts = [b.get('text') for b in pt['blocks']]
+                self.assertIn('Um novo parágrafo com 1.440 linhas e `code`.', texts)   # separators localised
+            finally:
+                i18n.TRAILS, i18n.STATE, i18n.WORK, i18n.ROOT = saved
 
 
 class SqlSplitTests(unittest.TestCase):
