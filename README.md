@@ -18,6 +18,11 @@ in every language, so progress carries over when you switch. To translate conten
 book as a PDF in Portuguese (link on each card). The Data Architecture
 chapters live in `trails/data-architecture/content/` as one JSON file per chapter.
 
+**Online:** a static copy runs at https://lucasrbarbosa-bos.github.io/data-trails-labs/, rebuilt on every
+merge to `main`. Data Architecture works fully there and Python exercises run in the browser (Brython);
+SQL is read-only online. For everything, including real Python 3.15, PostgreSQL 17 and the debugger,
+run the lab locally as below.
+
 ---
 
 ## Run it with Docker (recommended)
@@ -140,6 +145,7 @@ says what to start.
 │   └── _template/            starting point for new trails (hidden from the home page)
 ├── tools/new_trail.py        creates a trail from the template
 ├── tools/i18n.py             keeps the translated content in step (docs/TRANSLATING.md)
+├── tools/build_static.py     static copy of the lab for GitHub Pages (docs/MAINTAINING.md)
 ├── i18n/                     which source text each translation was made from
 ├── tests/test_engine.py      python -m unittest discover -s tests
 ├── docs/ADDING_A_TRAIL.md    how to add trails and engines

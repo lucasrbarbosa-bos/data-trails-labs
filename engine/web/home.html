@@ -23,6 +23,8 @@ a { color: inherit; }
 .hero h1 { font-size: clamp(30px, 6vw, 52px); line-height: 1.1; letter-spacing: -0.03em; font-weight: 800; margin: 0 0 14px; }
 .hero h1 span { background: linear-gradient(90deg, var(--th-python), var(--th-postgres), var(--th-none)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .hero p { margin: 0 auto; max-width: 580px; color: var(--th-ink-2); }
+.wip { display: inline-block; margin: 0 0 16px; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700;
+  color: #1a1a1a; background: #facc15; letter-spacing: .02em; }
 .hero .prompt { display: inline-block; margin-top: 22px; color: var(--th-ink-3); font-size: 12.5px; }
 .hero .prompt em { color: var(--th-ok); font-style: normal; }
 
@@ -92,6 +94,7 @@ footer b { color: var(--th-ink-2); font-weight: 500; }
 <body>
 <main class="wrap">
   <header class="hero">
+    <span class="wip" id="wip">● under development</span>
     <h1 id="heroTitle">Learning <span>Trails</span></h1>
     <p id="heroText"></p>
     <span class="prompt" id="prompt">$ …</span>
@@ -115,7 +118,7 @@ footer b { color: var(--th-ink-2); font-weight: 500; }
   'use strict';
   var TRAIL = window.TRAIL || {};
   var lang = TRAIL.lang || 'en';
-  var t = TRAIL.t || function (m) { return m.en; };
+  var t = TRAIL.t || function (m) { return typeof m === 'string' ? m : m.en; };
 
   var S = {
     title: { en: 'Learning <span>Trails</span>', es: 'Rutas de <span>Aprendizaje</span>', pt: 'Trilhas de <span>Aprendizado</span>' },
@@ -125,6 +128,7 @@ footer b { color: var(--th-ink-2); font-weight: 500; }
       pt: 'Trilhas práticas e independentes que rodam num motor de verdade. Escolha uma, troque quando quiser e continue de onde parou.'
     },
     trails: { en: 'Trails', es: 'Rutas', pt: 'Trilhas' },
+    wip: { en: '● under development', es: '● en desarrollo', pt: '● em desenvolvimento' },
     connecting: { en: '$ connecting to engine…', es: '$ conectando con el motor…', pt: '$ conectando ao motor…' },
     found: { en: '{n} found, {r} ready', es: '{n} encontradas, {r} listas', pt: '{n} encontradas, {r} prontas' },
     offline: { en: '$ engine offline', es: '$ motor desconectado', pt: '$ motor desconectado' },
@@ -159,6 +163,7 @@ footer b { color: var(--th-ink-2); font-weight: 500; }
   document.getElementById('heroTitle').innerHTML = t(S.title);
   document.getElementById('heroText').textContent = t(S.hero);
   document.getElementById('lblTrails').textContent = t(S.trails);
+  document.getElementById('wip').textContent = t(S.wip);
   document.getElementById('prompt').textContent = t(S.connecting);
   document.getElementById('footNote').textContent = t(S.stored);
   document.getElementById('engineLine').textContent = t(S.engines) + ': …';
@@ -193,6 +198,7 @@ footer b { color: var(--th-ink-2); font-weight: 500; }
     var L = local(tr);
     var progress = load('progress', tr.id), last = load('last', tr.id);
     var h = tr.health || { ready: false, label: 'unknown' };
+    var label = t(h.label), hint = h.hint ? t(h.hint) : '';      // the static build sends {en, es, pt}
     var pct = progress && progress.total ? Math.round(100 * progress.done / progress.total) : 0;
     var resume = tr.url + (last && last.hash ? last.hash : '');
     var state = last
@@ -204,11 +210,11 @@ footer b { color: var(--th-ink-2); font-weight: 500; }
     if (last && last.hash) links.unshift('<a href="' + esc(tr.url) + '">' + t(S.restart) + '</a>');
     return '<article class="card" data-engine="' + esc(tr.engine) + '" data-trail="' + esc(tr.id) + '">' +
       '<div class="row"><span class="cmd">' + esc(tr.id) + '</span>' +
-      '<span class="dot ' + (h.ready ? 'ok' : 'off') + '"><i></i>' + esc(h.label.toLowerCase()) + '</span></div>' +
+      '<span class="dot ' + (h.ready ? 'ok' : 'off') + '"><i></i>' + esc(label.toLowerCase()) + '</span></div>' +
       '<h2><a href="' + esc(resume) + '">' + esc(L.title) + '</a></h2>' +
       (L.subtitle ? '<p class="sub">' + esc(L.subtitle) + '</p>' : '') +
       (L.tags && L.tags.length ? '<p class="tags">' + L.tags.map(esc).join(' · ') + '</p>' : '') +
-      (!h.ready && h.hint ? '<p class="hint">' + hintHtml(h.hint) + '</p>' : '') +
+      (!h.ready && hint ? '<p class="hint">' + hintHtml(hint) + '</p>' : '') +
       '<div class="foot-row"><span>' + state + '</span><span class="links">' + links.join('') + '</span></div>' +
       '<div class="bar" title="' + pct + '%"><div style="width:' + pct + '%"></div></div>' +
       '</article>';
@@ -225,17 +231,20 @@ footer b { color: var(--th-ink-2); font-weight: 500; }
     document.getElementById('engineLine').textContent = t(S.engines) + ': offline';
   }
 
-  if (!window.LAB_TOKEN) {
+  if (!window.LAB_TOKEN && !window.TRAILS_STATIC) {
     notice(t(S.startFirst), t(S.startBody));
     return;
   }
 
-  fetch('/api/trails', { headers: { 'X-Lab-Token': window.LAB_TOKEN } })
-    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+  var trailList = window.TRAILS_STATIC                          // static site: list baked in at build time
+    ? Promise.resolve({ trails: window.TRAILS_STATIC })
+    : fetch('/api/trails', { headers: { 'X-Lab-Token': window.LAB_TOKEN } })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+  trailList
     .then(function (data) {
       var trails = data.trails || [];
-      grid.innerHTML = trails.map(card).join('') + newCard();
-      document.getElementById('newTrail').addEventListener('click', function () {
+      grid.innerHTML = trails.map(card).join('') + (window.TRAILS_STATIC ? '' : newCard());   // the public site has no "create a trail"
+      if (!window.TRAILS_STATIC) document.getElementById('newTrail').addEventListener('click', function () {
         var note = document.getElementById('copyNote');
         var done = function () { note.textContent = t(S.copied); note.className = 'copied'; };
         if (navigator.clipboard) navigator.clipboard.writeText(NEW_CMD).then(done, function () {});
@@ -243,7 +252,7 @@ footer b { color: var(--th-ink-2); font-weight: 500; }
       var ready = trails.filter(function (x) { return x.health && x.health.ready; }).length;
       document.getElementById('prompt').innerHTML = '$ trails --list <em>' + esc(fmt(t(S.found), { n: trails.length, r: ready })) + '</em>';
       var engines = {};
-      trails.forEach(function (x) { if (x.health) engines[x.health.label.toLowerCase()] = x.health.ready; });
+      trails.forEach(function (x) { if (x.health) engines[t(x.health.label).toLowerCase()] = x.health.ready; });
       document.getElementById('engineLine').innerHTML = t(S.engines) + ': ' + Object.keys(engines).map(function (k) {
         return '<span class="dot ' + (engines[k] ? 'ok' : 'off') + '"><i></i><b>' + esc(k) + '</b></span>';
       }).join(' · ');

@@ -27,6 +27,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / 'engine'))
 sys.path.insert(0, str(ROOT / 'tools'))
 
+import build_static  # noqa: E402
 import hub  # noqa: E402
 import i18n  # noqa: E402
 import new_trail  # noqa: E402
@@ -124,6 +125,37 @@ class TranslationTests(unittest.TestCase):
                 self.assertIn('Um novo parágrafo com 1.440 linhas e `code`.', texts)   # separators localised
             finally:
                 i18n.TRAILS, i18n.STATE, i18n.WORK, i18n.ROOT = saved
+
+
+class StaticSiteTests(unittest.TestCase):
+    """tools/build_static.py: the GitHub Pages copy of the lab."""
+
+    def test_build_under_a_sub_path(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / 'site'
+            result = build_static.build(out, '/data-trails-labs/')
+            self.assertEqual(result['trails'][:2], ['python', 'sql'])
+            home = (out / 'index.html').read_text(encoding='utf-8')
+            self.assertIn('href="/data-trails-labs/hub/theme.css"', home)
+            self.assertNotIn('"/hub/', home)                              # nothing points at the site root
+            self.assertIn('"url": "/data-trails-labs/t/sql/"', home)       # trail list baked in, under the base
+            self.assertTrue((out / 'hub' / 'trail-hub.js').is_file())
+            self.assertTrue((out / '.nojekyll').is_file())
+            for trail in result['trails']:
+                page = (out / 't' / trail / 'index.html').read_text(encoding='utf-8')
+                self.assertIn('<link rel="stylesheet" href="/data-trails-labs/hub/theme.css">', page)
+                self.assertIn('"static": true', page)
+                self.assertNotIn('LAB_TOKEN =', page)                      # no engine, no token
+            self.assertTrue((out / 't/data-architecture/content/es/manifest.json').is_file())
+            self.assertTrue((out / 't/sql/materials/sql-moderno-parte-1.pdf').is_file())
+            self.assertTrue((out / 't/python/content/en.json').is_file())
+
+    def test_base_must_be_a_path(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(ValueError):                         # a Windows path, not a URL path
+                build_static.build(Path(tmp) / 'site', 'C:/Program Files/Git/data-trails-labs/')
+            build_static.build(Path(tmp) / 'site', 'data-trails-labs')     # slashes are optional
+            self.assertIn('"/data-trails-labs/hub/', (Path(tmp) / 'site' / 'index.html').read_text(encoding='utf-8'))
 
 
 class SqlSplitTests(unittest.TestCase):

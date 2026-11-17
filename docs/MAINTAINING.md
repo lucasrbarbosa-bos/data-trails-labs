@@ -45,3 +45,20 @@ their fork, so only the owner (and anyone you later add as a collaborator) can c
   person *Write* access; they can then approve PRs for that trail.
 - If you rename a job in `pr-checks.yml`, update the required checks in the ruleset at the same time,
   or every PR will wait for a check that never comes.
+
+## Public site (GitHub Pages)
+
+`.github/workflows/pages.yml` publishes a static copy of the lab to
+`https://lucasrbarbosa-bos.github.io/data-trails-labs/` on every push to `main` (every merged PR) and
+from the *Run workflow* button. The PR checks build the same site, so a change that breaks it fails
+before merging.
+
+- **Settings → Pages → Source: GitHub Actions** (already set). Don't add the suggested Jekyll or
+  Static HTML workflows.
+- **Settings → Environments → github-pages → Deployment branches:** `main` only.
+- The site is built by `tools/build_static.py` from the same trails the local lab serves; Docker and
+  `engine/hub.py` are not involved. Preview it locally:
+  `python tools/build_static.py && python -m http.server -d _site 8000`.
+- What works online: Data Architecture completely; the Python trail runs exercises in the browser with
+  Brython (Python 3.12-compatible; file, database and 3.14+ examples are read-only); the SQL trail is
+  read-only. The full experience stays the local lab (`docker compose up -d`).

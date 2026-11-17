@@ -75,6 +75,10 @@ jobs:
         env:
           LAB_TEST_PG_URL: postgresql://lab:lab@localhost:5432/loja
         run: python -m unittest discover -s tests -v
+      - name: Static site builds (what GitHub Pages will publish)
+        env:
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: python tools/build_static.py --out _site --base "/${REPO_NAME}/"
       - name: Translations up to date (warning only)
         run: |
           if ! python tools/i18n.py status; then
