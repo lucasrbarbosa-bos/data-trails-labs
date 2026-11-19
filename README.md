@@ -6,8 +6,8 @@ trail, and come back to where you left off.
 
 | Trail | Engine | What it covers |
 |---|---|---|
-| **Python Moderno** (`trails/python`) | Python 3.15 | 17 chapters + 2 annexes, 89 examples, 12 challenges, step-by-step debugger. Content in Portuguese, English and Spanish. |
-| **SQL Moderno** (`trails/sql`) | PostgreSQL 17 | 9 chapters, 51 examples, 19 challenges, query plans, Snowflake and BigQuery variants, the creator marketplace interview case (chapter 8, in English), dbt and SQLMesh. Content in Portuguese, English and Spanish (chapter 8 is English in all three). |
+| **Modern Python** (`trails/python`) | Python 3.15 | 17 chapters + 2 annexes, 89 examples, 12 challenges, step-by-step debugger. Content in Portuguese, English and Spanish. |
+| **Modern SQL** (`trails/sql`) | PostgreSQL 17 | 9 chapters, 51 examples, 19 challenges, query plans, Snowflake and BigQuery variants, the creator marketplace interview case (chapter 8, in English), dbt and SQLMesh. Content in Portuguese, English and Spanish (chapter 8 is English in all three). |
 | **Data Architecture** (`trails/data-architecture`) | none (reading) | 10 parts, 50 chapters: fundamentals, modelling, data layers, ingestion (batch, CDC, micro-batching, real time), Apache Iceberg, Snowflake, orchestration and open-source frameworks, semantic models, ten reference architectures and three case studies. Checkpoint quizzes. Content in English, Spanish and Portuguese. |
 
 Every page shares one top bar with a **theme picker** (dark, light, dracula) and an **EN | ES | PT**
