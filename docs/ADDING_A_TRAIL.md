@@ -96,9 +96,12 @@ Unknown keys are rejected, so typos show up in `--check`.
 
 ## The page contract
 
-The page can be anything from a single file to a generated book. The hub injects four things at
-the end of its head element: the shared stylesheet `/hub/theme.css`, `window.LAB_TOKEN`,
-`window.TRAIL`, and the top-bar script. The top bar is added as the first element of `<body>`
+The page can be anything from a single file to a generated book. The hub injects five things at
+the end of its head element: the shared stylesheet `/hub/theme.css`, the shared page kit
+`/hub/trail-base.css`, `window.LAB_TOKEN`, `window.TRAIL`, and the top-bar script. The page kit
+(layout, prose, chapter nav, progress bar, call-outs, pager) applies only to pages that opt in with
+`<html class="tl">`, and its rules sit in a CSS layer, so the page's own `<style>` always wins; the
+Data Architecture trail uses it, and the file's header lists the markup it expects. The top bar is added as the first element of `<body>`
 (48px, `var(--th-bar-h)`): brand, "All trails", the trail switcher, the theme picker
 (dark, light, dracula) and the EN | ES | PT language toggle. A page follows five rules:
 

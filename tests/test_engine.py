@@ -140,10 +140,12 @@ class StaticSiteTests(unittest.TestCase):
             self.assertNotIn('"/hub/', home)                              # nothing points at the site root
             self.assertIn('"url": "/data-trails-labs/t/sql/"', home)       # trail list baked in, under the base
             self.assertTrue((out / 'hub' / 'trail-hub.js').is_file())
+            self.assertTrue((out / 'hub' / 'trail-base.css').is_file())
             self.assertTrue((out / '.nojekyll').is_file())
             for trail in result['trails']:
                 page = (out / 't' / trail / 'index.html').read_text(encoding='utf-8')
                 self.assertIn('<link rel="stylesheet" href="/data-trails-labs/hub/theme.css">', page)
+                self.assertIn('<link rel="stylesheet" href="/data-trails-labs/hub/trail-base.css">', page)
                 self.assertIn('"static": true', page)
                 self.assertNotIn('LAB_TOKEN =', page)                      # no engine, no token
             self.assertTrue((out / 't/data-architecture/content/es/manifest.json').is_file())
@@ -249,6 +251,7 @@ class HubHttpTests(unittest.TestCase):
         self.assertIn('window.TRAIL = {"id": "sql"', body)
         self.assertNotIn("api('/api/", body)
         self.assertIn('<link rel="stylesheet" href="/hub/theme.css">', body)   # shared themes + top bar
+        self.assertIn('<link rel="stylesheet" href="/hub/trail-base.css">', body)   # shared page kit
         self.assertIn('"titles": {"en": "Modern SQL"', body)                     # switcher labels per language
 
     def test_theme_and_hub_script_are_served(self):
@@ -256,6 +259,10 @@ class HubHttpTests(unittest.TestCase):
         self.assertEqual(status, 200)
         for theme in ('light', 'dracula'):
             self.assertIn(f'[data-theme="{theme}"]', css)
+        status, css = self.get('/hub/trail-base.css', token=False)
+        self.assertEqual(status, 200)
+        self.assertIn('@layer trail-base', css)          # a page's own unlayered <style> always wins
+        self.assertIn(':where(.tl)', css)                # opt-in: only pages with <html class="tl">
         status, js = self.get('/hub/trail-hub.js', token=False)
         self.assertEqual(status, 200)
         self.assertIn("'trails-hub:'", js)

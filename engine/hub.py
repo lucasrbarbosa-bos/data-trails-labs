@@ -184,6 +184,7 @@ def make_handler(hub: Hub):
             if rest in ('', trail.entry):
                 html = trail.entry_path.read_text(encoding='utf-8')
                 snippet = ('<link rel="stylesheet" href="/hub/theme.css">\n'
+                           '<link rel="stylesheet" href="/hub/trail-base.css">\n'
                            f'<script>window.LAB_TOKEN = {safe_json(TOKEN)};\n'
                            f'window.TRAIL = {safe_json(hub.trail_context(trail))};</script>\n'
                            f'<script>{hub_script}</script>')

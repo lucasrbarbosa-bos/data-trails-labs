@@ -30,7 +30,7 @@ from runners import RUNNERS  # noqa: E402
 from trails import Trail, discover  # noqa: E402
 
 WEB = ROOT / 'engine' / 'web'
-HUB_FILES = ('theme.css', 'trail-hub.js', 'favicon.svg')
+HUB_FILES = ('theme.css', 'trail-base.css', 'trail-hub.js', 'favicon.svg')
 
 # What the home card says about each engine when there is no server behind the site.
 STATIC_HEALTH = {
@@ -123,6 +123,7 @@ def build(out: Path, base: str = '/', trails_dir: Path = ROOT / 'trails') -> dic
         files += copy_trail_files(t, dest)
         page = t.entry_path.read_text(encoding='utf-8')
         snippet = (f'<link rel="stylesheet" href="{base}hub/theme.css">\n'
+                   f'<link rel="stylesheet" href="{base}hub/trail-base.css">\n'
                    f'<script>window.TRAIL = {safe_json(context(t, trails, base))};</script>\n'
                    f'<script>{hub_script}</script>')
         (dest / 'index.html').write_text(inject(page, snippet), encoding='utf-8')
