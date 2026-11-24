@@ -6,320 +6,1195 @@
 <title>Python Moderno — Laboratório interativo</title>
 <style>
 /* Colours, fonts and the top bar come from /hub/theme.css (themes: dark, light, dracula), injected by the hub. */
-html { height: 100%; -webkit-text-size-adjust: 100%; }
-* { box-sizing: border-box; }
-body { margin: 0; height: 100vh; height: 100dvh; overflow: hidden; display: flex; flex-direction: column;
-  background: var(--th-main); color: var(--th-ink); font-family: var(--th-mono); font-size: 14.5px; line-height: 1.75; }
-button, input, textarea, select { font-family: inherit; }
-a { color: var(--th-link); }
-:focus-visible { outline: 2px solid var(--th-accent); outline-offset: 2px; }
-::selection { background: var(--th-select); }
-* { scrollbar-color: var(--th-line-2) transparent; scrollbar-width: thin; }
+html {
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--th-main);
+  color: var(--th-ink);
+  font-family: var(--th-mono);
+  font-size: 14.5px;
+  line-height: 1.75;
+}
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+a {
+  color: var(--th-link);
+}
+:focus-visible {
+  outline: 2px solid var(--th-accent);
+  outline-offset: 2px;
+}
+::selection {
+  background: var(--th-select);
+}
+* {
+  scrollbar-color: var(--th-line-2) transparent;
+  scrollbar-width: thin;
+}
 
 /* ---------- layout: top bar (48px, from the hub) + sidebar | reading area, each scrolling on its own */
-.app { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: 300px minmax(0, 1fr); }
-aside { background: var(--th-side); border-right: 1px solid var(--th-line); overflow-y: auto; min-height: 0; padding: 20px 14px 40px; }
-main { overflow-y: auto; min-height: 0; background: var(--th-main); }
-.conteudo { max-width: 880px; margin: 0 auto; padding: 32px 36px 120px; }
+.app {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+}
+aside {
+  background: var(--th-side);
+  border-right: 1px solid var(--th-line);
+  overflow-y: auto;
+  min-height: 0;
+  padding: 20px 14px 40px;
+}
+main {
+  overflow-y: auto;
+  min-height: 0;
+  background: var(--th-main);
+}
+.content {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 36px 120px;
+}
 
 /* ---------- sidebar */
-.rotulo { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--th-ink-3); font-weight: 600; }
-aside h1 { font-size: 18px; line-height: 1.3; margin: 6px 0 2px; font-weight: 800; letter-spacing: -0.01em; }
-aside .sub { color: var(--th-ink-2); font-size: 12px; line-height: 1.5; margin-bottom: 16px; }
-.progresso { margin: 0 0 14px; }
-.prog-linha { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--th-ink-3); margin-bottom: 6px; }
-.barra { height: 3px; background: var(--th-line); border-radius: 2px; overflow: hidden; }
-.barra > div { height: 100%; background: var(--th-ok); width: 0; transition: width .4s; }
-.progresso small { display: block; color: var(--th-ink-2); font-size: 11.5px; margin-top: 6px; }
-.motor { margin: 0 0 18px; font-size: 11.5px; line-height: 1.5; color: var(--th-ink-2); display: flex; align-items: flex-start; gap: 8px;
-  border: 1px solid var(--th-line); border-radius: 8px; padding: 8px 10px; background: var(--th-main); }
-.motor i { flex: 0 0 7px; width: 7px; height: 7px; margin-top: 5px; border-radius: 50%; background: var(--th-warn); display: inline-block; }
-.motor.pronto i { background: var(--th-ok); box-shadow: 0 0 0 3px var(--th-ok-bg); }
-.motor.falhou i { background: var(--th-err); }
-.sec-nav { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; }
-.sec-nav::after { content: ""; flex: 1; height: 1px; background: var(--th-line); }
-nav a { display: block; color: var(--th-ink); text-decoration: none; padding: 4px 8px; border-radius: 6px; font-size: 12.5px; line-height: 1.45; }
-nav a:hover { background: var(--th-surface-2); }
-nav a.cap { font-weight: 600; margin-top: 6px; display: flex; justify-content: space-between; gap: 8px; }
-nav a.cap.ativo { background: var(--th-accent); color: var(--th-on-accent); }
-nav a.cap.ativo .cnt, nav a.cap.ativo .cnt.cheio { color: var(--th-on-accent); opacity: .8; }
-nav a.sec { margin-left: 12px; padding-left: 12px; border-left: 1px solid var(--th-line); border-radius: 0 6px 6px 0; color: var(--th-ink-2); font-size: 11.5px; }
-nav a.sec:hover { color: var(--th-ink); border-left-color: var(--th-line-2); }
-nav a code { font-family: inherit; }
-nav a .cnt { font-weight: 400; color: var(--th-ink-3); font-size: 11px; white-space: nowrap; }
-nav a .cnt.cheio { color: var(--th-ok); }
+.eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--th-ink-3);
+  font-weight: 600;
+}
+aside h1 {
+  font-size: 18px;
+  line-height: 1.3;
+  margin: 6px 0 2px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+aside .sub {
+  color: var(--th-ink-2);
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+.progress {
+  margin: 0 0 14px;
+}
+.progress-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--th-ink-3);
+  margin-bottom: 6px;
+}
+.progress-bar {
+  height: 3px;
+  background: var(--th-line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-bar > div {
+  height: 100%;
+  background: var(--th-ok);
+  width: 0;
+  transition: width .4s;
+}
+.progress small {
+  display: block;
+  color: var(--th-ink-2);
+  font-size: 11.5px;
+  margin-top: 6px;
+}
+.engine {
+  margin: 0 0 18px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--th-ink-2);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border: 1px solid var(--th-line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--th-main);
+}
+.engine i {
+  flex: 0 0 7px;
+  width: 7px;
+  height: 7px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--th-warn);
+  display: inline-block;
+}
+.engine.ready i {
+  background: var(--th-ok);
+  box-shadow: 0 0 0 3px var(--th-ok-bg);
+}
+.engine.failed i {
+  background: var(--th-err);
+}
+.sec-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 8px;
+}
+.sec-nav::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--th-line);
+}
+nav a {
+  display: block;
+  color: var(--th-ink);
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+nav a:hover {
+  background: var(--th-surface-2);
+}
+nav a.chapter {
+  font-weight: 600;
+  margin-top: 6px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+nav a.chapter.active {
+  background: var(--th-accent);
+  color: var(--th-on-accent);
+}
+nav a.chapter.active .cnt,
+nav a.chapter.active .cnt.full {
+  color: var(--th-on-accent);
+  opacity: .8;
+}
+nav a.sec {
+  margin-left: 12px;
+  padding-left: 12px;
+  border-left: 1px solid var(--th-line);
+  border-radius: 0 6px 6px 0;
+  color: var(--th-ink-2);
+  font-size: 11.5px;
+}
+nav a.sec:hover {
+  color: var(--th-ink);
+  border-left-color: var(--th-line-2);
+}
+nav a code {
+  font-family: inherit;
+}
+nav a .cnt {
+  font-weight: 400;
+  color: var(--th-ink-3);
+  font-size: 11px;
+  white-space: nowrap;
+}
+nav a .cnt.full {
+  color: var(--th-ok);
+}
 
 /* ---------- mobile top line (inside the reading area) */
-.topo-mobile { display: none; position: sticky; top: 0; z-index: 5; background: var(--th-side); border-bottom: 1px solid var(--th-line); padding: 8px 16px; align-items: center; gap: 10px; font-size: 13px; }
-.topo-mobile b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.topo-mobile button { background: var(--th-surface); border: 1px solid var(--th-line); color: var(--th-ink); border-radius: 6px; padding: 2px 10px; font-size: 15px; cursor: pointer; }
-.veu { display: none; }
+.mobile-top {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--th-side);
+  border-bottom: 1px solid var(--th-line);
+  padding: 8px 16px;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.mobile-top b {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.mobile-top button {
+  background: var(--th-surface);
+  border: 1px solid var(--th-line);
+  color: var(--th-ink);
+  border-radius: 6px;
+  padding: 2px 10px;
+  font-size: 15px;
+  cursor: pointer;
+}
+.overlay {
+  display: none;
+}
 
 /* ---------- prose */
-.carregando { color: var(--th-ink-3); font-size: 13px; }
-.carregando.erro { color: var(--th-err); }
-h2.cap { font-size: 25px; line-height: 1.3; margin: 4px 0 24px; font-weight: 800; letter-spacing: -0.02em; }
-h2.cap::before { content: "# "; color: var(--th-ink-3); font-weight: 400; }
-h3.sec { font-size: 18px; line-height: 1.4; margin: 40px 0 12px; font-weight: 700; padding-bottom: 6px; border-bottom: 1px solid var(--th-line); }
-h3.sec::before { content: "## "; color: var(--th-ink-3); font-weight: 400; }
-h4 { font-size: 15px; margin: 26px 0 8px; font-weight: 700; }
-h4::before { content: "### "; color: var(--th-ink-3); font-weight: 400; }
-p { margin: 0 0 14px; text-align: left; }
-ul.lista { margin: 0 0 16px; padding-left: 4px; list-style: none; }
-ul.lista li { margin-bottom: 6px; padding-left: 20px; position: relative; }
-ul.lista li::before { content: "-"; position: absolute; left: 4px; color: var(--th-accent); }
-code { font-family: var(--th-mono); font-size: .92em; background: var(--th-surface); border: 1px solid var(--th-line); padding: 0 5px; border-radius: 4px; }
-.ex code, .nota code, th code { background: var(--th-surface-2); }
-.tabela { overflow-x: auto; margin: 0 0 20px; }
-table { border-collapse: collapse; width: 100%; font-size: 13px; line-height: 1.55; }
-th, td { border: 1px solid var(--th-line); padding: 6px 10px; text-align: left; vertical-align: top; }
-th { background: var(--th-surface); font-weight: 700; }
-.ex th, .depurador th { background: var(--th-surface-2); }
+.loading {
+  color: var(--th-ink-3);
+  font-size: 13px;
+}
+.loading.error {
+  color: var(--th-err);
+}
+h2.chapter {
+  font-size: 25px;
+  line-height: 1.3;
+  margin: 4px 0 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+h2.chapter::before {
+  content: "# ";
+  color: var(--th-ink-3);
+  font-weight: 400;
+}
+h3.sec {
+  font-size: 18px;
+  line-height: 1.4;
+  margin: 40px 0 12px;
+  font-weight: 700;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--th-line);
+}
+h3.sec::before {
+  content: "## ";
+  color: var(--th-ink-3);
+  font-weight: 400;
+}
+h4 {
+  font-size: 15px;
+  margin: 26px 0 8px;
+  font-weight: 700;
+}
+h4::before {
+  content: "### ";
+  color: var(--th-ink-3);
+  font-weight: 400;
+}
+p {
+  margin: 0 0 14px;
+  text-align: left;
+}
+ul.list {
+  margin: 0 0 16px;
+  padding-left: 4px;
+  list-style: none;
+}
+ul.list li {
+  margin-bottom: 6px;
+  padding-left: 20px;
+  position: relative;
+}
+ul.list li::before {
+  content: "-";
+  position: absolute;
+  left: 4px;
+  color: var(--th-accent);
+}
+code {
+  font-family: var(--th-mono);
+  font-size: .92em;
+  background: var(--th-surface);
+  border: 1px solid var(--th-line);
+  padding: 0 5px;
+  border-radius: 4px;
+}
+.ex code,
+.note code,
+th code {
+  background: var(--th-surface-2);
+}
+.table {
+  overflow-x: auto;
+  margin: 0 0 20px;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+  line-height: 1.55;
+}
+th,
+td {
+  border: 1px solid var(--th-line);
+  padding: 6px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  background: var(--th-surface);
+  font-weight: 700;
+}
+.ex th,
+.debugger-panel th {
+  background: var(--th-surface-2);
+}
 
-/* call-out notes: kind values (NOTA, ATENÇÃO, DICA, NOVO) are data keys; only the label is translated */
-.nota { margin: 22px 0; background: var(--th-surface); border: 1px solid var(--th-line); border-left: 3px solid var(--nota, var(--th-info)); border-radius: 8px; padding: 10px 14px 4px; }
-.nota .rot { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--nota, var(--th-info)); margin-bottom: 2px; }
-.nota .tx { margin-bottom: 8px; }
-.nota.NOTA { --nota: var(--th-info); } .nota.ATENÇÃO { --nota: var(--th-err); }
-.nota.DICA { --nota: var(--th-ok); } .nota.NOVO { --nota: var(--th-warn); }
+/* call-out notes: kind values (NOTE, WARNING, TIP, NEW) are data keys; only the label is translated */
+.note {
+  margin: 22px 0;
+  background: var(--th-surface);
+  border: 1px solid var(--th-line);
+  border-left: 3px solid var(--note, var(--th-info));
+  border-radius: 8px;
+  padding: 10px 14px 4px;
+}
+.note .note-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--note, var(--th-info));
+  margin-bottom: 2px;
+}
+.note .tx {
+  margin-bottom: 8px;
+}
+.note.NOTE {
+  --note: var(--th-info);
+}
+.note.WARNING {
+  --note: var(--th-err);
+}
+.note.TIP {
+  --note: var(--th-ok);
+}
+.note.NEW {
+  --note: var(--th-warn);
+}
 
 /* ---------- examples and challenges */
-.ex { position: relative; background: var(--th-surface); border: 1px solid var(--th-line); border-radius: 8px; padding: 14px 18px 16px; margin: 26px 0; }
-.ex.desafio { border-left: 3px solid var(--th-accent); }
-.ex .titulo { font-weight: 700; font-size: 15px; line-height: 1.45; margin-bottom: 2px; }
-.ex .meta { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 4px 0 8px; flex-wrap: wrap; font-size: 11.5px; color: var(--th-ink-3); }
-.ex .arquivo::before { content: "$ "; }
-.pill { display: inline-block; border: 1px solid var(--th-line-2); border-radius: 999px; padding: 0 9px; font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--th-accent); }
-.ex .feito { font-size: 11.5px; color: var(--th-ok); }
-.ex .enunciado { margin: 8px 0 12px; }
-.callouts { list-style: none; padding: 0; margin: 12px 0 0; font-size: 13.5px; }
-.callouts li { display: grid; grid-template-columns: 24px 1fr; gap: 6px; margin-bottom: 6px; }
-.callouts .n { color: var(--th-accent); }
+.ex {
+  position: relative;
+  background: var(--th-surface);
+  border: 1px solid var(--th-line);
+  border-radius: 8px;
+  padding: 14px 18px 16px;
+  margin: 26px 0;
+}
+.ex.challenge {
+  border-left: 3px solid var(--th-accent);
+}
+.ex .title {
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.45;
+  margin-bottom: 2px;
+}
+.ex .meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 8px;
+  flex-wrap: wrap;
+  font-size: 11.5px;
+  color: var(--th-ink-3);
+}
+.ex .file::before {
+  content: "$ ";
+}
+.pill {
+  display: inline-block;
+  border: 1px solid var(--th-line-2);
+  border-radius: 999px;
+  padding: 0 9px;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--th-accent);
+}
+.ex .done {
+  font-size: 11.5px;
+  color: var(--th-ok);
+}
+.ex .prompt {
+  margin: 8px 0 12px;
+}
+.callouts {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  font-size: 13.5px;
+}
+.callouts li {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.callouts .n {
+  color: var(--th-accent);
+}
 
 /* editor: textarea over a highlighted <pre> */
-.editor { position: relative; border: 1px solid var(--th-line); border-radius: 6px; background: var(--th-code); overflow: hidden; }
-.editor:focus-within { border-color: var(--th-accent); }
-.ed-wrap { display: grid; grid-template-columns: auto 1fr; overflow-x: auto; }
-.gutter { font-family: var(--th-mono); font-size: 13px; line-height: 21px; color: var(--th-ink-3); text-align: right; padding: 12px 8px 12px 10px; user-select: none; border-right: 1px solid var(--th-line); background: var(--th-code); white-space: pre; }
-.gutter .erro { color: var(--th-err); font-weight: 700; }
-.area { position: relative; min-width: 0; }
-.area pre, .area textarea { margin: 0; font-family: var(--th-mono); font-size: 13px; line-height: 21px; padding: 12px 14px; white-space: pre; tab-size: 4; border: 0; letter-spacing: 0; font-variant-ligatures: none; }
-.area pre { pointer-events: none; color: var(--th-ink); min-height: 100%; }
-.area textarea { position: absolute; inset: 0; width: 100%; height: 100%; resize: none; background: transparent; color: transparent; caret-color: var(--th-ink); outline: none; overflow: hidden; }
-.area textarea::selection { background: var(--th-select); color: transparent; }
-.estatico pre { margin: 0; font-family: var(--th-mono); font-size: 13px; line-height: 21px; padding: 12px 14px; overflow-x: auto; white-space: pre; color: var(--th-ink); }
-.tk-kw { color: var(--th-kw); } .tk-str { color: var(--th-str); } .tk-com { color: var(--th-com); font-style: italic; }
-.tk-num { color: var(--th-num); } .tk-bi { color: var(--th-bi); } .tk-fn { color: var(--th-fn); }
-.linha-erro { background: var(--th-err-bg); display: inline-block; width: 100%; }
-.linha-atual { background: var(--th-select); display: inline-block; width: 100%; }
-.gutter .atual { color: var(--th-accent); font-weight: 700; }
+.editor {
+  position: relative;
+  border: 1px solid var(--th-line);
+  border-radius: 6px;
+  background: var(--th-code);
+  overflow: hidden;
+}
+.editor:focus-within {
+  border-color: var(--th-accent);
+}
+.ed-wrap {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  overflow-x: auto;
+}
+.gutter {
+  font-family: var(--th-mono);
+  font-size: 13px;
+  line-height: 21px;
+  color: var(--th-ink-3);
+  text-align: right;
+  padding: 12px 8px 12px 10px;
+  user-select: none;
+  border-right: 1px solid var(--th-line);
+  background: var(--th-code);
+  white-space: pre;
+}
+.gutter .error {
+  color: var(--th-err);
+  font-weight: 700;
+}
+.area {
+  position: relative;
+  min-width: 0;
+}
+.area pre,
+.area textarea {
+  margin: 0;
+  font-family: var(--th-mono);
+  font-size: 13px;
+  line-height: 21px;
+  padding: 12px 14px;
+  white-space: pre;
+  tab-size: 4;
+  border: 0;
+  letter-spacing: 0;
+  font-variant-ligatures: none;
+}
+.area pre {
+  pointer-events: none;
+  color: var(--th-ink);
+  min-height: 100%;
+}
+.area textarea {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  resize: none;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--th-ink);
+  outline: none;
+  overflow: hidden;
+}
+.area textarea::selection {
+  background: var(--th-select);
+  color: transparent;
+}
+.static-code pre {
+  margin: 0;
+  font-family: var(--th-mono);
+  font-size: 13px;
+  line-height: 21px;
+  padding: 12px 14px;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--th-ink);
+}
+.tk-kw {
+  color: var(--th-kw);
+}
+.tk-str {
+  color: var(--th-str);
+}
+.tk-com {
+  color: var(--th-com);
+  font-style: italic;
+}
+.tk-num {
+  color: var(--th-num);
+}
+.tk-bi {
+  color: var(--th-bi);
+}
+.tk-fn {
+  color: var(--th-fn);
+}
+.error-line {
+  background: var(--th-err-bg);
+  display: inline-block;
+  width: 100%;
+}
+.current-line {
+  background: var(--th-select);
+  display: inline-block;
+  width: 100%;
+}
+.gutter .current {
+  color: var(--th-accent);
+  font-weight: 700;
+}
 
-.acoes { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; align-items: center; }
-.btn { border: 1px solid var(--th-line); background: var(--th-surface-2); color: var(--th-ink); border-radius: 6px; padding: 5px 12px; font-size: 12.5px; font-weight: 500; cursor: pointer; line-height: 1.4; }
-.btn:hover { border-color: var(--th-line-2); }
-.btn.prim { background: var(--th-accent); border-color: var(--th-accent); color: var(--th-on-accent); font-weight: 700; }
-.btn.prim:hover { filter: brightness(1.08); }
-.btn.ok { background: var(--th-ok-bg); border-color: var(--th-ok); color: var(--th-ok); font-weight: 700; }
-.btn:disabled { opacity: .5; cursor: progress; }
-.atalho { font-size: 11px; color: var(--th-ink-3); margin-left: auto; }
-.campo { display: flex; align-items: flex-start; gap: 10px; margin-top: 10px; font-size: 12.5px; flex-wrap: wrap; }
-.campo label { color: var(--th-ink-2); min-width: 90px; padding-top: 6px; text-transform: uppercase; font-size: 11px; letter-spacing: .06em; }
-.campo input, .campo textarea { flex: 1; min-width: 200px; font-family: var(--th-mono); font-size: 13px; padding: 6px 9px; border: 1px solid var(--th-line); border-radius: 6px; background: var(--th-code); color: var(--th-ink); }
-.campo textarea { min-height: 52px; resize: vertical; }
-.campo input::placeholder, .campo textarea::placeholder { color: var(--th-ink-3); }
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 0;
+  align-items: center;
+}
+.btn {
+  border: 1px solid var(--th-line);
+  background: var(--th-surface-2);
+  color: var(--th-ink);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.btn:hover {
+  border-color: var(--th-line-2);
+}
+.btn.prim {
+  background: var(--th-accent);
+  border-color: var(--th-accent);
+  color: var(--th-on-accent);
+  font-weight: 700;
+}
+.btn.prim:hover {
+  filter: brightness(1.08);
+}
+.btn.ok {
+  background: var(--th-ok-bg);
+  border-color: var(--th-ok);
+  color: var(--th-ok);
+  font-weight: 700;
+}
+.btn:disabled {
+  opacity: .5;
+  cursor: progress;
+}
+.shortcut {
+  font-size: 11px;
+  color: var(--th-ink-3);
+  margin-left: auto;
+}
+.field {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 12.5px;
+  flex-wrap: wrap;
+}
+.field label {
+  color: var(--th-ink-2);
+  min-width: 90px;
+  padding-top: 6px;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: .06em;
+}
+.field input,
+.field textarea {
+  flex: 1;
+  min-width: 200px;
+  font-family: var(--th-mono);
+  font-size: 13px;
+  padding: 6px 9px;
+  border: 1px solid var(--th-line);
+  border-radius: 6px;
+  background: var(--th-code);
+  color: var(--th-ink);
+}
+.field textarea {
+  min-height: 52px;
+  resize: vertical;
+}
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--th-ink-3);
+}
 
-.saida { margin-top: 10px; border-radius: 6px; border: 1px solid var(--th-line); background: var(--th-code); font-family: var(--th-mono); font-size: 13px; line-height: 1.6; display: none; }
-.saida.vis { display: block; }
-.saida .cab, .dep-cab, .solucao .cab { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 5px 12px; border-bottom: 1px solid var(--th-line); font-size: 11px; color: var(--th-ink-3); }
-.saida .cab > span:first-child, .solucao .cab span, .dep-corpo h5 { text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
-.saida .corpo { padding: 10px 12px; white-space: pre-wrap; word-break: break-word; max-height: 360px; overflow-y: auto; }
-.saida .err { color: var(--th-err); }
-.saida .tb { color: var(--th-err); background: var(--th-err-bg); border-radius: 4px; padding: 8px 10px; margin-top: 6px; }
-.saida .tb a { color: var(--th-err); font-weight: 700; cursor: pointer; text-decoration: underline; }
-.saida .dica-erro { font-size: 12.5px; color: var(--th-ink); margin-top: 8px; padding-left: 10px; border-left: 2px solid var(--th-warn); }
-.mudo { color: var(--th-ink-3); }
-.resultado { margin-top: 10px; padding: 8px 12px; border-radius: 6px; font-size: 13px; display: none; border: 1px solid transparent; }
-.resultado.vis { display: block; }
-.resultado.ok { background: var(--th-ok-bg); color: var(--th-ok); border-color: var(--th-ok); }
-.resultado.falha { background: var(--th-warn-bg); color: var(--th-warn); border-color: var(--th-warn); }
-.inspetor { margin-top: 10px; display: none; }
-.inspetor.vis { display: block; }
-.inspetor table { font-size: 12.5px; background: var(--th-code); }
-.inspetor td:nth-child(1) { font-weight: 700; white-space: nowrap; }
-.inspetor td:nth-child(2) { color: var(--th-bi); white-space: nowrap; }
-.inspetor td:nth-child(3) { word-break: break-all; }
+.output {
+  margin-top: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--th-line);
+  background: var(--th-code);
+  font-family: var(--th-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  display: none;
+}
+.output.vis {
+  display: block;
+}
+.output .head,
+.dbg-head,
+.solution .head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-bottom: 1px solid var(--th-line);
+  font-size: 11px;
+  color: var(--th-ink-3);
+}
+.output .head > span:first-child,
+.solution .head span,
+.dbg-body h5 {
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 600;
+}
+.output .body {
+  padding: 10px 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 360px;
+  overflow-y: auto;
+}
+.output .err {
+  color: var(--th-err);
+}
+.output .tb {
+  color: var(--th-err);
+  background: var(--th-err-bg);
+  border-radius: 4px;
+  padding: 8px 10px;
+  margin-top: 6px;
+}
+.output .tb a {
+  color: var(--th-err);
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.output .error-hint {
+  font-size: 12.5px;
+  color: var(--th-ink);
+  margin-top: 8px;
+  padding-left: 10px;
+  border-left: 2px solid var(--th-warn);
+}
+.muted {
+  color: var(--th-ink-3);
+}
+.result {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  display: none;
+  border: 1px solid transparent;
+}
+.result.vis {
+  display: block;
+}
+.result.ok {
+  background: var(--th-ok-bg);
+  color: var(--th-ok);
+  border-color: var(--th-ok);
+}
+.result.fail {
+  background: var(--th-warn-bg);
+  color: var(--th-warn);
+  border-color: var(--th-warn);
+}
+.inspector {
+  margin-top: 10px;
+  display: none;
+}
+.inspector.vis {
+  display: block;
+}
+.inspector table {
+  font-size: 12.5px;
+  background: var(--th-code);
+}
+.inspector td:nth-child(1) {
+  font-weight: 700;
+  white-space: nowrap;
+}
+.inspector td:nth-child(2) {
+  color: var(--th-bi);
+  white-space: nowrap;
+}
+.inspector td:nth-child(3) {
+  word-break: break-all;
+}
 
 /* step-by-step debugger (local engine only) */
-.depurador { margin-top: 10px; border: 1px solid var(--th-line); border-radius: 6px; display: none; background: var(--th-code); }
-.depurador.vis { display: block; }
-.dep-cab { justify-content: flex-start; flex-wrap: wrap; padding: 8px 10px; font-size: 12px; color: var(--th-ink-2); }
-.dep-cab button { border: 1px solid var(--th-line); background: var(--th-surface-2); color: var(--th-ink); border-radius: 5px; padding: 1px 9px; cursor: pointer; font-size: 13px; }
-.dep-cab button:hover { border-color: var(--th-line-2); }
-.dep-cab input[type=range] { flex: 1; min-width: 120px; accent-color: var(--th-accent); }
-.dep-info { color: var(--th-ink-2); min-width: 220px; }
-.dep-evento { padding: 6px 12px; font-size: 12.5px; color: var(--th-warn); display: none; border-bottom: 1px solid var(--th-line); }
-.dep-evento.vis { display: block; }
-.dep-corpo { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
-.dep-corpo > div { padding: 8px 12px; min-width: 0; }
-.dep-corpo > div + div { border-left: 1px solid var(--th-line); }
-.dep-corpo h5 { margin: 0 0 6px; font-size: 11px; color: var(--th-ink-3); }
-.dep-corpo table { font-size: 12px; }
-.dep-corpo td { word-break: break-all; }
-.dep-corpo td:nth-child(2) { color: var(--th-bi); }
-.dep-corpo pre { margin: 0; font-family: var(--th-mono); font-size: 12.5px; white-space: pre-wrap; word-break: break-word; max-height: 220px; overflow-y: auto; }
-@media (max-width: 700px) { .dep-corpo { grid-template-columns: 1fr; } .dep-corpo > div + div { border-left: 0; border-top: 1px solid var(--th-line); } }
+.debugger-panel {
+  margin-top: 10px;
+  border: 1px solid var(--th-line);
+  border-radius: 6px;
+  display: none;
+  background: var(--th-code);
+}
+.debugger-panel.vis {
+  display: block;
+}
+.dbg-head {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--th-ink-2);
+}
+.dbg-head button {
+  border: 1px solid var(--th-line);
+  background: var(--th-surface-2);
+  color: var(--th-ink);
+  border-radius: 5px;
+  padding: 1px 9px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.dbg-head button:hover {
+  border-color: var(--th-line-2);
+}
+.dbg-head input[type=range] {
+  flex: 1;
+  min-width: 120px;
+  accent-color: var(--th-accent);
+}
+.dbg-info {
+  color: var(--th-ink-2);
+  min-width: 220px;
+}
+.dbg-event {
+  padding: 6px 12px;
+  font-size: 12.5px;
+  color: var(--th-warn);
+  display: none;
+  border-bottom: 1px solid var(--th-line);
+}
+.dbg-event.vis {
+  display: block;
+}
+.dbg-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.dbg-body > div {
+  padding: 8px 12px;
+  min-width: 0;
+}
+.dbg-body > div + div {
+  border-left: 1px solid var(--th-line);
+}
+.dbg-body h5 {
+  margin: 0 0 6px;
+  font-size: 11px;
+  color: var(--th-ink-3);
+}
+.dbg-body table {
+  font-size: 12px;
+}
+.dbg-body td {
+  word-break: break-all;
+}
+.dbg-body td:nth-child(2) {
+  color: var(--th-bi);
+}
+.dbg-body pre {
+  margin: 0;
+  font-family: var(--th-mono);
+  font-size: 12.5px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 220px;
+  overflow-y: auto;
+}
+@media (max-width: 700px) {
+  .dbg-body {
+    grid-template-columns: 1fr;
+  }
+  .dbg-body > div + div {
+    border-left: 0;
+    border-top: 1px solid var(--th-line);
+  }
+}
 
-.req { font-size: 12px; color: var(--th-warn); margin: 6px 0 18px; }
-.req::before { content: "! "; font-weight: 700; }
-.solucao { margin-top: 12px; display: none; }
-.solucao.vis { display: block; }
-.solucao .cab { border: 1px solid var(--th-line); border-bottom: 0; border-radius: 6px 6px 0 0; background: var(--th-code); }
-.solucao .cab + .editor { border-radius: 0 0 6px 6px; }
+.req {
+  font-size: 12px;
+  color: var(--th-warn);
+  margin: 6px 0 18px;
+}
+.req::before {
+  content: "! ";
+  font-weight: 700;
+}
+.solution {
+  margin-top: 12px;
+  display: none;
+}
+.solution.vis {
+  display: block;
+}
+.solution .head {
+  border: 1px solid var(--th-line);
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  background: var(--th-code);
+}
+.solution .head + .editor {
+  border-radius: 0 0 6px 6px;
+}
 
-.paginacao { display: flex; justify-content: space-between; margin-top: 50px; gap: 12px; }
-.paginacao a { color: var(--th-ink); text-decoration: none; border: 1px solid var(--th-line); border-radius: 8px; padding: 10px 16px; font-size: 13px; background: var(--th-surface); }
-.paginacao a:hover { border-color: var(--th-line-2); background: var(--th-surface-2); }
-.paginacao a:last-child { margin-left: auto; text-align: right; }
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 50px;
+  gap: 12px;
+}
+.pagination a {
+  color: var(--th-ink);
+  text-decoration: none;
+  border: 1px solid var(--th-line);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  background: var(--th-surface);
+}
+.pagination a:hover {
+  border-color: var(--th-line-2);
+  background: var(--th-surface-2);
+}
+.pagination a:last-child {
+  margin-left: auto;
+  text-align: right;
+}
 
 /* ---------- trail home */
-.inicio { padding-top: 12px; }
-.inicio .prompt { color: var(--th-ink-3); font-size: 12.5px; }
-.inicio .prompt em { color: var(--th-ok); font-style: normal; }
-.inicio h2 { font-size: clamp(28px, 5vw, 40px); line-height: 1.15; letter-spacing: -0.03em; font-weight: 800; margin: 8px 0 8px; }
-.inicio .sub { color: var(--th-ink-2); margin: 0 0 8px; }
-.label { display: flex; align-items: center; gap: 14px; margin: 30px 0 16px; color: var(--th-ink-2); font-size: 12px; }
-.label::before, .label::after { content: ""; flex: 1; height: 1px; background: var(--th-line); }
-.label span { border: 1px solid var(--th-line); border-radius: 999px; padding: 2px 12px; background: var(--th-main); }
-.como { background: var(--th-surface); border: 1px solid var(--th-line); border-radius: 8px; padding: 12px 18px; font-size: 13.5px; }
-.como ul { margin: 0; padding: 0; list-style: none; }
-.como li { margin: 6px 0; padding-left: 20px; position: relative; }
-.como li::before { content: ">"; position: absolute; left: 2px; color: var(--th-accent); }
-.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 12px; }
-.card { position: relative; display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--th-line); border-radius: 8px; padding: 12px 14px 16px; text-decoration: none; color: var(--th-ink); background: var(--th-surface); overflow: hidden; min-height: 112px; transition: border-color .15s, background .15s; }
-.card:hover { border-color: var(--th-line-2); background: var(--th-surface-2); }
-.card .row { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--th-ink-3); }
-.card .row .cmd { color: var(--th-python); }
-.card .row .cmd::before { content: "$ "; color: var(--th-ink-3); }
-.card .row .ok { color: var(--th-ok); }
-.card b { font-size: 14px; line-height: 1.4; }
-.card small { color: var(--th-ink-2); font-size: 11.5px; margin-top: auto; }
-.card .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--th-line); }
-.card .bar div { height: 100%; background: var(--th-ok); }
-kbd { font-family: var(--th-mono); font-size: 11px; border: 1px solid var(--th-line-2); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--th-surface-2); color: var(--th-ink); }
+.home {
+  padding-top: 12px;
+}
+.home .prompt {
+  color: var(--th-ink-3);
+  font-size: 12.5px;
+}
+.home .prompt em {
+  color: var(--th-ok);
+  font-style: normal;
+}
+.home h2 {
+  font-size: clamp(28px, 5vw, 40px);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+  margin: 8px 0 8px;
+}
+.home .sub {
+  color: var(--th-ink-2);
+  margin: 0 0 8px;
+}
+.label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 30px 0 16px;
+  color: var(--th-ink-2);
+  font-size: 12px;
+}
+.label::before,
+.label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--th-line);
+}
+.label span {
+  border: 1px solid var(--th-line);
+  border-radius: 999px;
+  padding: 2px 12px;
+  background: var(--th-main);
+}
+.how {
+  background: var(--th-surface);
+  border: 1px solid var(--th-line);
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-size: 13.5px;
+}
+.how ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.how li {
+  margin: 6px 0;
+  padding-left: 20px;
+  position: relative;
+}
+.how li::before {
+  content: ">";
+  position: absolute;
+  left: 2px;
+  color: var(--th-accent);
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: 12px;
+}
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid var(--th-line);
+  border-radius: 8px;
+  padding: 12px 14px 16px;
+  text-decoration: none;
+  color: var(--th-ink);
+  background: var(--th-surface);
+  overflow: hidden;
+  min-height: 112px;
+  transition: border-color .15s, background .15s;
+}
+.card:hover {
+  border-color: var(--th-line-2);
+  background: var(--th-surface-2);
+}
+.card .row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--th-ink-3);
+}
+.card .row .cmd {
+  color: var(--th-python);
+}
+.card .row .cmd::before {
+  content: "$ ";
+  color: var(--th-ink-3);
+}
+.card .row .ok {
+  color: var(--th-ok);
+}
+.card b {
+  font-size: 14px;
+  line-height: 1.4;
+}
+.card small {
+  color: var(--th-ink-2);
+  font-size: 11.5px;
+  margin-top: auto;
+}
+.card .bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--th-line);
+}
+.card .bar div {
+  height: 100%;
+  background: var(--th-ok);
+}
+kbd {
+  font-family: var(--th-mono);
+  font-size: 11px;
+  border: 1px solid var(--th-line-2);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0 5px;
+  background: var(--th-surface-2);
+  color: var(--th-ink);
+}
 
 @media (max-width: 900px) {
-  .app { grid-template-columns: minmax(0, 1fr); }
-  aside { position: fixed; top: var(--th-bar-h); bottom: 0; left: 0; width: min(300px, 86vw); z-index: 25; transform: translateX(-100%); transition: transform .25s, visibility .25s; visibility: hidden; }
-  body:not(.th-has-bar) aside { top: 0; }
-  aside.aberto { transform: none; visibility: visible; box-shadow: 0 10px 40px rgba(0, 0, 0, .35); }
-  aside.aberto + main .veu { display: block; position: fixed; inset: var(--th-bar-h) 0 0 0; z-index: 24; background: rgba(0, 0, 0, .35); }
-  .topo-mobile { display: flex; }
-  .conteudo { padding: 20px 16px 100px; }
-  .ex { padding: 12px 12px 14px; }
-  h2.cap { font-size: 22px; }
-  .atalho { display: none; }
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  aside {
+    position: fixed;
+    top: var(--th-bar-h);
+    bottom: 0;
+    left: 0;
+    width: min(300px, 86vw);
+    z-index: 25;
+    transform: translateX(-100%);
+    transition: transform .25s, visibility .25s;
+    visibility: hidden;
+  }
+  body:not(.th-has-bar) aside {
+    top: 0;
+  }
+  aside.open {
+    transform: none;
+    visibility: visible;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, .35);
+  }
+  aside.open + main .overlay {
+    display: block;
+    position: fixed;
+    inset: var(--th-bar-h) 0 0 0;
+    z-index: 24;
+    background: rgba(0, 0, 0, .35);
+  }
+  .mobile-top {
+    display: flex;
+  }
+  .content {
+    padding: 20px 16px 100px;
+  }
+  .ex {
+    padding: 12px 12px 14px;
+  }
+  h2.chapter {
+    font-size: 22px;
+  }
+  .shortcut {
+    display: none;
+  }
 }
-@media (prefers-reduced-motion: reduce) { aside, .barra > div, .card { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  aside,
+  .progress-bar > div,
+  .card {
+    transition: none;
+  }
+}
 </style>
 </head>
 <body>
 <div class="app">
   <aside id="menu">
-    <div class="rotulo">~/trails/python</div>
-    <h1 id="tituloTrilha">Python Moderno</h1>
-    <div class="sub" id="subTrilha">Laboratório interativo · Python 3.15</div>
-    <div class="progresso">
-      <div class="prog-linha"><span id="rotProgresso">progresso</span><span id="pctProgresso">0%</span></div>
-      <div class="barra"><div id="barra"></div></div>
-      <small id="txtProgresso"></small>
+    <div class="eyebrow">~/trails/python</div>
+    <h1 id="trailTitle">Python Moderno</h1>
+    <div class="sub" id="trailSubtitle">Laboratório interativo · Python 3.15</div>
+    <div class="progress">
+      <div class="progress-row">
+        <span id="progressLabel">progress</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar"><div id="progress-bar"></div></div>
+      <small id="progressText"></small>
     </div>
-    <div class="motor" id="motor"><i></i><span>…</span></div>
-    <div class="sec-nav rotulo" id="rotCapitulos">capítulos</div>
+    <div class="engine" id="engine"><i></i><span>…</span></div>
+    <div class="sec-nav eyebrow" id="chaptersLabel">capítulos</div>
     <nav id="nav"></nav>
   </aside>
   <main id="main">
-    <div class="topo-mobile"><button id="btnMenu" aria-label="Menu" aria-controls="menu" aria-expanded="false">☰</button><b id="tituloMobile">Python Moderno</b></div>
-    <div class="veu" id="veu"></div>
-    <div class="conteudo" id="conteudo"><p class="carregando">$ …</p></div>
+    <div class="mobile-top">
+      <button id="btnMenu" aria-label="Menu" aria-controls="menu" aria-expanded="false">☰</button>
+      <b id="mobileTitle">Python Moderno</b>
+    </div>
+    <div class="overlay" id="overlay"></div>
+    <div class="content" id="content"><p class="loading">$ …</p></div>
   </main>
 </div>
 
-<script type="text/python" id="motor_python">
+<script type="text/python" id="python_engine">
 import sys
 import traceback
 import builtins
 from browser import window
 
 
-class _Saida:
-    def __init__(self, tipo):
-        self.tipo = tipo
+class _Stream:
+    def __init__(self, kind):
+        self.kind = kind
 
-    def write(self, texto):
-        window.pyEmit(self.tipo, str(texto))
-        return len(str(texto))
+    def write(self, text):
+        window.pyEmit(self.kind, str(text))
+        return len(str(text))
 
     def flush(self):
         pass
 
 
-def executar(codigo, extra, entradas, argv):
+def run(code, extra, inputs, argv):
     ns = {'__name__': '__main__'}
-    fila = [str(x) for x in entradas]
+    queue = [str(x) for x in inputs]
 
     def _input(msg=''):
         sys.stdout.write(str(msg))
-        if fila:
-            valor = fila.pop(0)
+        if queue:
+            value = queue.pop(0)
         else:
-            valor = window.prompt(str(msg) or str(window.pyRotuloEntrada))
-            valor = '' if valor is None else str(valor)
-        sys.stdout.write(valor + '\n')
-        return valor
+            value = window.prompt(str(msg) or str(window.pyInputLabel))
+            value = '' if value is None else str(value)
+        sys.stdout.write(value + '\n')
+        return value
 
-    antigos = (sys.stdout, sys.stderr, builtins.input, sys.argv)
-    sys.stdout, sys.stderr = _Saida('out'), _Saida('err')
+    saved = (sys.stdout, sys.stderr, builtins.input, sys.argv)
+    sys.stdout, sys.stderr = _Stream('out'), _Stream('err')
     builtins.input = _input
-    sys.argv = ['programa.py'] + [str(a) for a in argv]
+    sys.argv = ['program.py'] + [str(a) for a in argv]
     status = 'ok'
     try:
-        exec(compile(codigo, '<seu código>', 'exec'), ns)
+        exec(compile(code, '<your code>', 'exec'), ns)
         if extra:
-            exec(compile(extra, '<verificação>', 'exec'), ns)
+            exec(compile(extra, '<check>', 'exec'), ns)
     except SystemExit as e:
         if e.code not in (0, None):
-            status = 'saida'
+            status = 'exit'
     except AssertionError as e:
-        status = 'falhou'
+        status = 'failed'
         window.pyEmit('assert', str(e) if str(e) else '')
     except BaseException:
-        status = 'erro'
+        status = 'error'
         window.pyEmit('tb', traceback.format_exc())
     finally:
-        sys.stdout, sys.stderr, builtins.input, sys.argv = antigos
-    variaveis = []
-    for nome, valor in list(ns.items()):
-        if nome.startswith('__') or type(valor).__name__ == 'module':
+        sys.stdout, sys.stderr, builtins.input, sys.argv = saved
+    variables = []
+    for name, value in list(ns.items()):
+        if name.startswith('__') or type(value).__name__ == 'module':
             continue
         try:
-            texto = repr(valor)
+            text = repr(value)
         except Exception:
-            texto = '?'
-        if len(texto) > 160:
-            texto = texto[:157] + '...'
-        variaveis.append([nome, type(valor).__name__, texto])
-    window.pyVars(variaveis)
+            text = '?'
+        if len(text) > 160:
+            text = text[:157] + '...'
+        variables.append([name, type(value).__name__, text])
+    window.pyVars(variables)
     return status
 
 
-window.pyExecutar = executar
-window.pyPronto()
+window.pyRun = run
+window.pyReady()
 </script>
 <script>
 (function () {
   'use strict';
 
-  // ---------- textos da interface (pt / en / es) ----------
+  // ---------- interface strings (pt / en / es) ----------
   const UI = {
     pt: {
       docTitle: 'Python Moderno — Laboratório interativo',
@@ -339,6 +1214,11 @@ window.pyPronto()
       serverRefused: 'Servidor recusou: ',
       serverDown: 'Não consegui falar com o servidor local. Ele ainda está rodando? ({m})',
       internalErr: 'Erro interno do motor: ',
+      engineMessages: [
+        [/the run took longer than (\d+)s \(infinite loop\?\) and was stopped\./, 'a execução passou de $1s (laço infinito?) e foi interrompida.'],
+        [/the program asked for input, but the Inputs field is empty/, 'o programa pediu uma entrada, mas o campo Entradas está vazio'],
+        [/^Internal executor error:/, 'Falha interna do executor:']
+      ],
       promptInput: 'Entrada:',
       editorAria: 'Editor de código Python',
       inputs: 'Entradas', inputsPh: 'Uma resposta por linha. Em branco, o navegador vai perguntar.',
@@ -348,7 +1228,7 @@ window.pyPronto()
       output: 'Saída', solution: 'Solução', copyToEditor: 'Copiar para o editor',
       first: 'Primeiro passo', prev: 'Passo anterior', next: 'Próximo passo', last: 'Último passo', closeDbg: 'Fechar depurador', stepSlider: 'Passo do depurador',
       varsStep: 'Variáveis neste passo', outSoFar: 'Saída até aqui', globals: 'Globais', none: '(nenhuma)',
-      stepInfo: 'Passo {i} de {n} · linha {l} · {onde}', moduleLevel: 'nível do módulo', returned: '↩ {fn}() devolveu {v}', exception: '⚠ exceção: ',
+      stepInfo: 'Passo {i} de {n} · linha {l} · {where}', moduleLevel: 'nível do módulo', returned: '↩ {fn}() devolveu {v}', exception: '⚠ exceção: ',
       nothingYet: '(nada ainda)', truncated: 'Mostrando só os primeiros passos.',
       running: 'executando…', line: 'linha', noOutput: '(sem saída)', endedErr: 'terminou com erro · ',
       notPassed: 'Ainda não passou{m}. Ajuste o código e tente de novo.', passed: '✓ Tudo certo! Desafio concluído.',
@@ -356,7 +1236,7 @@ window.pyPronto()
       runForVars: 'Execute o código para ver as variáveis criadas.', colName: 'Nome', colType: 'Tipo', colValue: 'Valor',
       confirmSol: 'Mostrar a solução? Tente mais um pouco antes, se puder.',
       challenge: 'desafio', done: '✓ concluído',
-      notes: { NOTA: 'Nota', 'ATENÇÃO': 'Atenção', DICA: 'Dica', NOVO: 'Novidade 3.15' },
+      notes: { NOTE: 'Nota', WARNING: 'Atenção', TIP: 'Dica', NEW: 'Novidade 3.15' },
       reqCode: 'Este exemplo usa recursos do Python 3.14 ou superior e não roda no motor do navegador. Execute no seu Python 3.15 local.',
       reqEx: 'Execute este exemplo no seu Python local: ele usa arquivos, banco de dados, vários módulos ou recursos do 3.14+, que o motor do navegador não oferece.',
       home: 'Início', lab: 'Laboratório livre', labCard: 'Um editor em branco para experimentar',
@@ -412,7 +1292,7 @@ window.pyPronto()
       output: 'Output', solution: 'Solution', copyToEditor: 'Copy to editor',
       first: 'First step', prev: 'Previous step', next: 'Next step', last: 'Last step', closeDbg: 'Close debugger', stepSlider: 'Debugger step',
       varsStep: 'Variables at this step', outSoFar: 'Output so far', globals: 'Globals', none: '(none)',
-      stepInfo: 'Step {i} of {n} · line {l} · {onde}', moduleLevel: 'module level', returned: '↩ {fn}() returned {v}', exception: '⚠ exception: ',
+      stepInfo: 'Step {i} of {n} · line {l} · {where}', moduleLevel: 'module level', returned: '↩ {fn}() returned {v}', exception: '⚠ exception: ',
       nothingYet: '(nothing yet)', truncated: 'Showing only the first steps.',
       running: 'running…', line: 'line', noOutput: '(no output)', endedErr: 'ended with an error · ',
       notPassed: 'Not passing yet{m}. Adjust the code and try again.', passed: '✓ All good! Challenge complete.',
@@ -420,7 +1300,7 @@ window.pyPronto()
       runForVars: 'Run the code to see the variables it creates.', colName: 'Name', colType: 'Type', colValue: 'Value',
       confirmSol: 'Show the solution? Try a little longer first, if you can.',
       challenge: 'challenge', done: '✓ done',
-      notes: { NOTA: 'Note', 'ATENÇÃO': 'Warning', DICA: 'Tip', NOVO: 'New in 3.15' },
+      notes: { NOTE: 'Note', WARNING: 'Warning', TIP: 'Tip', NEW: 'New in 3.15' },
       reqCode: 'This example uses Python 3.14+ features and does not run on the browser engine. Run it on your local Python 3.15.',
       reqEx: 'Run this example on your local Python: it uses files, a database, several modules or 3.14+ features that the browser engine does not offer.',
       home: 'Home', lab: 'Free lab', labCard: 'A blank editor to experiment in',
@@ -467,6 +1347,11 @@ window.pyPronto()
       serverRefused: 'El servidor rechazó la solicitud: ',
       serverDown: 'No se pudo contactar con el servidor local. ¿Sigue en ejecución? ({m})',
       internalErr: 'Error interno del motor: ',
+      engineMessages: [
+        [/the run took longer than (\d+)s \(infinite loop\?\) and was stopped\./, 'la ejecución superó los $1 s (¿bucle infinito?) y se detuvo.'],
+        [/the program asked for input, but the Inputs field is empty/, 'el programa pidió una entrada, pero el campo Entradas está vacío'],
+        [/^Internal executor error:/, 'Error interno del ejecutor:']
+      ],
       promptInput: 'Entrada:',
       editorAria: 'Editor de código Python',
       inputs: 'Entradas', inputsPh: 'Una respuesta por línea. Si lo dejas vacío, el navegador preguntará.',
@@ -476,7 +1361,7 @@ window.pyPronto()
       output: 'Salida', solution: 'Solución', copyToEditor: 'Copiar al editor',
       first: 'Primer paso', prev: 'Paso anterior', next: 'Paso siguiente', last: 'Último paso', closeDbg: 'Cerrar depurador', stepSlider: 'Paso del depurador',
       varsStep: 'Variables en este paso', outSoFar: 'Salida hasta aquí', globals: 'Globales', none: '(ninguna)',
-      stepInfo: 'Paso {i} de {n} · línea {l} · {onde}', moduleLevel: 'nivel del módulo', returned: '↩ {fn}() devolvió {v}', exception: '⚠ excepción: ',
+      stepInfo: 'Paso {i} de {n} · línea {l} · {where}', moduleLevel: 'nivel del módulo', returned: '↩ {fn}() devolvió {v}', exception: '⚠ excepción: ',
       nothingYet: '(nada todavía)', truncated: 'Se muestran solo los primeros pasos.',
       running: 'ejecutando…', line: 'línea', noOutput: '(sin salida)', endedErr: 'terminó con error · ',
       notPassed: 'Todavía no pasa{m}. Ajusta el código e inténtalo de nuevo.', passed: '✓ ¡Todo correcto! Desafío completado.',
@@ -484,7 +1369,7 @@ window.pyPronto()
       runForVars: 'Ejecuta el código para ver las variables que crea.', colName: 'Nombre', colType: 'Tipo', colValue: 'Valor',
       confirmSol: '¿Mostrar la solución? Inténtalo un poco más antes, si puedes.',
       challenge: 'desafío', done: '✓ completado',
-      notes: { NOTA: 'Nota', 'ATENÇÃO': 'Atención', DICA: 'Consejo', NOVO: 'Novedad 3.15' },
+      notes: { NOTE: 'Nota', WARNING: 'Atención', TIP: 'Consejo', NEW: 'Novedad 3.15' },
       reqCode: 'Este ejemplo usa funciones de Python 3.14 o posterior y no se ejecuta en el motor del navegador. Ejecútalo en tu Python 3.15 local.',
       reqEx: 'Ejecuta este ejemplo en tu Python local: usa archivos, bases de datos, varios módulos o funciones de 3.14+, que el motor del navegador no ofrece.',
       home: 'Inicio', lab: 'Laboratorio libre', labCard: 'Un editor en blanco para experimentar',
@@ -518,26 +1403,34 @@ window.pyPronto()
   const L = UI[LANG];
   const fmt = (s, o) => s.replace(/\{(\w+)\}/g, (m, k) => (o[k] != null ? o[k] : m));
 
-  // textos fixos do HTML
+  // fixed texts in the HTML
   document.title = L.docTitle;
-  document.getElementById('tituloTrilha').textContent = L.trailName;
-  document.getElementById('subTrilha').textContent = L.trailSub;
-  document.getElementById('rotProgresso').textContent = L.progressLabel;
-  document.getElementById('rotCapitulos').textContent = L.chapters;
+  document.getElementById('trailTitle').textContent = L.trailName;
+  document.getElementById('trailSubtitle').textContent = L.trailSub;
+  document.getElementById('progressLabel').textContent = L.progressLabel;
+  document.getElementById('chaptersLabel').textContent = L.chapters;
   document.getElementById('btnMenu').setAttribute('aria-label', L.menu);
-  document.getElementById('tituloMobile').textContent = L.trailName;
-  window.pyRotuloEntrada = L.promptInput;
+  document.getElementById('mobileTitle').textContent = L.trailName;
+  window.pyInputLabel = L.promptInput;
 
-  // ---------- armazenamento (por visitante) ----------
-  const CHAVE = 'python-moderno-v1';
-  let estado = { feitos: {}, codigos: {} };
-  try { const s = localStorage.getItem(CHAVE); if (s) estado = Object.assign(estado, JSON.parse(s)); } catch (e) {}
-  function salvar() { try { localStorage.setItem(CHAVE, JSON.stringify(estado)); } catch (e) {} }
+  // ---------- storage (per visitor) ----------
+  const STORAGE_KEY = 'python-moderno-v1';
+  let state = { done: {}, savedCode: {} };
+  try {
+    const s = localStorage.getItem(STORAGE_KEY);
+    if (s) {
+      const saved = JSON.parse(s);
+      // progress saved before the English rename used the keys feitos and codigos
+      state.done = saved.done || saved.feitos || {};
+      state.savedCode = saved.savedCode || saved.codigos || {};
+    }
+  } catch (e) {}
+  function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {} }
 
-  // conteúdo da trilha (content/<idioma>.json), carregado na inicialização
-  let DADOS = null;
+  // the trail's content (content/<lang>.json), loaded at start-up
+  let BOOK = null;
 
-  // ---------- utilidades ----------
+  // ---------- helpers ----------
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const escAttr = s => esc(s).replace(/"/g, '&quot;');
   function inline(t) {
@@ -548,381 +1441,383 @@ window.pyPronto()
   }
   const CIRC = '❶❷❸❹❺❻❼❽❾❿';
 
-  // ---------- realce de sintaxe ----------
+  // ---------- syntax highlighting ----------
   const KW = new Set('False None True and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield match case type lazy'.split(' '));
   const BI = new Set('print len range int float str bool list dict set tuple type input sum min max sorted reversed isinstance enumerate zip map filter open round abs any all repr help dir id iter next super object frozenset frozendict sentinel breakpoint format divmod pow hash chr ord'.split(' '));
   const TOKEN = /(#[^\n]*)|([rRbBfFtTuU]{0,2}("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'))|(\b\d[\d_]*(?:\.\d+)?(?:[eE][+-]?\d+)?\b)|([A-Za-z_À-ÿ][\wÀ-ÿ]*)/g;
-  function realce(code, lang) {
+  function highlight(code, lang) {
     if (lang !== 'python') return esc(code);
-    let out = '', ultimo = 0, anterior = '';
-    code.replace(TOKEN, (m, com, str, _q, num, nome, pos) => {
-      out += esc(code.slice(ultimo, pos));
+    let out = '', lastIndex = 0, previous = '';
+    code.replace(TOKEN, (m, com, str, _q, num, name, pos) => {
+      out += esc(code.slice(lastIndex, pos));
       let cls = null;
       if (com) cls = 'com'; else if (str) cls = 'str'; else if (num) cls = 'num';
-      else if (nome) {
-        if (KW.has(nome)) cls = 'kw';
-        else if (anterior === 'def' || anterior === 'class') cls = 'fn';
-        else if (BI.has(nome)) cls = 'bi';
-        anterior = nome;
+      else if (name) {
+        if (KW.has(name)) cls = 'kw';
+        else if (previous === 'def' || previous === 'class') cls = 'fn';
+        else if (BI.has(name)) cls = 'bi';
+        previous = name;
       }
       out += cls ? '<span class="tk-' + cls + '">' + esc(m) + '</span>' : esc(m);
-      ultimo = pos + m.length;
+      lastIndex = pos + m.length;
       return m;
     });
-    return out + esc(code.slice(ultimo));
+    return out + esc(code.slice(lastIndex));
   }
 
-  // ---------- motor Python ----------
-  let pronto = false, modoLocal = false, emissor = null, coletorVars = null;
-  const motorEl = document.getElementById('motor');
-  function statusMotor(classe, texto) { motorEl.className = 'motor ' + classe; motorEl.querySelector('span').textContent = texto; }
-  statusMotor('', L.loadingPy);
-  function habilitar() { pronto = true; document.querySelectorAll('.btn-run').forEach(b => b.disabled = false); }
-  window.pyEmit = (tipo, texto) => { if (emissor) emissor(tipo, texto); };
-  window.pyVars = v => { if (coletorVars) coletorVars(v); };
-  window.pyPronto = () => {
-    if (modoLocal) return;
-    statusMotor('pronto', fmt(L.brythonOk, { v: (window.__BRYTHON__ && __BRYTHON__.implementation) ? __BRYTHON__.implementation.slice(0, 3).join('.') : '' }));
-    habilitar();
+  // ---------- Python engine ----------
+  let ready = false, localMode = false, emitter = null, varsCollector = null;
+  const engineEl = document.getElementById('engine');
+  function setEngineStatus(statusClass, text) { engineEl.className = 'engine ' + statusClass; engineEl.querySelector('span').textContent = text; }
+  setEngineStatus('', L.loadingPy);
+  function enableRun() { ready = true; document.querySelectorAll('.btn-run').forEach(b => b.disabled = false); }
+  window.pyEmit = (kind, text) => { if (emitter) emitter(kind, text); };
+  window.pyVars = v => { if (varsCollector) varsCollector(v); };
+  window.pyReady = () => {
+    if (localMode) return;
+    setEngineStatus('ready', fmt(L.brythonOk, { v: (window.__BRYTHON__ && __BRYTHON__.implementation) ? __BRYTHON__.implementation.slice(0, 3).join('.') : '' }));
+    enableRun();
   };
-  function carregarScript(src) {
-    return new Promise((ok, erro) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => erro(new Error(src)); document.head.appendChild(s); });
+  function loadScript(src) {
+    return new Promise((ok, error) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => error(new Error(src)); document.head.appendChild(s); });
   }
-  async function iniciarBrython() {
-    statusMotor('', L.loadingBrowserPy);
-    const falhou = () => statusMotor('falhou', L.brythonFail);
-    const limite = setTimeout(() => { if (!pronto) falhou(); }, 30000);
+  async function startBrython() {
+    setEngineStatus('', L.loadingBrowserPy);
+    const failed = () => setEngineStatus('failed', L.brythonFail);
+    const timer = setTimeout(() => { if (!ready) failed(); }, 30000);
     try {
-      await carregarScript('https://cdn.jsdelivr.net/npm/brython@3.12.4/brython.min.js');
-      await carregarScript('https://cdn.jsdelivr.net/npm/brython@3.12.4/brython_stdlib.js');
+      await loadScript('https://cdn.jsdelivr.net/npm/brython@3.12.4/brython.min.js');
+      await loadScript('https://cdn.jsdelivr.net/npm/brython@3.12.4/brython_stdlib.js');
       window.brython({ debug: 1 });
-    } catch (e) { clearTimeout(limite); falhou(); }
+    } catch (e) { clearTimeout(timer); failed(); }
   }
-  async function iniciarMotor() {
+  async function startEngine() {
     if (window.LAB_TOKEN) {
       try {
         const r = await fetch('api/status', { headers: { 'X-Lab-Token': window.LAB_TOKEN } });
         if (r.ok) {
           const info = await r.json();
-          modoLocal = true;
-          statusMotor('pronto', fmt(L.localOk, { v: info.versao }));
-          habilitar();
-          rotear();
+          localMode = true;
+          setEngineStatus('ready', fmt(L.localOk, { v: info.version }));
+          enableRun();
+          route();
           return;
         }
       } catch (e) {}
     }
-    iniciarBrython();
+    startBrython();
   }
 
-  async function rodar(codigo, extra, entradas, argv, aoEmitir, aoVars, depurar) {
-    if (modoLocal) {
+  async function runCode(code, extra, inputs, argv, onEmit, onVars, debug) {
+    if (localMode) {
       try {
-        const r = await fetch('api/executar', {
+        const r = await fetch('api/run', {
           method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Lab-Token': window.LAB_TOKEN },
-          body: JSON.stringify({ codigo, verificacao: extra || '', entradas, argv, depurar: !!depurar })
+          body: JSON.stringify({ code, check: extra || '', inputs, argv, debug: !!debug })
         });
         const res = await r.json();
-        if (!r.ok) { aoEmitir('tb', L.serverRefused + (res.erro || r.status)); return { status: 'erro', passos: [] }; }
-        (res.saida || []).forEach(([tipo, texto]) => aoEmitir(tipo, texto));
-        if (res.status === 'falhou') aoEmitir('assert', res.assercao || '');
-        aoVars(res.vars || []);
-        return { status: res.status, passos: res.passos || [], saida: res.saida || [], cortado: res.cortado };
+        if (!r.ok) { onEmit('tb', L.serverRefused + (res.error || r.status)); return { status: 'error', steps: [] }; }
+        // the engine answers in English; show its known messages in the selected language
+        const translate = text => (L.engineMessages || []).reduce((t, [re, to]) => t.replace(re, to), text);
+        (res.output || []).forEach(([kind, text]) => onEmit(kind, kind === 'tb' ? translate(text) : text));
+        if (res.status === 'failed') onEmit('assert', res.assertion || '');
+        onVars(res.vars || []);
+        return { status: res.status, steps: res.steps || [], output: res.output || [], truncated: res.truncated };
       } catch (e) {
-        aoEmitir('tb', fmt(L.serverDown, { m: e.message }));
-        return { status: 'erro', passos: [] };
+        onEmit('tb', fmt(L.serverDown, { m: e.message }));
+        return { status: 'error', steps: [] };
       }
     }
-    emissor = aoEmitir; coletorVars = aoVars;
-    try { return { status: window.pyExecutar(codigo, extra || '', entradas, argv), passos: [] }; }
-    catch (e) { aoEmitir('tb', L.internalErr + (e && e.message ? e.message : e)); return { status: 'erro', passos: [] }; }
-    finally { emissor = null; coletorVars = null; }
+    emitter = onEmit; varsCollector = onVars;
+    try { return { status: window.pyRun(code, extra || '', inputs, argv), steps: [] }; }
+    catch (e) { onEmit('tb', L.internalErr + (e && e.message ? e.message : e)); return { status: 'error', steps: [] }; }
+    finally { emitter = null; varsCollector = null; }
   }
 
-  // ---------- progresso ----------
-  const atividades = [];
-  function atualizarProgresso() {
-    const total = atividades.length, feitos = atividades.filter(id => estado.feitos[id]).length;
-    const pct = total ? 100 * feitos / total : 0;
-    document.getElementById('barra').style.width = pct + '%';
-    document.getElementById('pctProgresso').textContent = Math.round(pct) + '%';
-    document.getElementById('txtProgresso').textContent = fmt(L.progress, { f: feitos, t: total });
-    if (window.TRAIL && window.TRAIL.progress) window.TRAIL.progress(feitos, total);
-    DADOS.capitulos.forEach((cap, i) => {
-      const ids = cap.atividades, f = ids.filter(id => estado.feitos[id]).length;
-      const el = document.querySelector('#nav a[data-cap="' + i + '"] .cnt');
-      if (el) { el.textContent = f + '/' + ids.length; el.classList.toggle('cheio', f === ids.length && ids.length > 0); }
+  // ---------- progress ----------
+  const activities = [];
+  function updateProgress() {
+    const total = activities.length, done = activities.filter(id => state.done[id]).length;
+    const pct = total ? 100 * done / total : 0;
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('progressPct').textContent = Math.round(pct) + '%';
+    document.getElementById('progressText').textContent = fmt(L.progress, { f: done, t: total });
+    if (window.TRAIL && window.TRAIL.progress) window.TRAIL.progress(done, total);
+    BOOK.chapters.forEach((chapter, i) => {
+      const ids = chapter.activities, f = ids.filter(id => state.done[id]).length;
+      const el = document.querySelector('#nav a[data-chapter="' + i + '"] .cnt');
+      if (el) { el.textContent = f + '/' + ids.length; el.classList.toggle('full', f === ids.length && ids.length > 0); }
     });
   }
-  function marcar(id) {
-    if (!estado.feitos[id]) { estado.feitos[id] = true; salvar(); atualizarProgresso(); }
-    document.querySelectorAll('.feito[data-feito]').forEach(el => { if (el.dataset.feito === id) el.textContent = L.done; });
+  function markDone(id) {
+    if (!state.done[id]) { state.done[id] = true; save(); updateProgress(); }
+    document.querySelectorAll('.done[data-done]').forEach(el => { if (el.dataset.done === id) el.textContent = L.done; });
   }
-  const feitoHtml = id => '<span class="feito" data-feito="' + escAttr(id) + '">' + (estado.feitos[id] ? L.done : '') + '</span>';
+  const doneHtml = id => '<span class="done" data-done="' + escAttr(id) + '">' + (state.done[id] ? L.done : '') + '</span>';
 
   // ---------- editor ----------
-  function criarEditor(id, inicial) {
-    const salvo = estado.codigos[id];
+  function createEditor(id, starter) {
+    const saved = state.savedCode[id];
     const box = document.createElement('div');
     box.className = 'editor';
     box.innerHTML = '<div class="ed-wrap"><div class="gutter"></div><div class="area"><pre aria-hidden="true"></pre><textarea spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="' + escAttr(L.editorAria) + '"></textarea></div></div>';
     const ta = box.querySelector('textarea'), pre = box.querySelector('pre'), gut = box.querySelector('.gutter');
-    ta.value = salvo != null ? salvo : inicial;
-    let erroLinha = 0, linhaAtual = 0;
-    function pintar() {
-      const linhas = ta.value.split('\n');
-      let html = realce(ta.value, 'python');
-      const marcada = linhaAtual || erroLinha, classe = linhaAtual ? 'linha-atual' : 'linha-erro';
-      if (marcada) {
-        const partes = html.split('\n');
-        if (partes[marcada - 1] !== undefined) partes[marcada - 1] = '<span class="' + classe + '">' + (partes[marcada - 1] || ' ') + '</span>';
-        html = partes.join('\n');
+    ta.value = saved != null ? saved : starter;
+    let errorLine = 0, currentLine = 0;
+    function paint() {
+      const lines = ta.value.split('\n');
+      let html = highlight(ta.value, 'python');
+      const marked = currentLine || errorLine, lineClass = currentLine ? 'current-line' : 'error-line';
+      if (marked) {
+        const parts = html.split('\n');
+        if (parts[marked - 1] !== undefined) parts[marked - 1] = '<span class="' + lineClass + '">' + (parts[marked - 1] || ' ') + '</span>';
+        html = parts.join('\n');
       }
       pre.innerHTML = html + '\n';
-      gut.innerHTML = linhas.map((_, i) => i + 1 === marcada ? '<span class="' + (linhaAtual ? 'atual' : 'erro') + '">' + (i + 1) + '</span>' : (i + 1)).join('\n');
-      const largura = Math.max(...linhas.map(l => l.length)) + 2;
-      pre.style.minWidth = 'calc(' + largura + 'ch + 28px)';
+      gut.innerHTML = lines.map((_, i) => i + 1 === marked ? '<span class="' + (currentLine ? 'current' : 'error') + '">' + (i + 1) + '</span>' : (i + 1)).join('\n');
+      const width = Math.max(...lines.map(l => l.length)) + 2;
+      pre.style.minWidth = 'calc(' + width + 'ch + 28px)';
     }
-    ta.addEventListener('input', () => { erroLinha = 0; linhaAtual = 0; pintar(); estado.codigos[id] = ta.value; salvar(); });
+    ta.addEventListener('input', () => { errorLine = 0; currentLine = 0; paint(); state.savedCode[id] = ta.value; save(); });
     ta.addEventListener('keydown', e => {
       if (e.key === 'Tab') {
         e.preventDefault();
         const s = ta.selectionStart, f = ta.selectionEnd;
         if (e.shiftKey) {
-          const ini = ta.value.lastIndexOf('\n', s - 1) + 1;
-          if (ta.value.slice(ini, ini + 4) === '    ') { ta.value = ta.value.slice(0, ini) + ta.value.slice(ini + 4); ta.selectionStart = ta.selectionEnd = Math.max(ini, s - 4); }
+          const lineStart = ta.value.lastIndexOf('\n', s - 1) + 1;
+          if (ta.value.slice(lineStart, lineStart + 4) === '    ') { ta.value = ta.value.slice(0, lineStart) + ta.value.slice(lineStart + 4); ta.selectionStart = ta.selectionEnd = Math.max(lineStart, s - 4); }
         } else { ta.setRangeText('    ', s, f, 'end'); }
         ta.dispatchEvent(new Event('input'));
       } else if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
-        const s = ta.selectionStart, ini = ta.value.lastIndexOf('\n', s - 1) + 1;
-        const linha = ta.value.slice(ini, s);
-        let recuo = (linha.match(/^\s*/) || [''])[0];
-        if (/:\s*(#.*)?$/.test(linha)) recuo += '    ';
+        const s = ta.selectionStart, lineStart = ta.value.lastIndexOf('\n', s - 1) + 1;
+        const line = ta.value.slice(lineStart, s);
+        let indent = (line.match(/^\s*/) || [''])[0];
+        if (/:\s*(#.*)?$/.test(line)) indent += '    ';
         e.preventDefault();
-        ta.setRangeText('\n' + recuo, s, ta.selectionEnd, 'end');
+        ta.setRangeText('\n' + indent, s, ta.selectionEnd, 'end');
         ta.dispatchEvent(new Event('input'));
       }
     });
-    pintar();
+    paint();
     return {
       el: box, ta,
-      valor: () => ta.value,
-      definir: v => { ta.value = v; erroLinha = 0; pintar(); estado.codigos[id] = v; salvar(); },
-      marcarErro: n => { erroLinha = n; linhaAtual = 0; pintar(); },
-      marcarAtual: n => { linhaAtual = n; pintar(); },
-      irPara: n => {
-        const linhas = ta.value.split('\n'); let pos = 0;
-        for (let i = 0; i < n - 1 && i < linhas.length; i++) pos += linhas[i].length + 1;
-        ta.focus(); ta.setSelectionRange(pos, pos + (linhas[n - 1] || '').length);
+      value: () => ta.value,
+      setValue: v => { ta.value = v; errorLine = 0; paint(); state.savedCode[id] = v; save(); },
+      markError: n => { errorLine = n; currentLine = 0; paint(); },
+      markCurrent: n => { currentLine = n; paint(); },
+      goToLine: n => {
+        const lines = ta.value.split('\n'); let pos = 0;
+        for (let i = 0; i < n - 1 && i < lines.length; i++) pos += lines[i].length + 1;
+        ta.focus(); ta.setSelectionRange(pos, pos + (lines[n - 1] || '').length);
       }
     };
   }
 
-  const DICAS_ERRO = L.errHints;
+  const ERROR_HINTS = L.errHints;
 
-  // ---------- célula executável ----------
-  function celula(opts) {
-    // opts: id, codigo, verificacao, solucao, desafio(bool)
+  // ---------- runnable cell ----------
+  function cell(opts) {
+    // opts: id, code, check, solution, challenge(bool)
     const frag = document.createElement('div');
-    const ed = criarEditor(opts.id, opts.codigo);
+    const ed = createEditor(opts.id, opts.code);
     frag.appendChild(ed.el);
-    const usaInput = /\binput\s*\(/.test(opts.codigo);
-    const usaArgv = /sys\.argv|parse_args\(argv\)|argparse/.test(opts.codigo) && !opts.desafio;
-    let campoIn = null, campoArgv = null;
-    if (usaInput) {
-      const c = document.createElement('div'); c.className = 'campo';
+    const usesInput = /\binput\s*\(/.test(opts.code);
+    const usesArgv = /sys\.argv|parse_args\(argv\)|argparse/.test(opts.code) && !opts.challenge;
+    let inputsField = null, argvField = null;
+    if (usesInput) {
+      const c = document.createElement('div'); c.className = 'field';
       c.innerHTML = '<label>' + esc(L.inputs) + '</label><textarea aria-label="' + escAttr(L.inputs) + '" placeholder="' + escAttr(L.inputsPh) + '"></textarea>';
-      campoIn = c.querySelector('textarea'); campoIn.value = opts.entradas || '';
+      inputsField = c.querySelector('textarea'); inputsField.value = opts.inputs || '';
       frag.appendChild(c);
     }
-    if (usaArgv) {
-      const c = document.createElement('div'); c.className = 'campo';
+    if (usesArgv) {
+      const c = document.createElement('div'); c.className = 'field';
       c.innerHTML = '<label>' + esc(L.args) + '</label><input type="text" aria-label="' + escAttr(L.args) + '" placeholder="' + escAttr(L.argsPh) + '">';
-      campoArgv = c.querySelector('input'); campoArgv.value = opts.argv || '';
+      argvField = c.querySelector('input'); argvField.value = opts.argv || '';
       frag.appendChild(c);
     }
-    const acoes = document.createElement('div'); acoes.className = 'acoes';
-    acoes.innerHTML =
-      '<button class="btn prim btn-run"' + (pronto ? '' : ' disabled') + '>' + esc(L.run) + '</button>' +
-      (opts.desafio ? '<button class="btn ok btn-run btn-verif"' + (pronto ? '' : ' disabled') + '>' + esc(L.verify) + '</button>' : '') +
-      (modoLocal ? '<button class="btn btn-run btn-dep">' + esc(L.debug) + '</button>' : '') +
-      '<button class="btn btn-insp">' + esc(L.vars) + '</button>' +
+    const actions = document.createElement('div'); actions.className = 'actions';
+    actions.innerHTML =
+      '<button class="btn prim btn-run"' + (ready ? '' : ' disabled') + '>' + esc(L.run) + '</button>' +
+      (opts.challenge ? '<button class="btn ok btn-run btn-check"' + (ready ? '' : ' disabled') + '>' + esc(L.verify) + '</button>' : '') +
+      (localMode ? '<button class="btn btn-run btn-dbg">' + esc(L.debug) + '</button>' : '') +
+      '<button class="btn btn-inspect">' + esc(L.vars) + '</button>' +
       '<button class="btn btn-reset">' + esc(L.reset) + '</button>' +
-      (opts.desafio ? '<button class="btn btn-sol">' + esc(L.showSol) + '</button>' : '') +
-      '<span class="atalho">' + L.shortcut + (opts.desafio ? L.shortcutVerify : '') + '</span>';
-    frag.appendChild(acoes);
-    const saida = document.createElement('div'); saida.className = 'saida';
-    saida.innerHTML = '<div class="cab"><span>' + esc(L.output) + '</span><span class="tempo"></span></div><div class="corpo"></div>';
-    frag.appendChild(saida);
-    const resultado = document.createElement('div'); resultado.className = 'resultado'; resultado.setAttribute('role', 'status'); frag.appendChild(resultado);
-    const insp = document.createElement('div'); insp.className = 'inspetor tabela'; frag.appendChild(insp);
-    const dep = document.createElement('div'); dep.className = 'depurador';
-    const bt = (a, rot, txt) => '<button data-a="' + a + '" title="' + escAttr(rot) + '" aria-label="' + escAttr(rot) + '">' + txt + '</button>';
-    dep.innerHTML = '<div class="dep-cab">' + bt('ini', L.first, '⏮') + bt('ant', L.prev, '◀') + bt('prox', L.next, '▶') + bt('fim', L.last, '⏭') +
-      '<input type="range" min="0" value="0" aria-label="' + escAttr(L.stepSlider) + '"><span class="dep-info"></span>' + bt('fechar', L.closeDbg, '✕') + '</div>' +
-      '<div class="dep-evento"></div><div class="dep-corpo"><div><h5>' + esc(L.varsStep) + '</h5><div class="dep-vars"></div></div><div><h5>' + esc(L.outSoFar) + '</h5><pre class="dep-saida"></pre></div></div>';
-    frag.appendChild(dep);
+      (opts.challenge ? '<button class="btn btn-sol">' + esc(L.showSol) + '</button>' : '') +
+      '<span class="shortcut">' + L.shortcut + (opts.challenge ? L.shortcutVerify : '') + '</span>';
+    frag.appendChild(actions);
+    const output = document.createElement('div'); output.className = 'output';
+    output.innerHTML = '<div class="head"><span>' + esc(L.output) + '</span><span class="time"></span></div><div class="body"></div>';
+    frag.appendChild(output);
+    const result = document.createElement('div'); result.className = 'result'; result.setAttribute('role', 'status'); frag.appendChild(result);
+    const inspect = document.createElement('div'); inspect.className = 'inspector table'; frag.appendChild(inspect);
+    const dbg = document.createElement('div'); dbg.className = 'debugger-panel';
+    const bt = (a, label, txt) => '<button data-a="' + a + '" title="' + escAttr(label) + '" aria-label="' + escAttr(label) + '">' + txt + '</button>';
+    dbg.innerHTML = '<div class="dbg-head">' + bt('first', L.first, '⏮') + bt('prev', L.prev, '◀') + bt('next', L.next, '▶') + bt('last', L.last, '⏭') +
+      '<input type="range" min="0" value="0" aria-label="' + escAttr(L.stepSlider) + '"><span class="dbg-info"></span>' + bt('close', L.closeDbg, '✕') + '</div>' +
+      '<div class="dbg-event"></div><div class="dbg-body"><div><h5>' + esc(L.varsStep) + '</h5><div class="dbg-vars"></div></div><div><h5>' + esc(L.outSoFar) + '</h5><pre class="dbg-output"></pre></div></div>';
+    frag.appendChild(dbg);
     let solDiv = null;
-    if (opts.desafio) {
-      solDiv = document.createElement('div'); solDiv.className = 'solucao';
-      solDiv.innerHTML = '<div class="cab"><span>' + esc(L.solution) + '</span></div><div class="estatico editor"><pre>' + realce(opts.solucao, 'python') + '</pre></div><div class="acoes"><button class="btn btn-usar">' + esc(L.copyToEditor) + '</button></div>';
+    if (opts.challenge) {
+      solDiv = document.createElement('div'); solDiv.className = 'solution';
+      solDiv.innerHTML = '<div class="head"><span>' + esc(L.solution) + '</span></div><div class="static-code editor"><pre>' + highlight(opts.solution, 'python') + '</pre></div><div class="actions"><button class="btn btn-use">' + esc(L.copyToEditor) + '</button></div>';
       frag.appendChild(solDiv);
-      solDiv.querySelector('.btn-usar').onclick = () => ed.definir(opts.solucao);
+      solDiv.querySelector('.btn-use').onclick = () => ed.setValue(opts.solution);
     }
-    const corpo = saida.querySelector('.corpo');
-    let ultimasVars = [];
+    const body = output.querySelector('.body');
+    let lastVars = [];
 
-    let passos = [], saidaTotal = [], passoAtual = 0;
-    function tabelaVars(lista) {
-      if (!lista || !lista.length) return '<small class="mudo">' + esc(L.none) + '</small>';
-      return '<table>' + lista.map(([n, t, r]) => '<tr><td><b>' + esc(n) + '</b></td><td>' + esc(t) + '</td><td>' + esc(r) + '</td></tr>').join('') + '</table>';
+    let steps = [], fullOutput = [], currentStep = 0;
+    function varsTable(list) {
+      if (!list || !list.length) return '<small class="muted">' + esc(L.none) + '</small>';
+      return '<table>' + list.map(([n, t, r]) => '<tr><td><b>' + esc(n) + '</b></td><td>' + esc(t) + '</td><td>' + esc(r) + '</td></tr>').join('') + '</table>';
     }
-    function mostrarPasso(i) {
-      if (!passos.length) return;
-      passoAtual = Math.max(0, Math.min(passos.length - 1, i));
-      const p = passos[passoAtual];
-      ed.marcarAtual(p.linha);
-      dep.querySelector('input').value = passoAtual;
-      const onde = p.pilha.length > 1 ? p.pilha.slice(1).join(' → ') + '()' : L.moduleLevel;
-      dep.querySelector('.dep-info').textContent = fmt(L.stepInfo, { i: passoAtual + 1, n: passos.length, l: p.linha, onde });
-      const ev = dep.querySelector('.dep-evento');
-      if (p.evento === 'return' && p.pilha.length > 1) { ev.textContent = fmt(L.returned, { fn: p.pilha[p.pilha.length - 1], v: p.retorno }); ev.className = 'dep-evento vis'; }
-      else if (p.evento === 'exception') { ev.textContent = L.exception + p.excecao; ev.className = 'dep-evento vis'; }
-      else { ev.className = 'dep-evento'; ev.textContent = ''; }
-      dep.querySelector('.dep-vars').innerHTML = tabelaVars(p.vars) + (p.globais ? '<h5 style="margin-top:10px">' + esc(L.globals) + '</h5>' + tabelaVars(p.globais) : '');
-      let texto = '', resta = p.saida;
-      for (const [tipo, t] of saidaTotal) { if (tipo === 'tb' || resta <= 0) continue; texto += t.slice(0, resta); resta -= t.length; }
-      dep.querySelector('.dep-saida').textContent = texto || L.nothingYet;
-      const sd = dep.querySelector('.dep-saida'); sd.scrollTop = sd.scrollHeight;
+    function showStep(i) {
+      if (!steps.length) return;
+      currentStep = Math.max(0, Math.min(steps.length - 1, i));
+      const p = steps[currentStep];
+      ed.markCurrent(p.line);
+      dbg.querySelector('input').value = currentStep;
+      const where = p.stack.length > 1 ? p.stack.slice(1).join(' → ') + '()' : L.moduleLevel;
+      dbg.querySelector('.dbg-info').textContent = fmt(L.stepInfo, { i: currentStep + 1, n: steps.length, l: p.line, where });
+      const ev = dbg.querySelector('.dbg-event');
+      if (p.event === 'return' && p.stack.length > 1) { ev.textContent = fmt(L.returned, { fn: p.stack[p.stack.length - 1], v: p.returned }); ev.className = 'dbg-event vis'; }
+      else if (p.event === 'exception') { ev.textContent = L.exception + p.exception; ev.className = 'dbg-event vis'; }
+      else { ev.className = 'dbg-event'; ev.textContent = ''; }
+      dbg.querySelector('.dbg-vars').innerHTML = varsTable(p.vars) + (p.globals ? '<h5 style="margin-top:10px">' + esc(L.globals) + '</h5>' + varsTable(p.globals) : '');
+      let text = '', remaining = p.output;
+      for (const [kind, t] of fullOutput) { if (kind === 'tb' || remaining <= 0) continue; text += t.slice(0, remaining); remaining -= t.length; }
+      dbg.querySelector('.dbg-output').textContent = text || L.nothingYet;
+      const sd = dbg.querySelector('.dbg-output'); sd.scrollTop = sd.scrollHeight;
     }
-    dep.querySelector('.dep-cab').addEventListener('click', e => {
+    dbg.querySelector('.dbg-head').addEventListener('click', e => {
       const b = e.target.closest('button'); const a = b && b.dataset.a; if (!a) return;
-      if (a === 'fechar') { dep.classList.remove('vis'); ed.marcarAtual(0); return; }
-      mostrarPasso({ ini: 0, ant: passoAtual - 1, prox: passoAtual + 1, fim: passos.length - 1 }[a]);
+      if (a === 'close') { dbg.classList.remove('vis'); ed.markCurrent(0); return; }
+      showStep({ first: 0, prev: currentStep - 1, next: currentStep + 1, last: steps.length - 1 }[a]);
     });
-    dep.querySelector('input').addEventListener('input', e => mostrarPasso(+e.target.value));
+    dbg.querySelector('input').addEventListener('input', e => showStep(+e.target.value));
 
-    async function executar(comVerificacao, depurar) {
-      if (!pronto) return;
-      const botoes = acoes.querySelectorAll('.btn-run');
-      botoes.forEach(b => b.disabled = true);
-      corpo.innerHTML = '<span class="mudo">' + esc(L.running) + '</span>'; saida.classList.add('vis'); resultado.className = 'resultado';
-      ed.marcarErro(0);
-      if (!depurar) dep.classList.remove('vis');
-      const entradas = campoIn ? campoIn.value.split('\n').filter((l, i, a) => i < a.length - 1 || l !== '') : [];
-      const argv = campoArgv ? campoArgv.value.trim().split(/\s+/).filter(Boolean) : [];
+    async function run(withCheck, debug) {
+      if (!ready) return;
+      const buttons = actions.querySelectorAll('.btn-run');
+      buttons.forEach(b => b.disabled = true);
+      body.innerHTML = '<span class="muted">' + esc(L.running) + '</span>'; output.classList.add('vis'); result.className = 'result';
+      ed.markError(0);
+      if (!debug) dbg.classList.remove('vis');
+      const inputs = inputsField ? inputsField.value.split('\n').filter((l, i, a) => i < a.length - 1 || l !== '') : [];
+      const argv = argvField ? argvField.value.trim().split(/\s+/).filter(Boolean) : [];
       let buffer = '';
       const t0 = performance.now();
-      const res = await rodar(ed.valor(), comVerificacao ? opts.verificacao : '', entradas, argv, (tipo, texto) => {
-        if (tipo === 'out') { buffer += esc(texto); }
-        else if (tipo === 'err') { buffer += '<span class="err">' + esc(texto) + '</span>'; }
-        else if (tipo === 'tb') {
-          let tb = esc(texto);
-          let linhaErro = 0;
-          tb = tb.replace(/File &quot;&lt;seu código&gt;&quot;, line (\d+)|File "&lt;seu código&gt;", line (\d+)/g, (m, a, b) => {
-            const n = +(a || b); linhaErro = n;
+      const res = await runCode(ed.value(), withCheck ? opts.check : '', inputs, argv, (kind, text) => {
+        if (kind === 'out') { buffer += esc(text); }
+        else if (kind === 'err') { buffer += '<span class="err">' + esc(text) + '</span>'; }
+        else if (kind === 'tb') {
+          let tb = esc(text);
+          let errorLine = 0;
+          tb = tb.replace(/File &quot;&lt;your code&gt;&quot;, line (\d+)|File "&lt;your code&gt;", line (\d+)/g, (m, a, b) => {
+            const n = +(a || b); errorLine = n;
             return m.replace(/line \d+/, '<a data-l="' + n + '">' + esc(L.line) + ' ' + n + '</a>');
           });
-          const tipoErro = (texto.trim().split('\n').pop().match(/^(\w+)/) || [])[1];
-          buffer += '<div class="tb">' + tb + '</div>' + (DICAS_ERRO[tipoErro] ? '<div class="dica-erro">💡 ' + esc(DICAS_ERRO[tipoErro]) + '</div>' : '');
-          if (linhaErro) ed.marcarErro(linhaErro);
-        } else if (tipo === 'assert') {
-          resultado.className = 'resultado vis falha';
-          resultado.textContent = fmt(L.notPassed, { m: texto ? ' — ' + texto : '' });
+          const errorType = (text.trim().split('\n').pop().match(/^(\w+)/) || [])[1];
+          buffer += '<div class="tb">' + tb + '</div>' + (ERROR_HINTS[errorType] ? '<div class="error-hint">💡 ' + esc(ERROR_HINTS[errorType]) + '</div>' : '');
+          if (errorLine) ed.markError(errorLine);
+        } else if (kind === 'assert') {
+          result.className = 'result vis fail';
+          result.textContent = fmt(L.notPassed, { m: text ? ' — ' + text : '' });
         }
-      }, v => { ultimasVars = v; }, depurar);
+      }, v => { lastVars = v; }, debug);
       const status = res.status;
-      botoes.forEach(b => b.disabled = false);
-      corpo.innerHTML = buffer || '<span class="mudo">' + esc(L.noOutput) + '</span>';
-      corpo.querySelectorAll('a[data-l]').forEach(a => a.onclick = () => ed.irPara(+a.dataset.l));
-      saida.querySelector('.tempo').textContent = (status === 'erro' ? L.endedErr : '') + Math.round(performance.now() - t0) + ' ms';
-      if (insp.classList.contains('vis')) mostrarVars();
-      if (depurar) {
-        passos = res.passos || []; saidaTotal = res.saida || [];
-        if (passos.length) {
-          dep.classList.add('vis');
-          dep.querySelector('input').max = passos.length - 1;
-          if (res.cortado) dep.querySelector('.dep-info').title = L.truncated;
-          mostrarPasso(0);
+      buttons.forEach(b => b.disabled = false);
+      body.innerHTML = buffer || '<span class="muted">' + esc(L.noOutput) + '</span>';
+      body.querySelectorAll('a[data-l]').forEach(a => a.onclick = () => ed.goToLine(+a.dataset.l));
+      output.querySelector('.time').textContent = (status === 'error' ? L.endedErr : '') + Math.round(performance.now() - t0) + ' ms';
+      if (inspect.classList.contains('vis')) showVars();
+      if (debug) {
+        steps = res.steps || []; fullOutput = res.output || [];
+        if (steps.length) {
+          dbg.classList.add('vis');
+          dbg.querySelector('input').max = steps.length - 1;
+          if (res.truncated) dbg.querySelector('.dbg-info').title = L.truncated;
+          showStep(0);
         }
       }
-      if (comVerificacao) {
+      if (withCheck) {
         if (status === 'ok') {
-          resultado.className = 'resultado vis ok';
-          resultado.textContent = L.passed;
-          marcar(opts.id);
-        } else if (status === 'erro' && !resultado.classList.contains('vis')) {
-          resultado.className = 'resultado vis falha';
-          resultado.textContent = L.errBeforeCheck;
+          result.className = 'result vis ok';
+          result.textContent = L.passed;
+          markDone(opts.id);
+        } else if (status === 'error' && !result.classList.contains('vis')) {
+          result.className = 'result vis fail';
+          result.textContent = L.errBeforeCheck;
         }
-      } else if (!opts.desafio && (status !== 'erro' || opts.erroEsperado)) {
-        marcar(opts.id);
+      } else if (!opts.challenge && (status !== 'error' || opts.expectedError)) {
+        markDone(opts.id);
       }
     }
-    function mostrarVars() {
-      if (!ultimasVars.length) { insp.innerHTML = '<small class="mudo">' + esc(L.runForVars) + '</small>'; return; }
-      insp.innerHTML = '<table><tr><th>' + esc(L.colName) + '</th><th>' + esc(L.colType) + '</th><th>' + esc(L.colValue) + '</th></tr>' +
-        ultimasVars.map(([n, t, r]) => '<tr><td>' + esc(n) + '</td><td>' + esc(t) + '</td><td>' + esc(r) + '</td></tr>').join('') + '</table>';
+    function showVars() {
+      if (!lastVars.length) { inspect.innerHTML = '<small class="muted">' + esc(L.runForVars) + '</small>'; return; }
+      inspect.innerHTML = '<table><tr><th>' + esc(L.colName) + '</th><th>' + esc(L.colType) + '</th><th>' + esc(L.colValue) + '</th></tr>' +
+        lastVars.map(([n, t, r]) => '<tr><td>' + esc(n) + '</td><td>' + esc(t) + '</td><td>' + esc(r) + '</td></tr>').join('') + '</table>';
     }
-    acoes.querySelector('.btn-run').onclick = () => executar(false);
-    if (modoLocal) acoes.querySelector('.btn-dep').onclick = () => executar(false, true);
-    if (opts.desafio) acoes.querySelector('.btn-verif').onclick = () => executar(true);
-    acoes.querySelector('.btn-insp').onclick = () => { insp.classList.toggle('vis'); mostrarVars(); };
-    acoes.querySelector('.btn-reset').onclick = () => { ed.definir(opts.codigo); corpo.innerHTML = ''; saida.classList.remove('vis'); resultado.className = 'resultado'; };
-    if (solDiv) acoes.querySelector('.btn-sol').onclick = () => {
+    actions.querySelector('.btn-run').onclick = () => run(false);
+    if (localMode) actions.querySelector('.btn-dbg').onclick = () => run(false, true);
+    if (opts.challenge) actions.querySelector('.btn-check').onclick = () => run(true);
+    actions.querySelector('.btn-inspect').onclick = () => { inspect.classList.toggle('vis'); showVars(); };
+    actions.querySelector('.btn-reset').onclick = () => { ed.setValue(opts.code); body.innerHTML = ''; output.classList.remove('vis'); result.className = 'result'; };
+    if (solDiv) actions.querySelector('.btn-sol').onclick = () => {
       if (solDiv.classList.contains('vis') || confirm(L.confirmSol)) solDiv.classList.toggle('vis');
     };
-    ed.ta.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); executar(opts.desafio && e.shiftKey); } });
-    ed.ta.addEventListener('keydown', e => { if (e.key === 'F10' && dep.classList.contains('vis')) { e.preventDefault(); mostrarPasso(passoAtual + (e.shiftKey ? -1 : 1)); } });
+    ed.ta.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); run(opts.challenge && e.shiftKey); } });
+    ed.ta.addEventListener('keydown', e => { if (e.key === 'F10' && dbg.classList.contains('vis')) { e.preventDefault(); showStep(currentStep + (e.shiftKey ? -1 : 1)); } });
     return frag;
   }
 
-  // ---------- renderização ----------
-  const conteudo = document.getElementById('conteudo');
-  conteudo.innerHTML = '<p class="carregando">' + esc(L.loadingContent) + '</p>';
-  function estatico(code, lang) {
-    const d = document.createElement('div'); d.className = 'estatico editor';
-    d.innerHTML = '<pre>' + realce(code, lang) + '</pre>';
+  // ---------- rendering ----------
+  const content = document.getElementById('content');
+  content.innerHTML = '<p class="loading">' + esc(L.loadingContent) + '</p>';
+  function staticBlock(code, lang) {
+    const d = document.createElement('div'); d.className = 'static-code editor';
+    d.innerHTML = '<pre>' + highlight(code, lang) + '</pre>';
     return d;
   }
-  const NOTA_IC = { NOTA: 'i', 'ATENÇÃO': '!', DICA: '✓', NOVO: '★' };
-  function renderCapitulo(ci) {
-    const cap = DADOS.capitulos[ci];
-    conteudo.innerHTML = '';
-    const h = document.createElement('h2'); h.className = 'cap'; h.textContent = cap.titulo; conteudo.appendChild(h);
-    let lista = null;
-    cap.blocos.forEach(b => {
-      if (b.t !== 'bullet') lista = null;
+  const NOTE_ICONS = { NOTE: 'i', WARNING: '!', TIP: '✓', NEW: '★' };
+  function renderChapter(ci) {
+    const chapter = BOOK.chapters[ci];
+    content.innerHTML = '';
+    const h = document.createElement('h2'); h.className = 'chapter'; h.textContent = chapter.title; content.appendChild(h);
+    let list = null;
+    chapter.blocks.forEach(b => {
+      if (b.t !== 'bullet') list = null;
       let el = null;
       switch (b.t) {
-        case 'h2': el = document.createElement('h3'); el.className = 'sec'; el.id = b.ancora; el.innerHTML = inline(b.text); break;
+        case 'h2': el = document.createElement('h3'); el.className = 'sec'; el.id = b.anchor; el.innerHTML = inline(b.text); break;
         case 'h3': el = document.createElement('h4'); el.innerHTML = inline(b.text); break;
         case 'p': el = document.createElement('p'); el.innerHTML = inline(b.text); break;
         case 'bullet':
-          if (!lista) { lista = document.createElement('ul'); lista.className = 'lista'; conteudo.appendChild(lista); }
-          const li = document.createElement('li'); li.innerHTML = inline(b.text); lista.appendChild(li); return;
+          if (!list) { list = document.createElement('ul'); list.className = 'list'; content.appendChild(list); }
+          const li = document.createElement('li'); li.innerHTML = inline(b.text); list.appendChild(li); return;
         case 'note':
-          el = document.createElement('div'); el.className = 'nota ' + b.kind;
-          el.innerHTML = '<div class="rot">' + esc((NOTA_IC[b.kind] || 'i') + ' ' + (L.notes[b.kind] || b.kind)) + '</div><div class="tx">' + inline(b.text) + '</div>';
+          el = document.createElement('div'); el.className = 'note ' + b.kind;
+          el.innerHTML = '<div class="note-title">' + esc((NOTE_ICONS[b.kind] || 'i') + ' ' + (L.notes[b.kind] || b.kind)) + '</div><div class="tx">' + inline(b.text) + '</div>';
           break;
         case 'table':
-          el = document.createElement('div'); el.className = 'tabela';
+          el = document.createElement('div'); el.className = 'table';
           el.innerHTML = '<table>' + b.rows.map((r, i) => '<tr>' + r.map(c => (i ? '<td>' : '<th>') + inline(c) + (i ? '</td>' : '</th>')).join('') + '</tr>').join('') + '</table>';
           break;
         case 'code':
-          if (b.run || (modoLocal && b.lang === 'python')) { el = document.createElement('div'); el.style.margin = '18px 0'; el.appendChild(celula({ id: b.id || ('local-' + ci + '-' + b.code.length), codigo: b.code })); }
+          if (b.run || (localMode && b.lang === 'python')) { el = document.createElement('div'); el.style.margin = '18px 0'; el.appendChild(cell({ id: b.id || ('local-' + ci + '-' + b.code.length), code: b.code })); }
           else {
-            el = document.createElement('div'); el.appendChild(estatico(b.code, b.lang));
+            el = document.createElement('div'); el.appendChild(staticBlock(b.code, b.lang));
             if (b.lang === 'python') { const r = document.createElement('div'); r.className = 'req'; r.textContent = L.reqCode; el.appendChild(r); }
             else el.style.margin = '0 0 18px';
           }
           break;
         case 'ex': {
           el = document.createElement('div'); el.className = 'ex';
-          el.innerHTML = '<div class="titulo">' + inline(b.titulo) + '</div><div class="meta"><span class="arquivo">' + esc(b.arquivo) + '</span>' + (b.run ? feitoHtml(b.id) : '') + '</div>';
-          if (b.run || (modoLocal && b.lang === 'python')) el.appendChild(celula({ id: b.id || ('local-' + ci + '-' + b.code.length), codigo: b.code, entradas: b.entradas, argv: b.argv, erroEsperado: b.erroEsperado }));
+          el.innerHTML = '<div class="title">' + inline(b.title) + '</div><div class="meta"><span class="file">' + esc(b.file) + '</span>' + (b.run ? doneHtml(b.id) : '') + '</div>';
+          if (b.run || (localMode && b.lang === 'python')) el.appendChild(cell({ id: b.id || ('local-' + ci + '-' + b.code.length), code: b.code, inputs: b.inputs, argv: b.argv, expectedError: b.expectedError }));
           else {
-            el.appendChild(estatico(b.code, b.lang));
+            el.appendChild(staticBlock(b.code, b.lang));
             if (b.lang === 'python') { const r = document.createElement('div'); r.className = 'req'; r.style.margin = '8px 0 0'; r.textContent = L.reqEx; el.appendChild(r); }
           }
           if (b.callouts.length) {
@@ -932,99 +1827,101 @@ window.pyPronto()
           }
           break;
         }
-        case 'desafio': {
-          el = document.createElement('div'); el.className = 'ex desafio';
-          el.innerHTML = '<div class="meta"><span class="pill">' + esc(L.challenge) + '</span>' + feitoHtml(b.id) + '</div><div class="titulo">' + inline(b.titulo) + '</div><div class="enunciado">' + inline(b.enunciado) + '</div>';
-          el.appendChild(celula({ id: b.id, codigo: b.inicial, verificacao: b.verificacao, solucao: b.solucao, desafio: true }));
+        case 'challenge': {
+          el = document.createElement('div'); el.className = 'ex challenge';
+          el.innerHTML = '<div class="meta"><span class="pill">' + esc(L.challenge) + '</span>' + doneHtml(b.id) + '</div><div class="title">' + inline(b.title) + '</div><div class="prompt">' + inline(b.prompt) + '</div>';
+          el.appendChild(cell({ id: b.id, code: b.starter, check: b.check, solution: b.solution, challenge: true }));
           break;
         }
       }
-      if (el) conteudo.appendChild(el);
+      if (el) content.appendChild(el);
     });
-    const pag = document.createElement('div'); pag.className = 'paginacao';
-    pag.innerHTML = (ci > 0 ? '<a href="#cap-' + ci + '">← ' + esc(DADOS.capitulos[ci - 1].titulo) + '</a>' : '<a href="#inicio">← ' + esc(L.home) + '</a>') +
-      (ci < DADOS.capitulos.length - 1 ? '<a href="#cap-' + (ci + 2) + '">' + esc(DADOS.capitulos[ci + 1].titulo) + ' →</a>' : '<a href="#laboratorio">' + esc(L.lab) + ' →</a>');
-    conteudo.appendChild(pag);
-    document.getElementById('tituloMobile').textContent = cap.titulo;
+    const pager = document.createElement('div'); pager.className = 'pagination';
+    pager.innerHTML = (ci > 0 ? '<a href="#chapter-' + ci + '">← ' + esc(BOOK.chapters[ci - 1].title) + '</a>' : '<a href="#home">← ' + esc(L.home) + '</a>') +
+      (ci < BOOK.chapters.length - 1 ? '<a href="#chapter-' + (ci + 2) + '">' + esc(BOOK.chapters[ci + 1].title) + ' →</a>' : '<a href="#lab">' + esc(L.lab) + ' →</a>');
+    content.appendChild(pager);
+    document.getElementById('mobileTitle').textContent = chapter.title;
   }
-  function renderInicio() {
-    const items = L.howItems.concat(modoLocal ? L.howLocal : L.howBrowser);
-    conteudo.innerHTML = '<div class="inicio"><div class="prompt">$ python3 --version <em>→ 3.15</em></div><h2>' + esc(L.trailName) + '</h2><p class="sub">' + esc(DADOS.subtitulo) + '</p>' +
+  function renderHome() {
+    const items = L.howItems.concat(localMode ? L.howLocal : L.howBrowser);
+    content.innerHTML = '<div class="home"><div class="prompt">$ python3 --version <em>→ 3.15</em></div><h2>' + esc(L.trailName) + '</h2><p class="sub">' + esc(BOOK.subtitle) + '</p>' +
       '<div class="label"><span>' + esc(L.howTo) + '</span></div>' +
-      '<div class="como"><ul>' + items.map(t => '<li>' + t + '</li>').join('') + '</ul></div>' +
+      '<div class="how"><ul>' + items.map(t => '<li>' + t + '</li>').join('') + '</ul></div>' +
       '<div class="label"><span>' + esc(L.chapters) + '</span></div><div class="cards">' +
-      DADOS.capitulos.map((c, i) => {
-        const n = c.atividades.length, f = c.atividades.filter(id => estado.feitos[id]).length;
-        const num = (c.titulo.match(/^(\d+)\./) || [])[1];
-        return '<a class="card" href="#cap-' + (i + 1) + '"><span class="row"><span class="cmd">' + esc(num ? fmt(L.chapter, { n: num.padStart(2, '0') }) : L.annex) + '</span>' +
-          '<span class="' + (n && f === n ? 'ok' : '') + '">' + f + '/' + n + '</span></span><b>' + esc(c.titulo) + '</b><small>' + esc(n === 1 ? L.activity : fmt(L.activities, { n })) + '</small>' +
+      BOOK.chapters.map((c, i) => {
+        const n = c.activities.length, f = c.activities.filter(id => state.done[id]).length;
+        const num = (c.title.match(/^(\d+)\./) || [])[1];
+        return '<a class="card" href="#chapter-' + (i + 1) + '"><span class="row"><span class="cmd">' + esc(num ? fmt(L.chapter, { n: num.padStart(2, '0') }) : L.annex) + '</span>' +
+          '<span class="' + (n && f === n ? 'ok' : '') + '">' + f + '/' + n + '</span></span><b>' + esc(c.title) + '</b><small>' + esc(n === 1 ? L.activity : fmt(L.activities, { n })) + '</small>' +
           '<span class="bar"><div style="width:' + (n ? 100 * f / n : 0) + '%"></div></span></a>';
       }).join('') +
-      '<a class="card" href="#laboratorio"><span class="row"><span class="cmd">python3</span></span><b>' + esc(L.lab) + '</b><small>' + esc(L.labCard) + '</small></a></div></div>';
-    document.getElementById('tituloMobile').textContent = L.trailName;
+      '<a class="card" href="#lab"><span class="row"><span class="cmd">python3</span></span><b>' + esc(L.lab) + '</b><small>' + esc(L.labCard) + '</small></a></div></div>';
+    document.getElementById('mobileTitle').textContent = L.trailName;
   }
-  function renderLaboratorio() {
-    conteudo.innerHTML = '<h2 class="cap">' + esc(L.lab) + '</h2><p>' + esc(L.labIntro) + '</p>';
+  function renderLab() {
+    content.innerHTML = '<h2 class="chapter">' + esc(L.lab) + '</h2><p>' + esc(L.labIntro) + '</p>';
     const d = document.createElement('div'); d.className = 'ex';
-    d.appendChild(celula({ id: 'laboratorio', codigo: L.labCode }));
-    conteudo.appendChild(d);
-    document.getElementById('tituloMobile').textContent = L.lab;
+    d.appendChild(cell({ id: 'laboratorio', code: L.labCode }));   // storage id of the saved lab code: unchanged
+    content.appendChild(d);
+    document.getElementById('mobileTitle').textContent = L.lab;
   }
 
-  // ---------- navegação ----------
+  // ---------- navigation ----------
   const nav = document.getElementById('nav');
   const menu = document.getElementById('menu'), btnMenu = document.getElementById('btnMenu');
-  function abrirMenu(aberto) { menu.classList.toggle('aberto', aberto); btnMenu.setAttribute('aria-expanded', String(aberto)); }
-  let ancoraPendente = null;
-  function rotear() {
-    if (!DADOS) return;
-    const h = location.hash.slice(1) || 'inicio';
-    const m = h.match(/^cap-(\d+)$/);
-    nav.querySelectorAll('a.cap').forEach(a => a.classList.toggle('ativo', a.getAttribute('href') === '#' + h));
-    if (m && DADOS.capitulos[+m[1] - 1]) renderCapitulo(+m[1] - 1);
-    else if (h === 'laboratorio') renderLaboratorio();
-    else renderInicio();
-    const alvo = ancoraPendente && document.getElementById(ancoraPendente);
-    if (alvo) alvo.scrollIntoView(); else document.getElementById('main').scrollTop = 0;
-    ancoraPendente = null;
+  function openMenu(open) { menu.classList.toggle('open', open); btnMenu.setAttribute('aria-expanded', String(open)); }
+  let pendingAnchor = null;
+  function route() {
+    if (!BOOK) return;
+    // links saved before the English rename used #inicio, #laboratorio and #cap-N
+    const h = ({ inicio: 'home', laboratorio: 'lab' })[location.hash.slice(1)] ||
+      location.hash.slice(1).replace(/^cap-(?=\d+$)/, 'chapter-') || 'home';
+    const m = h.match(/^chapter-(\d+)$/);
+    nav.querySelectorAll('a.chapter').forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + h));
+    if (m && BOOK.chapters[+m[1] - 1]) renderChapter(+m[1] - 1);
+    else if (h === 'lab') renderLab();
+    else renderHome();
+    const anchorTarget = pendingAnchor && document.getElementById(pendingAnchor);
+    if (anchorTarget) anchorTarget.scrollIntoView(); else document.getElementById('main').scrollTop = 0;
+    pendingAnchor = null;
   }
-  function iniciar(dados) {
-    DADOS = dados;
-    nav.innerHTML = '<a href="#inicio" class="cap">' + esc(L.home) + '</a>' + DADOS.capitulos.map((c, i) =>
-      '<a class="cap" data-cap="' + i + '" href="#cap-' + (i + 1) + '"><span>' + esc(c.titulo) + '</span><span class="cnt"></span></a>' +
-      c.secoes.map(s => '<a class="sec" href="#cap-' + (i + 1) + '" data-ancora="' + escAttr(s.ancora) + '">' + inline(s.titulo) + '</a>').join('')).join('') +
-      '<a class="cap" href="#laboratorio">' + esc(L.lab) + '</a>';
-    DADOS.capitulos.forEach(c => atividades.push(...c.atividades));
+  function init(book) {
+    BOOK = book;
+    nav.innerHTML = '<a href="#home" class="chapter">' + esc(L.home) + '</a>' + BOOK.chapters.map((c, i) =>
+      '<a class="chapter" data-chapter="' + i + '" href="#chapter-' + (i + 1) + '"><span>' + esc(c.title) + '</span><span class="cnt"></span></a>' +
+      c.sections.map(s => '<a class="sec" href="#chapter-' + (i + 1) + '" data-anchor="' + escAttr(s.anchor) + '">' + inline(s.title) + '</a>').join('')).join('') +
+      '<a class="chapter" href="#lab">' + esc(L.lab) + '</a>';
+    BOOK.chapters.forEach(c => activities.push(...c.activities));
     nav.addEventListener('click', e => {
       const a = e.target.closest('a'); if (!a) return;
-      ancoraPendente = a.dataset.ancora || null;
-      abrirMenu(false);
-      if (a.getAttribute('href') === location.hash) { e.preventDefault(); rotear(); }
+      pendingAnchor = a.dataset.anchor || null;
+      openMenu(false);
+      if (a.getAttribute('href') === location.hash) { e.preventDefault(); route(); }
     });
-    window.addEventListener('hashchange', rotear);
-    rotear();
-    atualizarProgresso();
-    iniciarMotor();
+    window.addEventListener('hashchange', route);
+    route();
+    updateProgress();
+    startEngine();
   }
-  btnMenu.onclick = () => abrirMenu(!menu.classList.contains('aberto'));
-  document.getElementById('veu').onclick = () => abrirMenu(false);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && menu.classList.contains('aberto')) abrirMenu(false); });
+  btnMenu.onclick = () => openMenu(!menu.classList.contains('open'));
+  document.getElementById('overlay').onclick = () => openMenu(false);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && menu.classList.contains('open')) openMenu(false); });
 
-  async function carregarConteudo(lang) {
+  async function loadContent(lang) {
     const r = await fetch('content/' + lang + '.json');
     if (!r.ok) throw new Error(r.status);
     return r.json();
   }
   (async () => {
-    let dados = null;
-    try { dados = await carregarConteudo(LANG); }
-    catch (e) { try { dados = await carregarConteudo('pt'); } catch (e2) {} }
-    if (!dados || !Array.isArray(dados.capitulos)) {
-      conteudo.innerHTML = '<p class="carregando erro">' + esc(L.needHub) + '</p>';
-      statusMotor('falhou', '—');
+    let book = null;
+    try { book = await loadContent(LANG); }
+    catch (e) { try { book = await loadContent('pt'); } catch (e2) {} }
+    if (!book || !Array.isArray(book.chapters)) {
+      content.innerHTML = '<p class="loading error">' + esc(L.needHub) + '</p>';
+      setEngineStatus('failed', '—');
       return;
     }
-    iniciar(dados);
+    init(book);
   })();
 })();
 </script>

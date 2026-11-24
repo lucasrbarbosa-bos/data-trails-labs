@@ -1,8 +1,8 @@
 """The contract every engine (runner) implements.
 
 The hub creates one runner per trail. A trail page calls its runner through
-relative URLs, so a page served at /t/<trail-id>/ that fetches "api/executar"
-reaches   POST /t/<trail-id>/api/executar  ->  runner.handle('POST', 'executar', body).
+relative URLs, so a page served at /t/<trail-id>/ that fetches "api/run"
+reaches   POST /t/<trail-id>/api/run  ->  runner.handle('POST', 'run', body).
 """
 from __future__ import annotations
 
@@ -42,7 +42,7 @@ class Runner:
 
     def handle(self, method: str, action: str, payload: dict | None) -> tuple[int, dict]:
         """Answer GET/POST /t/<id>/api/<action>. Returns (HTTP status, JSON body)."""
-        return HTTPStatus.NOT_FOUND, {'erro': f'ação desconhecida: {action}'}
+        return HTTPStatus.NOT_FOUND, {'error': f'unknown action: {action}'}
 
 
 class StaticRunner(Runner):

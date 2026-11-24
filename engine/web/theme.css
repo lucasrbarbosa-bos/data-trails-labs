@@ -19,68 +19,237 @@
   --th-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   --th-bar-h: 48px;
   /* dark (default): roadmap.sh-like near-black, with distinct levels */
-  --th-bar: #09090b; --th-side: #101013; --th-main: #16161a; --th-surface: #1d1d22; --th-surface-2: #25252b; --th-code: #121215;
-  --th-line: #2a2a31; --th-line-2: #3d3d46;
-  --th-ink: #ececef; --th-ink-2: #a1a1aa; --th-ink-3: #6b6b75;
-  --th-accent: #facc15; --th-accent-bg: rgba(250, 204, 21, .12); --th-on-accent: #111111; --th-link: #7cb7ff;
-  --th-ok: #4ade80; --th-ok-bg: rgba(74, 222, 128, .12); --th-err: #f87171; --th-err-bg: rgba(248, 113, 113, .12);
-  --th-warn: #fb923c; --th-warn-bg: rgba(251, 146, 60, .12); --th-info: #60a5fa; --th-info-bg: rgba(96, 165, 250, .12);
-  --th-kw: #c586c0; --th-str: #ce9178; --th-com: #6a9955; --th-num: #b5cea8; --th-bi: #4ec9b0; --th-fn: #dcdcaa;
-  --th-python: #60a5fa; --th-postgres: #5eead4; --th-none: #c4b5fd;
+  --th-bar: #09090b;
+  --th-side: #101013;
+  --th-main: #16161a;
+  --th-surface: #1d1d22;
+  --th-surface-2: #25252b;
+  --th-code: #121215;
+  --th-line: #2a2a31;
+  --th-line-2: #3d3d46;
+  --th-ink: #ececef;
+  --th-ink-2: #a1a1aa;
+  --th-ink-3: #6b6b75;
+  --th-accent: #facc15;
+  --th-accent-bg: rgba(250, 204, 21, .12);
+  --th-on-accent: #111111;
+  --th-link: #7cb7ff;
+  --th-ok: #4ade80;
+  --th-ok-bg: rgba(74, 222, 128, .12);
+  --th-err: #f87171;
+  --th-err-bg: rgba(248, 113, 113, .12);
+  --th-warn: #fb923c;
+  --th-warn-bg: rgba(251, 146, 60, .12);
+  --th-info: #60a5fa;
+  --th-info-bg: rgba(96, 165, 250, .12);
+  --th-kw: #c586c0;
+  --th-str: #ce9178;
+  --th-com: #6a9955;
+  --th-num: #b5cea8;
+  --th-bi: #4ec9b0;
+  --th-fn: #dcdcaa;
+  --th-python: #60a5fa;
+  --th-postgres: #5eead4;
+  --th-none: #c4b5fd;
   --th-select: rgba(250, 204, 21, .25);
   color-scheme: dark;
 }
 :root[data-theme="light"] {
-  --th-bar: #ffffff; --th-side: #f0f0f3; --th-main: #fbfbfc; --th-surface: #f2f2f5; --th-surface-2: #e8e8ed; --th-code: #ffffff;
-  --th-line: #dedee4; --th-line-2: #b4b4bd;
-  --th-ink: #18181b; --th-ink-2: #52525b; --th-ink-3: #8e8e98;
-  --th-accent: #b45309; --th-accent-bg: rgba(180, 83, 9, .10); --th-on-accent: #ffffff; --th-link: #1d4ed8;
-  --th-ok: #15803d; --th-ok-bg: #e7f6ec; --th-err: #b91c1c; --th-err-bg: #fdeaea;
-  --th-warn: #c2410c; --th-warn-bg: #fff1e6; --th-info: #1d4ed8; --th-info-bg: #e8effd;
-  --th-kw: #af00db; --th-str: #a31515; --th-com: #008000; --th-num: #098658; --th-bi: #267f99; --th-fn: #795e26;
-  --th-python: #1d4ed8; --th-postgres: #0f766e; --th-none: #6d28d9;
+  --th-bar: #ffffff;
+  --th-side: #f0f0f3;
+  --th-main: #fbfbfc;
+  --th-surface: #f2f2f5;
+  --th-surface-2: #e8e8ed;
+  --th-code: #ffffff;
+  --th-line: #dedee4;
+  --th-line-2: #b4b4bd;
+  --th-ink: #18181b;
+  --th-ink-2: #52525b;
+  --th-ink-3: #8e8e98;
+  --th-accent: #b45309;
+  --th-accent-bg: rgba(180, 83, 9, .10);
+  --th-on-accent: #ffffff;
+  --th-link: #1d4ed8;
+  --th-ok: #15803d;
+  --th-ok-bg: #e7f6ec;
+  --th-err: #b91c1c;
+  --th-err-bg: #fdeaea;
+  --th-warn: #c2410c;
+  --th-warn-bg: #fff1e6;
+  --th-info: #1d4ed8;
+  --th-info-bg: #e8effd;
+  --th-kw: #af00db;
+  --th-str: #a31515;
+  --th-com: #008000;
+  --th-num: #098658;
+  --th-bi: #267f99;
+  --th-fn: #795e26;
+  --th-python: #1d4ed8;
+  --th-postgres: #0f766e;
+  --th-none: #6d28d9;
   --th-select: rgba(180, 83, 9, .18);
   color-scheme: light;
 }
 :root[data-theme="dracula"] {
-  --th-bar: #191a21; --th-side: #21222c; --th-main: #282a36; --th-surface: #2f3140; --th-surface-2: #3a3c4e; --th-code: #232530;
-  --th-line: #3b3e51; --th-line-2: #6272a4;
-  --th-ink: #f8f8f2; --th-ink-2: #c3c6d6; --th-ink-3: #8a93bf;
-  --th-accent: #bd93f9; --th-accent-bg: rgba(189, 147, 249, .14); --th-on-accent: #191a21; --th-link: #8be9fd;
-  --th-ok: #50fa7b; --th-ok-bg: rgba(80, 250, 123, .12); --th-err: #ff5555; --th-err-bg: rgba(255, 85, 85, .14);
-  --th-warn: #ffb86c; --th-warn-bg: rgba(255, 184, 108, .13); --th-info: #8be9fd; --th-info-bg: rgba(139, 233, 253, .12);
-  --th-kw: #ff79c6; --th-str: #f1fa8c; --th-com: #6272a4; --th-num: #bd93f9; --th-bi: #8be9fd; --th-fn: #50fa7b;
-  --th-python: #8be9fd; --th-postgres: #50fa7b; --th-none: #bd93f9;
+  --th-bar: #191a21;
+  --th-side: #21222c;
+  --th-main: #282a36;
+  --th-surface: #2f3140;
+  --th-surface-2: #3a3c4e;
+  --th-code: #232530;
+  --th-line: #3b3e51;
+  --th-line-2: #6272a4;
+  --th-ink: #f8f8f2;
+  --th-ink-2: #c3c6d6;
+  --th-ink-3: #8a93bf;
+  --th-accent: #bd93f9;
+  --th-accent-bg: rgba(189, 147, 249, .14);
+  --th-on-accent: #191a21;
+  --th-link: #8be9fd;
+  --th-ok: #50fa7b;
+  --th-ok-bg: rgba(80, 250, 123, .12);
+  --th-err: #ff5555;
+  --th-err-bg: rgba(255, 85, 85, .14);
+  --th-warn: #ffb86c;
+  --th-warn-bg: rgba(255, 184, 108, .13);
+  --th-info: #8be9fd;
+  --th-info-bg: rgba(139, 233, 253, .12);
+  --th-kw: #ff79c6;
+  --th-str: #f1fa8c;
+  --th-com: #6272a4;
+  --th-num: #bd93f9;
+  --th-bi: #8be9fd;
+  --th-fn: #50fa7b;
+  --th-python: #8be9fd;
+  --th-postgres: #50fa7b;
+  --th-none: #bd93f9;
   --th-select: rgba(189, 147, 249, .30);
   color-scheme: dark;
 }
 
 /* ------------------------------------------------------------------ top bar (rendered by trail-hub.js) */
-.th-top { position: sticky; top: 0; z-index: 30; height: var(--th-bar-h); flex: 0 0 var(--th-bar-h);
-  display: flex; align-items: center; gap: 14px; padding: 0 16px; background: var(--th-bar); border-bottom: 1px solid var(--th-line);
-  font: 500 12.5px/1 var(--th-mono); color: var(--th-ink-2); }
-.th-top a { color: inherit; text-decoration: none; }
-.th-brand { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--th-ink); white-space: nowrap; }
-.th-brand b { background: var(--th-ink); color: var(--th-bar); border-radius: 5px; padding: 3px 7px; font-weight: 800; }
-.th-crumbs { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.th-crumbs .th-sep { color: var(--th-ink-3); }
-.th-crumbs a:hover { color: var(--th-ink); }
-.th-spacer { flex: 1; }
-.th-ctl { display: inline-flex; align-items: center; gap: 6px; color: var(--th-ink-3); }
-.th-ctl select, .th-crumbs select { font: 500 12px var(--th-mono); color: var(--th-ink); background: var(--th-surface); border: 1px solid var(--th-line);
-  border-radius: 6px; padding: 4px 24px 4px 8px; cursor: pointer; appearance: none; -webkit-appearance: none;
-  background-image: linear-gradient(45deg, transparent 50%, var(--th-ink-3) 50%), linear-gradient(135deg, var(--th-ink-3) 50%, transparent 50%);
-  background-position: calc(100% - 12px) 52%, calc(100% - 8px) 52%; background-size: 4px 4px; background-repeat: no-repeat; max-width: 44vw; }
-.th-ctl select:hover, .th-crumbs select:hover { border-color: var(--th-line-2); }
-.th-top :focus-visible { outline: 2px solid var(--th-accent); outline-offset: 2px; border-radius: 4px; }
-.th-seg { display: inline-flex; border: 1px solid var(--th-line); border-radius: 6px; overflow: hidden; }
-.th-seg button { font: 600 11.5px var(--th-mono); background: var(--th-surface); color: var(--th-ink-2); border: 0; padding: 5px 9px; cursor: pointer; }
-.th-seg button + button { border-left: 1px solid var(--th-line); }
-.th-seg button:hover { color: var(--th-ink); }
-.th-seg button[aria-pressed="true"] { background: var(--th-accent); color: var(--th-on-accent); }
-@media (max-width: 760px) {
-  .th-top { gap: 8px; padding: 0 10px; }
-  .th-brand span, .th-lbl, .th-crumbs .th-home-label { display: none; }
-  .th-crumbs select { max-width: 34vw; }
+.th-top {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: var(--th-bar-h);
+  flex: 0 0 var(--th-bar-h);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 16px;
+  background: var(--th-bar);
+  border-bottom: 1px solid var(--th-line);
+  font: 500 12.5px/1 var(--th-mono);
+  color: var(--th-ink-2);
 }
-@media (max-width: 420px) { .th-crumbs select, .th-crumbs .th-sep-pick { display: none; } }
+.th-top a {
+  color: inherit;
+  text-decoration: none;
+}
+.th-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--th-ink);
+  white-space: nowrap;
+}
+.th-brand b {
+  background: var(--th-ink);
+  color: var(--th-bar);
+  border-radius: 5px;
+  padding: 3px 7px;
+  font-weight: 800;
+}
+.th-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.th-crumbs .th-sep {
+  color: var(--th-ink-3);
+}
+.th-crumbs a:hover {
+  color: var(--th-ink);
+}
+.th-spacer {
+  flex: 1;
+}
+.th-ctl {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--th-ink-3);
+}
+.th-ctl select,
+.th-crumbs select {
+  font: 500 12px var(--th-mono);
+  color: var(--th-ink);
+  background: var(--th-surface);
+  border: 1px solid var(--th-line);
+  border-radius: 6px;
+  padding: 4px 24px 4px 8px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--th-ink-3) 50%), linear-gradient(135deg, var(--th-ink-3) 50%, transparent 50%);
+  background-position: calc(100% - 12px) 52%, calc(100% - 8px) 52%;
+  background-size: 4px 4px;
+  background-repeat: no-repeat;
+  max-width: 44vw;
+}
+.th-ctl select:hover,
+.th-crumbs select:hover {
+  border-color: var(--th-line-2);
+}
+.th-top :focus-visible {
+  outline: 2px solid var(--th-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.th-seg {
+  display: inline-flex;
+  border: 1px solid var(--th-line);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.th-seg button {
+  font: 600 11.5px var(--th-mono);
+  background: var(--th-surface);
+  color: var(--th-ink-2);
+  border: 0;
+  padding: 5px 9px;
+  cursor: pointer;
+}
+.th-seg button + button {
+  border-left: 1px solid var(--th-line);
+}
+.th-seg button:hover {
+  color: var(--th-ink);
+}
+.th-seg button[aria-pressed="true"] {
+  background: var(--th-accent);
+  color: var(--th-on-accent);
+}
+@media (max-width: 760px) {
+  .th-top {
+    gap: 8px;
+    padding: 0 10px;
+  }
+  .th-brand span,
+  .th-lbl,
+  .th-crumbs .th-home-label {
+    display: none;
+  }
+  .th-crumbs select {
+    max-width: 34vw;
+  }
+}
+@media (max-width: 420px) {
+  .th-crumbs select,
+  .th-crumbs .th-sep-pick {
+    display: none;
+  }
+}

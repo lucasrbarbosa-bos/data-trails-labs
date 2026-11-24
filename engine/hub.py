@@ -117,7 +117,7 @@ def make_handler(hub: Hub):
             self._send(HTTPStatus.OK, html.encode('utf-8'), 'text/html; charset=utf-8')
 
         def _not_found(self):
-            self._json({'erro': 'não encontrado'}, HTTPStatus.NOT_FOUND)
+            self._json({'error': 'not found'}, HTTPStatus.NOT_FOUND)
 
         def _file(self, base: Path, relative: str):
             try:
@@ -147,7 +147,7 @@ def make_handler(hub: Hub):
                 return self._html(inject(html, f'<script>window.LAB_TOKEN = {safe_json(TOKEN)};</script>'))
             if path == '/api/trails':
                 if not self._authorized():
-                    return self._json({'erro': 'não autorizado'}, HTTPStatus.FORBIDDEN)
+                    return self._json({'error': 'not authorized'}, HTTPStatus.FORBIDDEN)
                 return self._json({'trails': hub.listing()})
             if path.startswith('/hub/') and method == 'GET':
                 return self._file(WEB, path[len('/hub/'):])
@@ -166,16 +166,16 @@ def make_handler(hub: Hub):
 
             if rest.startswith('api/'):
                 if not self._authorized():
-                    return self._json({'erro': 'não autorizado'}, HTTPStatus.FORBIDDEN)
+                    return self._json({'error': 'not authorized'}, HTTPStatus.FORBIDDEN)
                 payload = None
                 if method == 'POST':
                     size = int(self.headers.get('Content-Length', 0) or 0)
                     if size > MAX_BODY:
-                        return self._json({'erro': 'pedido grande demais'}, HTTPStatus.REQUEST_ENTITY_TOO_LARGE)
+                        return self._json({'error': 'request too large'}, HTTPStatus.REQUEST_ENTITY_TOO_LARGE)
                     try:
                         payload = json.loads(self.rfile.read(size) or b'{}')
                     except json.JSONDecodeError:
-                        return self._json({'erro': 'JSON inválido'}, HTTPStatus.BAD_REQUEST)
+                        return self._json({'error': 'invalid JSON'}, HTTPStatus.BAD_REQUEST)
                 status, body = hub.runners[trail.id].handle(method, rest[len('api/'):], payload)
                 return self._json(body, status)
 
@@ -184,6 +184,7 @@ def make_handler(hub: Hub):
             if rest in ('', trail.entry):
                 html = trail.entry_path.read_text(encoding='utf-8')
                 snippet = ('<link rel="stylesheet" href="/hub/theme.css">\n'
+                           '<link rel="stylesheet" href="/hub/trail-base.css">\n'
                            f'<script>window.LAB_TOKEN = {safe_json(TOKEN)};\n'
                            f'window.TRAIL = {safe_json(hub.trail_context(trail))};</script>\n'
                            f'<script>{hub_script}</script>')

@@ -6,221 +6,1046 @@
 <title>SQL Moderno — Laboratório</title>
 <style>
 /* Colours, font and the top bar come from the hub (/hub/theme.css, themes dark · light · dracula).
-   The page keeps its old variable names as aliases of the shared --th-* tokens. */
+  The page keeps its old variable names as aliases of the shared --th-* tokens. */
 :root {
-  --bg: var(--th-main); --bg-2: var(--th-side); --bg-ex: var(--th-surface); --bg-ex-2: var(--th-surface-2); --bg-code: var(--th-code);
-  --line: var(--th-line); --line-2: var(--th-line-2);
-  --ink: var(--th-ink); --ink-2: var(--th-ink-2); --ink-3: var(--th-ink-3);
-  --accent: var(--th-accent); --accent-2: var(--th-accent-bg); --on-accent: var(--th-on-accent); --link: var(--th-link);
-  --ok: var(--th-ok); --ok-bg: var(--th-ok-bg); --err: var(--th-err); --err-bg: var(--th-err-bg);
-  --warn: var(--th-warn); --warn-bg: var(--th-warn-bg); --info: var(--th-info); --info-bg: var(--th-info-bg);
-  --kw: var(--th-kw); --str: var(--th-str); --com: var(--th-com); --num: var(--th-num); --bi: var(--th-bi); --fn: var(--th-fn);
+  --bg: var(--th-main);
+  --bg-2: var(--th-side);
+  --bg-ex: var(--th-surface);
+  --bg-ex-2: var(--th-surface-2);
+  --bg-code: var(--th-code);
+  --line: var(--th-line);
+  --line-2: var(--th-line-2);
+  --ink: var(--th-ink);
+  --ink-2: var(--th-ink-2);
+  --ink-3: var(--th-ink-3);
+  --accent: var(--th-accent);
+  --accent-2: var(--th-accent-bg);
+  --on-accent: var(--th-on-accent);
+  --link: var(--th-link);
+  --ok: var(--th-ok);
+  --ok-bg: var(--th-ok-bg);
+  --err: var(--th-err);
+  --err-bg: var(--th-err-bg);
+  --warn: var(--th-warn);
+  --warn-bg: var(--th-warn-bg);
+  --info: var(--th-info);
+  --info-bg: var(--th-info-bg);
+  --kw: var(--th-kw);
+  --str: var(--th-str);
+  --com: var(--th-com);
+  --num: var(--th-num);
+  --bi: var(--th-bi);
+  --fn: var(--th-fn);
   --mono: var(--th-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace);
   --bar-h: var(--th-bar-h, 0px);
 }
-* { box-sizing: border-box; }
-html { height: 100%; -webkit-text-size-adjust: 100%; }
-body { margin: 0; height: 100dvh; overflow: hidden; background: var(--bg); color: var(--ink); font-family: var(--mono); font-size: 14.5px; line-height: 1.75; }
-button, input, textarea, select { font-family: inherit; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-a { color: var(--link); }
+* {
+  box-sizing: border-box;
+}
+html {
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 14.5px;
+  line-height: 1.75;
+}
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+a {
+  color: var(--link);
+}
 
 /* ---------- layout: top bar (hub) + sidebar + reading area, each scrolling on its own ---------- */
-.app { display: grid; grid-template-columns: 300px minmax(0, 1fr); height: calc(100dvh - var(--bar-h)); overflow: hidden; }
-aside { background: var(--bg-2); border-right: 1px solid var(--line); overflow-y: auto; padding: 22px 16px 40px; font-size: 13px; line-height: 1.5; }
-main { background: var(--bg); overflow-y: auto; height: 100%; min-width: 0; }
-.conteudo { max-width: 880px; margin: 0 auto; padding: 34px 32px 120px; }
+.app {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  height: calc(100dvh - var(--bar-h));
+  overflow: hidden;
+}
+aside {
+  background: var(--bg-2);
+  border-right: 1px solid var(--line);
+  overflow-y: auto;
+  padding: 22px 16px 40px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+main {
+  background: var(--bg);
+  overflow-y: auto;
+  height: 100%;
+  min-width: 0;
+}
+.content {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 34px 32px 120px;
+}
 
 /* ---------- sidebar ---------- */
-.marca { font-size: 11.5px; color: var(--ink-3); margin-bottom: 6px; }
-.marca::before { content: "$ "; color: var(--accent); }
-aside h1 { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.25; margin: 0 0 4px; }
-aside .sub { color: var(--ink-2); font-size: 12px; margin-bottom: 16px; }
-.rotulo { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin: 18px 0 8px; }
-.progresso { margin: 6px 0 14px; }
-.barra { height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; margin: 2px 0 6px; }
-.barra > div { height: 100%; background: var(--ok); width: 0; transition: width .4s; }
-.progresso small { color: var(--ink-2); font-size: 11.5px; }
-nav a { display: block; color: var(--ink-2); text-decoration: none; padding: 5px 8px; border-radius: 6px; font-size: 12.5px; line-height: 1.4; }
-nav a:hover { background: var(--bg-ex); color: var(--ink); }
-nav a.cap { color: var(--ink); font-weight: 600; margin-top: 6px; display: flex; justify-content: space-between; gap: 8px; }
-nav a.cap.ativo { background: var(--accent); color: var(--on-accent); }
-nav a.sec { padding-left: 20px; font-size: 12px; }
-nav a.sec::before { content: "› "; color: var(--ink-3); }
-nav a .cnt { font-weight: 400; color: var(--ink-3); font-size: 11px; white-space: nowrap; }
-nav a .cnt.cheio { color: var(--ok); }
-nav a.cap.ativo .cnt { color: var(--on-accent); opacity: .75; }
-.esquema { margin-top: 14px; font-size: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
-.esquema summary { cursor: pointer; font-weight: 700; padding: 7px 10px; border-radius: 8px; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
-.esquema summary:hover { color: var(--ink); background: var(--bg-ex); }
-.esquema[open] summary { border-bottom: 1px solid var(--line); border-radius: 8px 8px 0 0; }
-#esquema { padding: 4px 10px 10px; max-height: 50vh; overflow-y: auto; }
-#esquema small { color: var(--ink-3); }
-.tab-esq { margin: 8px 0 0; }
-.tab-esq b { display: block; font-size: 12px; color: var(--ink); }
-.tab-esq b::before { content: "▸ "; color: var(--ink-3); }
-.tab-esq div { display: flex; justify-content: space-between; gap: 8px; padding-left: 14px; font-size: 11.5px; color: var(--ink-2); }
-.tab-esq em { color: var(--bi); font-style: normal; }
-.motor { margin-top: 18px; font-size: 11.5px; color: var(--ink-2); display: flex; align-items: flex-start; gap: 8px; }
-.motor i { flex: 0 0 auto; width: 7px; height: 7px; margin-top: 5px; border-radius: 50%; background: var(--warn); display: inline-block; }
-.motor.pronto i { background: var(--ok); box-shadow: 0 0 0 3px var(--ok-bg); }
-.motor.falhou i { background: var(--err); }
+.brand {
+  font-size: 11.5px;
+  color: var(--ink-3);
+  margin-bottom: 6px;
+}
+.brand::before {
+  content: "$ ";
+  color: var(--accent);
+}
+aside h1 {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin: 0 0 4px;
+}
+aside .sub {
+  color: var(--ink-2);
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+.eyebrow {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 18px 0 8px;
+}
+.progress {
+  margin: 6px 0 14px;
+}
+.progress-bar {
+  height: 3px;
+  background: var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 2px 0 6px;
+}
+.progress-bar > div {
+  height: 100%;
+  background: var(--ok);
+  width: 0;
+  transition: width .4s;
+}
+.progress small {
+  color: var(--ink-2);
+  font-size: 11.5px;
+}
+nav a {
+  display: block;
+  color: var(--ink-2);
+  text-decoration: none;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+nav a:hover {
+  background: var(--bg-ex);
+  color: var(--ink);
+}
+nav a.chapter {
+  color: var(--ink);
+  font-weight: 600;
+  margin-top: 6px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+nav a.chapter.active {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+nav a.sec {
+  padding-left: 20px;
+  font-size: 12px;
+}
+nav a.sec::before {
+  content: "› ";
+  color: var(--ink-3);
+}
+nav a .cnt {
+  font-weight: 400;
+  color: var(--ink-3);
+  font-size: 11px;
+  white-space: nowrap;
+}
+nav a .cnt.full {
+  color: var(--ok);
+}
+nav a.chapter.active .cnt {
+  color: var(--on-accent);
+  opacity: .75;
+}
+.schema {
+  margin-top: 14px;
+  font-size: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+}
+.schema summary {
+  cursor: pointer;
+  font-weight: 700;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 10.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.schema summary:hover {
+  color: var(--ink);
+  background: var(--bg-ex);
+}
+.schema[open] summary {
+  border-bottom: 1px solid var(--line);
+  border-radius: 8px 8px 0 0;
+}
+#schema {
+  padding: 4px 10px 10px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+#schema small {
+  color: var(--ink-3);
+}
+.schema-table {
+  margin: 8px 0 0;
+}
+.schema-table b {
+  display: block;
+  font-size: 12px;
+  color: var(--ink);
+}
+.schema-table b::before {
+  content: "▸ ";
+  color: var(--ink-3);
+}
+.schema-table div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding-left: 14px;
+  font-size: 11.5px;
+  color: var(--ink-2);
+}
+.schema-table em {
+  color: var(--bi);
+  font-style: normal;
+}
+.engine {
+  margin-top: 18px;
+  font-size: 11.5px;
+  color: var(--ink-2);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.engine i {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--warn);
+  display: inline-block;
+}
+.engine.ready i {
+  background: var(--ok);
+  box-shadow: 0 0 0 3px var(--ok-bg);
+}
+.engine.failed i {
+  background: var(--err);
+}
 
 /* ---------- mobile top line inside the reading area ---------- */
-.topo-mobile { display: none; position: sticky; top: 0; z-index: 5; background: var(--bg-2); border-bottom: 1px solid var(--line); padding: 8px 16px; align-items: center; gap: 10px; font-size: 13px; }
-.topo-mobile b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.topo-mobile button { background: var(--bg-ex); border: 1px solid var(--line); color: var(--ink); border-radius: 6px; padding: 3px 10px; font-size: 15px; cursor: pointer; }
+.mobile-top {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--line);
+  padding: 8px 16px;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.mobile-top b {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mobile-top button {
+  background: var(--bg-ex);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 15px;
+  cursor: pointer;
+}
 
 /* ---------- reading area ---------- */
-.kicker { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 6px; }
-.kicker::before { content: "# "; color: var(--accent); }
-h2.cap { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.25; margin: 0 0 26px; }
-h3.sec { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.35; margin: 44px 0 14px; padding-top: 18px; border-top: 1px solid var(--line); }
-h3.sec::before { content: "## "; color: var(--ink-3); font-weight: 400; }
-h4 { font-size: 15.5px; font-weight: 700; margin: 28px 0 10px; }
-h4::before { content: "### "; color: var(--ink-3); font-weight: 400; }
-p { margin: 0 0 16px; text-align: left; }
-ul.lista { margin: 0 0 16px; padding-left: 22px; }
-ul.lista li { margin-bottom: 6px; }
-ul.lista li::marker { content: "- "; color: var(--ink-3); }
-code { font-family: var(--mono); font-size: .9em; background: var(--bg-ex-2); border: 1px solid var(--line); padding: 0 5px; border-radius: 4px; }
-.tabela { overflow-x: auto; margin: 0 0 20px; }
-table { border-collapse: collapse; width: 100%; font-size: 13px; line-height: 1.55; }
-th, td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; vertical-align: top; }
-th { background: var(--bg-ex); font-weight: 700; }
-.nota { margin: 22px 0; border: 1px solid var(--line); border-left: 3px solid var(--k, var(--info)); border-radius: 8px; background: var(--bg-ex); padding: 10px 16px 12px; }
-.nota .ic { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--k, var(--info)); margin-bottom: 2px; }
-.nota .tx { text-align: left; }
-.nota.NOTA { --k: var(--info); } .nota.ATENÇÃO { --k: var(--err); } .nota.DICA { --k: var(--ok); } .nota.NOVO { --k: var(--warn); }
-.ex { background: var(--bg-ex); border: 1px solid var(--line); border-radius: 8px; padding: 16px 20px 16px; margin: 26px 0; }
-.ex .kicker { margin-bottom: 4px; }
-.ex.desafio .kicker::before { content: "$ "; }
-.ex .titulo { font-weight: 700; font-size: 15px; line-height: 1.45; margin-bottom: 4px; }
-.ex .meta { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 4px 0 8px; flex-wrap: wrap; }
-.arquivo { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
-.ex .enunciado { margin: 8px 0 12px; }
-.callouts { list-style: none; padding: 0; margin: 12px 0 0; font-size: 13.5px; }
-.callouts li { display: grid; grid-template-columns: 24px 1fr; gap: 6px; margin-bottom: 6px; text-align: left; }
-.callouts .n { color: var(--accent); }
+.kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0 0 6px;
+}
+.kicker::before {
+  content: "# ";
+  color: var(--accent);
+}
+h2.chapter {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin: 0 0 26px;
+}
+h3.sec {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  margin: 44px 0 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+h3.sec::before {
+  content: "## ";
+  color: var(--ink-3);
+  font-weight: 400;
+}
+h4 {
+  font-size: 15.5px;
+  font-weight: 700;
+  margin: 28px 0 10px;
+}
+h4::before {
+  content: "### ";
+  color: var(--ink-3);
+  font-weight: 400;
+}
+p {
+  margin: 0 0 16px;
+  text-align: left;
+}
+ul.list {
+  margin: 0 0 16px;
+  padding-left: 22px;
+}
+ul.list li {
+  margin-bottom: 6px;
+}
+ul.list li::marker {
+  content: "- ";
+  color: var(--ink-3);
+}
+code {
+  font-family: var(--mono);
+  font-size: .9em;
+  background: var(--bg-ex-2);
+  border: 1px solid var(--line);
+  padding: 0 5px;
+  border-radius: 4px;
+}
+.table {
+  overflow-x: auto;
+  margin: 0 0 20px;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+  line-height: 1.55;
+}
+th,
+td {
+  border: 1px solid var(--line);
+  padding: 7px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  background: var(--bg-ex);
+  font-weight: 700;
+}
+.note {
+  margin: 22px 0;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--k, var(--info));
+  border-radius: 8px;
+  background: var(--bg-ex);
+  padding: 10px 16px 12px;
+}
+.note .note-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--k, var(--info));
+  margin-bottom: 2px;
+}
+.note .tx {
+  text-align: left;
+}
+.note.NOTE {
+  --k: var(--info);
+}
+.note.WARNING {
+  --k: var(--err);
+}
+.note.TIP {
+  --k: var(--ok);
+}
+.note.NEW {
+  --k: var(--warn);
+}
+.ex {
+  background: var(--bg-ex);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px 20px 16px;
+  margin: 26px 0;
+}
+.ex .kicker {
+  margin-bottom: 4px;
+}
+.ex.challenge .kicker::before {
+  content: "$ ";
+}
+.ex .title {
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.45;
+  margin-bottom: 4px;
+}
+.ex .meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 8px;
+  flex-wrap: wrap;
+}
+.file {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.ex .prompt {
+  margin: 8px 0 12px;
+}
+.callouts {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  font-size: 13.5px;
+}
+.callouts li {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 6px;
+  margin-bottom: 6px;
+  text-align: left;
+}
+.callouts .n {
+  color: var(--accent);
+}
 
 /* ---------- editors ---------- */
-.editor { position: relative; border: 1px solid var(--line); border-radius: 8px; background: var(--bg-code); overflow: hidden; }
-.editor:focus-within { border-color: var(--accent); }
-.ed-wrap { display: grid; grid-template-columns: auto 1fr; overflow-x: auto; }
-.gutter { font-family: var(--mono); font-size: 13px; line-height: 21px; color: var(--ink-3); text-align: right; padding: 12px 8px 12px 10px; user-select: none; border-right: 1px solid var(--line); background: var(--bg-code); white-space: pre; }
-.gutter .erro { color: var(--err); font-weight: 700; }
-.area { position: relative; min-width: 0; }
-.area pre, .area textarea { margin: 0; font-family: var(--mono); font-size: 13px; line-height: 21px; padding: 12px 14px; white-space: pre; tab-size: 4; border: 0; letter-spacing: 0; font-variant-ligatures: none; }
-.area pre { pointer-events: none; color: var(--ink); min-height: 100%; }
-.area textarea { position: absolute; inset: 0; width: 100%; height: 100%; resize: none; background: transparent; color: transparent; caret-color: var(--ink); outline: none; overflow: hidden; }
-.area textarea::selection { background: var(--th-select, rgba(120, 150, 220, .35)); color: transparent; }
-.estatico pre { margin: 0; font-family: var(--mono); font-size: 13px; line-height: 21px; padding: 12px 14px; overflow-x: auto; white-space: pre; color: var(--ink); }
-.tk-kw { color: var(--kw); } .tk-str { color: var(--str); } .tk-com { color: var(--com); font-style: italic; }
-.tk-num { color: var(--num); } .tk-bi { color: var(--bi); } .tk-fn { color: var(--fn); }
-.linha-erro { background: var(--err-bg); display: inline-block; width: 100%; }
-.abas { display: flex; gap: 4px; align-items: flex-end; margin-bottom: -1px; flex-wrap: wrap; position: relative; z-index: 1; }
-.aba { border: 1px solid var(--line); border-bottom: 0; background: var(--bg-ex-2); color: var(--ink-2); border-radius: 6px 6px 0 0; padding: 4px 12px; font-size: 12px; cursor: pointer; }
-.aba:hover { color: var(--ink); }
-.aba.ativa { background: var(--bg-code); color: var(--ink); font-weight: 700; }
-.aba-dica { margin-left: auto; font-size: 11px; color: var(--ink-3); padding-bottom: 4px; }
-.variante .area textarea { cursor: default; }
+.editor {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg-code);
+  overflow: hidden;
+}
+.editor:focus-within {
+  border-color: var(--accent);
+}
+.ed-wrap {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  overflow-x: auto;
+}
+.gutter {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 21px;
+  color: var(--ink-3);
+  text-align: right;
+  padding: 12px 8px 12px 10px;
+  user-select: none;
+  border-right: 1px solid var(--line);
+  background: var(--bg-code);
+  white-space: pre;
+}
+.gutter .error {
+  color: var(--err);
+  font-weight: 700;
+}
+.area {
+  position: relative;
+  min-width: 0;
+}
+.area pre,
+.area textarea {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 21px;
+  padding: 12px 14px;
+  white-space: pre;
+  tab-size: 4;
+  border: 0;
+  letter-spacing: 0;
+  font-variant-ligatures: none;
+}
+.area pre {
+  pointer-events: none;
+  color: var(--ink);
+  min-height: 100%;
+}
+.area textarea {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  resize: none;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--ink);
+  outline: none;
+  overflow: hidden;
+}
+.area textarea::selection {
+  background: var(--th-select, rgba(120, 150, 220, .35));
+  color: transparent;
+}
+.static-code pre {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 21px;
+  padding: 12px 14px;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--ink);
+}
+.tk-kw {
+  color: var(--kw);
+}
+.tk-str {
+  color: var(--str);
+}
+.tk-com {
+  color: var(--com);
+  font-style: italic;
+}
+.tk-num {
+  color: var(--num);
+}
+.tk-bi {
+  color: var(--bi);
+}
+.tk-fn {
+  color: var(--fn);
+}
+.error-line {
+  background: var(--err-bg);
+  display: inline-block;
+  width: 100%;
+}
+.tabs {
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+  margin-bottom: -1px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+.tab {
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  background: var(--bg-ex-2);
+  color: var(--ink-2);
+  border-radius: 6px 6px 0 0;
+  padding: 4px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.tab:hover {
+  color: var(--ink);
+}
+.tab.active {
+  background: var(--bg-code);
+  color: var(--ink);
+  font-weight: 700;
+}
+.tab-hint {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--ink-3);
+  padding-bottom: 4px;
+}
+.variant .area textarea {
+  cursor: default;
+}
 
 /* ---------- buttons and output ---------- */
-.acoes { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; align-items: center; }
-.btn { border: 1px solid var(--line-2); background: var(--bg-ex-2); color: var(--ink); border-radius: 6px; padding: 5px 12px; font-size: 12.5px; font-weight: 500; cursor: pointer; line-height: 1.4; }
-.btn:hover { border-color: var(--accent); }
-.btn.prim { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 700; }
-.btn.prim:hover { filter: brightness(1.08); }
-.btn.ok { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); font-weight: 700; }
-.btn:disabled { opacity: .5; cursor: progress; }
-.atalho { font-size: 11px; color: var(--ink-3); margin-left: auto; }
-kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line-2); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--bg-ex-2); color: var(--ink); }
-.resultado { margin-top: 10px; padding: 9px 14px; border-radius: 8px; font-size: 13px; display: none; border: 1px solid transparent; }
-.resultado.vis { display: block; }
-.resultado.ok { background: var(--ok-bg); color: var(--ok); border-color: var(--ok); }
-.resultado.falha { background: var(--warn-bg); color: var(--warn); border-color: var(--warn); }
-.solucao { margin-top: 12px; display: none; }
-.solucao.vis { display: block; }
-.saida-sql { margin-top: 10px; display: none; }
-.saida-sql.vis { display: block; }
-.res-bloco { border: 1px solid var(--line); border-radius: 8px; background: var(--bg-code); margin-bottom: 8px; overflow: hidden; }
-.res-cab { padding: 6px 12px; font-size: 11.5px; color: var(--ink-2); border-bottom: 1px solid var(--line); background: var(--bg-ex-2); }
-.res-cab::before { content: "> "; color: var(--accent); }
-.res-bloco .res-cab:only-child { border-bottom: 0; }
-.saida-sql > .res-cab { border: 1px solid var(--line); border-radius: 8px; }
-.res-rodape { font-size: 11px; color: var(--ink-3); margin: 2px 2px 0; }
-.grade { margin: 0; max-height: 380px; overflow: auto; }
-.grade table { font-family: var(--mono); font-size: 12.5px; border: 0; }
-.grade th { position: sticky; top: 0; background: var(--bg-ex-2); font-size: 12px; }
-.grade th, .grade td { border-width: 0 1px 1px 0; white-space: nowrap; padding: 4px 10px; }
-.grade td.num { text-align: right; color: var(--num); }
-.nulo { color: var(--ink-3); font-style: italic; }
-.plano { margin: 0; padding: 10px 12px; font-family: var(--mono); font-size: 12px; line-height: 1.6; white-space: pre; overflow-x: auto; color: var(--ink); }
-.saida-sql .tb { color: var(--err); background: var(--err-bg); border: 1px solid var(--err); border-radius: 8px; padding: 10px 12px; font-family: var(--mono); font-size: 12.5px; white-space: pre-wrap; margin-bottom: 8px; }
-.saida-sql .tb a { color: var(--err); font-weight: 700; text-decoration: underline; cursor: pointer; }
-.rotulo-bloco { margin: 12px 0 4px; }
-.selo-pratica { font-size: 11.5px; color: var(--warn); margin: 0 0 8px; }
-.selo-pratica::before { content: "! "; font-weight: 700; }
-.rotulo-sol { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 6px; }
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 0;
+  align-items: center;
+}
+.btn {
+  border: 1px solid var(--line-2);
+  background: var(--bg-ex-2);
+  color: var(--ink);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  line-height: 1.4;
+}
+.btn:hover {
+  border-color: var(--accent);
+}
+.btn.prim {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+.btn.prim:hover {
+  filter: brightness(1.08);
+}
+.btn.ok {
+  background: var(--ok-bg);
+  border-color: var(--ok);
+  color: var(--ok);
+  font-weight: 700;
+}
+.btn:disabled {
+  opacity: .5;
+  cursor: progress;
+}
+.shortcut {
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-left: auto;
+}
+kbd {
+  font-family: var(--mono);
+  font-size: 11px;
+  border: 1px solid var(--line-2);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 0 5px;
+  background: var(--bg-ex-2);
+  color: var(--ink);
+}
+.result {
+  margin-top: 10px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: none;
+  border: 1px solid transparent;
+}
+.result.vis {
+  display: block;
+}
+.result.ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+  border-color: var(--ok);
+}
+.result.fail {
+  background: var(--warn-bg);
+  color: var(--warn);
+  border-color: var(--warn);
+}
+.solution {
+  margin-top: 12px;
+  display: none;
+}
+.solution.vis {
+  display: block;
+}
+.output-sql {
+  margin-top: 10px;
+  display: none;
+}
+.output-sql.vis {
+  display: block;
+}
+.res-block {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg-code);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.res-head {
+  padding: 6px 12px;
+  font-size: 11.5px;
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-ex-2);
+}
+.res-head::before {
+  content: "> ";
+  color: var(--accent);
+}
+.res-block .res-head:only-child {
+  border-bottom: 0;
+}
+.output-sql > .res-head {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.res-footer {
+  font-size: 11px;
+  color: var(--ink-3);
+  margin: 2px 2px 0;
+}
+.grid {
+  margin: 0;
+  max-height: 380px;
+  overflow: auto;
+}
+.grid table {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  border: 0;
+}
+.grid th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-ex-2);
+  font-size: 12px;
+}
+.grid th,
+.grid td {
+  border-width: 0 1px 1px 0;
+  white-space: nowrap;
+  padding: 4px 10px;
+}
+.grid td.num {
+  text-align: right;
+  color: var(--num);
+}
+.null-value {
+  color: var(--ink-3);
+  font-style: italic;
+}
+.plan {
+  margin: 0;
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre;
+  overflow-x: auto;
+  color: var(--ink);
+}
+.output-sql .tb {
+  color: var(--err);
+  background: var(--err-bg);
+  border: 1px solid var(--err);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  white-space: pre-wrap;
+  margin-bottom: 8px;
+}
+.output-sql .tb a {
+  color: var(--err);
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.block-label {
+  margin: 12px 0 4px;
+}
+.practice-badge {
+  font-size: 11.5px;
+  color: var(--warn);
+  margin: 0 0 8px;
+}
+.practice-badge::before {
+  content: "! ";
+  font-weight: 700;
+}
+.solution-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0 0 6px;
+}
 
 /* ---------- pagination, home view ---------- */
-.paginacao { display: flex; justify-content: space-between; margin-top: 50px; gap: 12px; flex-wrap: wrap; }
-.paginacao a { color: var(--link); text-decoration: none; border: 1px solid var(--line); background: var(--bg-ex); border-radius: 8px; padding: 9px 14px; font-size: 13px; }
-.paginacao a:hover { border-color: var(--line-2); background: var(--bg-ex-2); }
-.carregando { color: var(--ink-3); font-size: 13px; padding-top: 20px; }
-.carregando::before { content: "$ "; color: var(--accent); }
-.aviso { border: 1px dashed var(--line-2); border-radius: 8px; padding: 18px 20px; color: var(--ink-2); margin-top: 20px; }
-.aviso strong { color: var(--ink); display: block; margin-bottom: 4px; }
-.inicio { padding-top: 18px; }
-.inicio h2 { font-size: clamp(28px, 5vw, 40px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; margin: 0 0 8px; }
-.inicio .sub { color: var(--ink-2); margin-bottom: 8px; }
-.inicio .prompt { color: var(--ink-3); font-size: 12px; margin-bottom: 26px; }
-.inicio .prompt em { color: var(--ok); font-style: normal; }
-.label { display: flex; align-items: center; gap: 14px; margin: 30px 0 16px; color: var(--ink-2); font-size: 11.5px; }
-.label::before, .label::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-.label span { border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; background: var(--bg); }
-.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 12px; text-align: left; }
-.card { position: relative; border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px 16px; text-decoration: none; color: var(--ink); background: var(--bg-ex); overflow: hidden; display: flex; flex-direction: column; gap: 4px; transition: border-color .15s, background .15s; }
-.card:hover { border-color: var(--line-2); background: var(--bg-ex-2); }
-.card .num-cap { font-size: 11px; color: var(--th-postgres, var(--accent)); }
-.card .num-cap::before { content: "$ "; color: var(--ink-3); }
-.card b { display: block; font-size: 14px; line-height: 1.4; }
-.card small { color: var(--ink-3); font-size: 11.5px; margin-top: auto; }
-.card .mini { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--line); }
-.card .mini span { display: block; height: 100%; background: var(--ok); width: 0; }
-.como { text-align: left; background: var(--bg-ex); border: 1px solid var(--line); border-radius: 8px; padding: 14px 20px 6px; font-size: 13.5px; }
-.como ul { padding-left: 18px; margin: 0 0 8px; }
-.como li { margin-bottom: 6px; }
-.como li::marker { content: "- "; color: var(--ink-3); }
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 50px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.pagination a {
+  color: var(--link);
+  text-decoration: none;
+  border: 1px solid var(--line);
+  background: var(--bg-ex);
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 13px;
+}
+.pagination a:hover {
+  border-color: var(--line-2);
+  background: var(--bg-ex-2);
+}
+.loading {
+  color: var(--ink-3);
+  font-size: 13px;
+  padding-top: 20px;
+}
+.loading::before {
+  content: "$ ";
+  color: var(--accent);
+}
+.notice {
+  border: 1px dashed var(--line-2);
+  border-radius: 8px;
+  padding: 18px 20px;
+  color: var(--ink-2);
+  margin-top: 20px;
+}
+.notice strong {
+  color: var(--ink);
+  display: block;
+  margin-bottom: 4px;
+}
+.home {
+  padding-top: 18px;
+}
+.home h2 {
+  font-size: clamp(28px, 5vw, 40px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin: 0 0 8px;
+}
+.home .sub {
+  color: var(--ink-2);
+  margin-bottom: 8px;
+}
+.home .prompt {
+  color: var(--ink-3);
+  font-size: 12px;
+  margin-bottom: 26px;
+}
+.home .prompt em {
+  color: var(--ok);
+  font-style: normal;
+}
+.label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 30px 0 16px;
+  color: var(--ink-2);
+  font-size: 11.5px;
+}
+.label::before,
+.label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.label span {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 12px;
+  background: var(--bg);
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: 12px;
+  text-align: left;
+}
+.card {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px 16px;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--bg-ex);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color .15s, background .15s;
+}
+.card:hover {
+  border-color: var(--line-2);
+  background: var(--bg-ex-2);
+}
+.card .chapter-num {
+  font-size: 11px;
+  color: var(--th-postgres, var(--accent));
+}
+.card .chapter-num::before {
+  content: "$ ";
+  color: var(--ink-3);
+}
+.card b {
+  display: block;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.card small {
+  color: var(--ink-3);
+  font-size: 11.5px;
+  margin-top: auto;
+}
+.card .mini {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--line);
+}
+.card .mini span {
+  display: block;
+  height: 100%;
+  background: var(--ok);
+  width: 0;
+}
+.how {
+  text-align: left;
+  background: var(--bg-ex);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px 20px 6px;
+  font-size: 13.5px;
+}
+.how ul {
+  padding-left: 18px;
+  margin: 0 0 8px;
+}
+.how li {
+  margin-bottom: 6px;
+}
+.how li::marker {
+  content: "- ";
+  color: var(--ink-3);
+}
 
 @media (max-width: 900px) {
-  .app { grid-template-columns: minmax(0, 1fr); }
-  aside { position: fixed; top: var(--bar-h); bottom: 0; left: 0; width: min(300px, 86vw); z-index: 20; transform: translateX(-100%); transition: transform .25s, visibility .25s; visibility: hidden; }
-  aside.aberto { transform: none; visibility: visible; box-shadow: 0 0 40px rgba(0,0,0,.35); }
-  .topo-mobile { display: flex; }
-  .conteudo { padding: 22px 16px 100px; }
-  .ex { padding: 14px 12px; }
-  h2.cap { font-size: 22px; }
-  .atalho { display: none; }
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  aside {
+    position: fixed;
+    top: var(--bar-h);
+    bottom: 0;
+    left: 0;
+    width: min(300px, 86vw);
+    z-index: 20;
+    transform: translateX(-100%);
+    transition: transform .25s, visibility .25s;
+    visibility: hidden;
+  }
+  aside.open {
+    transform: none;
+    visibility: visible;
+    box-shadow: 0 0 40px rgba(0,0,0,.35);
+  }
+  .mobile-top {
+    display: flex;
+  }
+  .content {
+    padding: 22px 16px 100px;
+  }
+  .ex {
+    padding: 14px 12px;
+  }
+  h2.chapter {
+    font-size: 22px;
+  }
+  .shortcut {
+    display: none;
+  }
 }
-@media (prefers-reduced-motion: reduce) { aside, .barra > div { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  aside,
+  .progress-bar > div {
+    transition: none;
+  }
+}
 </style>
 </head>
 <body>
 <div class="app">
   <aside id="menu">
-    <div class="marca" id="marca">psql · lab</div>
-    <h1 id="tituloTrilha">SQL Moderno</h1>
-    <div class="sub" id="subTrilha"></div>
-    <div class="progresso"><span class="rotulo" id="rotProgresso"></span><div class="barra"><div id="barra"></div></div><small id="txtProgresso"></small></div>
-    <span class="rotulo" id="rotCapitulos"></span>
+    <div class="brand" id="brand">psql · lab</div>
+    <h1 id="trailTitle">SQL Moderno</h1>
+    <div class="sub" id="trailSubtitle"></div>
+    <div class="progress">
+      <span class="eyebrow" id="progressLabel"></span>
+      <div class="progress-bar"><div id="progress-bar"></div></div>
+      <small id="progressText"></small>
+    </div>
+    <span class="eyebrow" id="chaptersLabel"></span>
     <nav id="nav"></nav>
-    <details class="esquema" id="esquemaBox"><summary id="rotEsquema"></summary><div id="esquema"><small id="esqCarregando"></small></div></details>
-    <div class="motor" id="motor"><i></i><span></span></div>
+    <details class="schema" id="schemaBox">
+      <summary id="schemaLabel"></summary>
+      <div id="schema"><small id="schemaLoading"></small></div>
+    </details>
+    <div class="engine" id="engine"><i></i><span></span></div>
   </aside>
   <main id="main">
-    <div class="topo-mobile"><button id="btnMenu" type="button">☰</button><b id="tituloMobile">SQL Moderno</b></div>
-    <div class="conteudo" id="conteudo"></div>
+    <div class="mobile-top">
+      <button id="btnMenu" type="button">☰</button>
+      <b id="mobileTitle">SQL Moderno</b>
+    </div>
+    <div class="content" id="content"></div>
   </main>
 </div>
 <script>
@@ -233,42 +1058,42 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line-2)
   const UI = {
     pt: {
       pageTitle: 'SQL Moderno — Laboratório',
-      titulo: 'SQL Moderno',
-      marca: 'psql · laboratório',
-      subTrilha: 'Laboratório · PostgreSQL com Snowflake e BigQuery',
-      rotProgresso: 'progresso',
-      rotCapitulos: 'capítulos',
-      progresso: (f, t) => f + ' de ' + t + ' atividades concluídas',
-      esquema: 'Esquema da base',
-      conectando: 'Conectando…',
-      soServidor: 'Disponível com o servidor local.',
-      procurando: 'Procurando o servidor…',
-      somenteLeitura: 'Somente leitura. Para executar, abra pelo Trails Lab: docker compose up -d (veja o README)',
-      motorPronto: v => 'PostgreSQL ' + v + ' (Docker) · transações desfeitas a cada execução',
-      motorFalhou: m => 'O servidor respondeu, mas o Postgres não: rode "docker compose up -d" e recarregue. (' + m + ')',
-      semResposta: 'sem resposta',
-      abrirMenu: 'Abrir menu', navCapitulos: 'Capítulos', editorSql: 'Editor SQL', editorLeitura: 'Exemplo somente leitura',
-      planoExec: 'plano de execução', executado: 'executado',
-      linhas: n => n + (n === 1 ? ' linha' : ' linhas'), mostrando: n => ' (mostrando ' + n + ')',
-      soPostgres: 'só o PostgreSQL executa no laboratório',
-      executar: '▶ Executar', verificar: '✓ Verificar', plano: 'Plano de execução', restaurar: '↺ Restaurar', verSolucao: 'Ver solução',
-      copiar: 'Copiar para o editor', solucao: 'Solução',
-      atalho: '<kbd>Ctrl</kbd>+<kbd>Enter</kbd> executa', atalhoDesafio: '<kbd>Ctrl</kbd>+<kbd>Enter</kbd> executa · <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> verifica',
-      executando: 'executando…', semServidor: 'Não consegui falar com o servidor local. Ele ainda está rodando?',
-      comando: n => 'Comando ' + n, linha: n => 'linha ' + n, nada: 'nada a executar',
-      rodape: ms => ms + ' ms · alterações desfeitas automaticamente (ROLLBACK)',
-      sucesso: '✓ Resultado igual ao esperado. Desafio concluído!',
-      aindaNao: m => 'Ainda não: ' + m + '.', comErro: 'a consulta terminou com erro',
-      confirmaSol: 'Mostrar a solução?',
-      ordemVerificada: '(a ordem das linhas é verificada)',
-      seloPratica: 'prática sem gabarito · diga em voz alta grão, partição e ordem',
-      exemplo: 'exemplo', desafio: 'desafio', pratica: 'prática', capitulo: (i, n) => 'capítulo ' + i + ' / ' + n,
-      inicio: 'Início', console: 'Console livre', consoleSub: 'Um editor SQL em branco',
-      consoleTexto: 'Um espaço para qualquer consulta na base da loja. Para salvar mudanças, use outra ferramenta conectada em <code>localhost:5433</code> (usuário e senha <code>lab</code>).',
-      atividades: n => n + (n === 1 ? ' atividade' : ' atividades'),
-      comoUsar: 'como usar', rotCards: 'capítulos',
+      title: 'SQL Moderno',
+      brand: 'psql · laboratório',
+      trailSubtitle: 'Laboratório · PostgreSQL com Snowflake e BigQuery',
+      progressLabel: 'progresso',
+      chaptersLabel: 'capítulos',
+      progress: (f, t) => f + ' de ' + t + ' atividades concluídas',
+      schema: 'Esquema da base',
+      connecting: 'Conectando…',
+      serverOnly: 'Disponível com o servidor local.',
+      searching: 'Procurando o servidor…',
+      readOnly: 'Somente leitura. Para executar, abra pelo Trails Lab: docker compose up -d (veja o README)',
+      engineReady: v => 'PostgreSQL ' + v + ' (Docker) · transações desfeitas a cada execução',
+      engineFailed: m => 'O servidor respondeu, mas o Postgres não: rode "docker compose up -d" e recarregue. (' + m + ')',
+      noResponse: 'sem resposta',
+      openMenu: 'Abrir menu', navChapters: 'Capítulos', sqlEditor: 'Editor SQL', readOnlyEditor: 'Exemplo somente leitura',
+      execPlan: 'plano de execução', executed: 'executado',
+      rows: n => n + (n === 1 ? ' linha' : ' linhas'), showing: n => ' (mostrando ' + n + ')',
+      postgresOnly: 'só o PostgreSQL executa no laboratório',
+      run: '▶ Executar', check: '✓ Verificar', plan: 'Plano de execução', restore: '↺ Restaurar', showSolution: 'Ver solução',
+      copy: 'Copiar para o editor', solution: 'Solução',
+      shortcut: '<kbd>Ctrl</kbd>+<kbd>Enter</kbd> executa', challengeShortcut: '<kbd>Ctrl</kbd>+<kbd>Enter</kbd> executa · <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> verifica',
+      running: 'executando…', noServer: 'Não consegui falar com o servidor local. Ele ainda está rodando?',
+      statement: n => 'Comando ' + n, line: n => 'linha ' + n, nothing: 'nada a executar',
+      footer: ms => ms + ' ms · alterações desfeitas automaticamente (ROLLBACK)',
+      success: '✓ Resultado igual ao esperado. Desafio concluído!',
+      notYet: m => 'Ainda não: ' + m + '.', withError: 'a consulta terminou com erro',
+      confirmSolution: 'Mostrar a solução?',
+      orderChecked: '(a ordem das linhas é verificada)',
+      practiceBadge: 'prática sem gabarito · diga em voz alta grão, partição e ordem',
+      example: 'exemplo', challenge: 'desafio', practice: 'prática', chapter: (i, n) => 'capítulo ' + i + ' / ' + n,
+      home: 'Início', console: 'Console livre', consoleSub: 'Um editor SQL em branco',
+      consoleText: 'Um espaço para qualquer consulta na base da loja. Para salvar mudanças, use outra ferramenta conectada em <code>localhost:5433</code> (usuário e senha <code>lab</code>).',
+      activities: n => n + (n === 1 ? ' atividade' : ' atividades'),
+      howToUse: 'como usar', cardsLabel: 'capítulos',
       prompt: 'psql -d loja <em>-- pronto para consultar</em>',
-      como: [
+      how: [
         'Todo exemplo em PostgreSQL é um editor: altere e clique em <b>▶ Executar</b> (<kbd>Ctrl</kbd>+<kbd>Enter</kbd>). Vários comandos podem ser executados de uma vez; cada resultado aparece separado.',
         'As abas <b>Snowflake</b> e <b>BigQuery</b> mostram a sintaxe equivalente para comparar.',
         '<b>Plano de execução</b> roda <code>EXPLAIN (ANALYZE, BUFFERS)</code> no último comando.',
@@ -276,51 +1101,64 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line-2)
         'Nos desafios, <b>✓ Verificar</b> compara o seu resultado com o esperado e explica a diferença.',
         'O esquema da base fica no menu lateral, em “Esquema da base”.'
       ],
-      notas: { NOTA: 'nota', 'ATENÇÃO': 'atenção', DICA: 'dica', NOVO: 'novo' },
-      carregando: 'carregando conteúdo…',
-      falhaConteudo: 'Não foi possível carregar o conteúdo da trilha.',
-      abrirHub: 'Esta página precisa ser aberta pelo Trails Lab',
-      abrirHubTexto: 'Rode <code>docker compose up -d</code> na pasta do repositório e abra <code>http://127.0.0.1:8765</code>.',
-      motivos: null
+      notes: { NOTE: 'nota', WARNING: 'atenção', TIP: 'dica', NEW: 'novo' },
+      loading: 'carregando conteúdo…',
+      contentFailed: 'Não foi possível carregar o conteúdo da trilha.',
+      openHub: 'Esta página precisa ser aberta pelo Trails Lab',
+      openHubText: 'Rode <code>docker compose up -d</code> na pasta do repositório e abra <code>http://127.0.0.1:8765</code>.',
+      reasons: [
+        [/^the reference query returned no result \(please tell the author\)$/, () => 'a consulta de referência não devolveu resultado (avise o autor)'],
+        [/^your query did not return any table$/, () => 'sua consulta não devolveu nenhuma tabela'],
+        [/^expected (\d+) column\(s\) \((.*)\), got (\d+)$/, m => 'esperava ' + m[1] + ' coluna(s) (' + m[2] + '), veio ' + m[3]],
+        [/^expected (\d+) row\(s\), got (\d+)$/, m => 'esperava ' + m[1] + ' linha(s), veio ' + m[2]],
+        [/^row (\d+) differs: expected ([\s\S]*), got ([\s\S]*?)( \(order matters in this challenge\))?$/,
+          m => 'a linha ' + m[1] + ' difere: esperava ' + m[2] + ', veio ' + m[3] + (m[4] ? ' (a ordem importa neste desafio)' : '')]
+      ],
+      errors: [
+        [/Postgres is not reachable\. Run "docker compose up -d" in the repository folder and wait a few seconds\./, 'O Postgres não está acessível. Rode "docker compose up -d" na pasta do repositório e aguarde alguns segundos.'],
+        [/^The run exceeded the time limit\.$/, 'A execução passou do tempo limite.'],
+        [/^The meta-command (\S+) is not allowed in the lab\.$/, 'O meta-comando $1 não é permitido no laboratório.'],
+        [/^The query plan is shown for the last statement, which must be a query \(SELECT or WITH\)\.$/, 'O plano de execução é mostrado para o último comando, que deve ser uma consulta (SELECT ou WITH).']
+      ]
     },
     en: {
       pageTitle: 'Modern SQL — Lab',
-      titulo: 'Modern SQL',
-      marca: 'psql · lab',
-      subTrilha: 'Lab · PostgreSQL with Snowflake and BigQuery',
-      rotProgresso: 'progress',
-      rotCapitulos: 'chapters',
-      progresso: (f, t) => f + ' of ' + t + ' activities done',
-      esquema: 'Database schema',
-      conectando: 'Connecting…',
-      soServidor: 'Available with the local server.',
-      procurando: 'Looking for the server…',
-      somenteLeitura: 'Read-only. To run queries, open it through Trails Lab: docker compose up -d (see the README)',
-      motorPronto: v => 'PostgreSQL ' + v + ' (Docker) · every run is rolled back',
-      motorFalhou: m => 'The server answered, but Postgres did not: run "docker compose up -d" and reload. (' + m + ')',
-      semResposta: 'no response',
-      abrirMenu: 'Open menu', navCapitulos: 'Chapters', editorSql: 'SQL editor', editorLeitura: 'Read-only example',
-      planoExec: 'query plan', executado: 'done',
-      linhas: n => n + (n === 1 ? ' row' : ' rows'), mostrando: n => ' (showing ' + n + ')',
-      soPostgres: 'only PostgreSQL runs in the lab',
-      executar: '▶ Run', verificar: '✓ Check', plano: 'Query plan', restaurar: '↺ Reset', verSolucao: 'Show solution',
-      copiar: 'Copy to editor', solucao: 'Solution',
-      atalho: '<kbd>Ctrl</kbd>+<kbd>Enter</kbd> runs', atalhoDesafio: '<kbd>Ctrl</kbd>+<kbd>Enter</kbd> runs · <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> checks',
-      executando: 'running…', semServidor: 'Could not reach the local server. Is it still running?',
-      comando: n => 'Statement ' + n, linha: n => 'line ' + n, nada: 'nothing to run',
-      rodape: ms => ms + ' ms · changes rolled back automatically (ROLLBACK)',
-      sucesso: '✓ Same result as expected. Challenge complete!',
-      aindaNao: m => 'Not yet: ' + m + '.', comErro: 'the query ended with an error',
-      confirmaSol: 'Show the solution?',
-      ordemVerificada: '(row order is checked)',
-      seloPratica: 'practice without an answer key · say grain, partition and order out loud',
-      exemplo: 'example', desafio: 'challenge', pratica: 'practice', capitulo: (i, n) => 'chapter ' + i + ' / ' + n,
-      inicio: 'Home', console: 'Free console', consoleSub: 'A blank SQL editor',
-      consoleTexto: 'A place for any query against the store database. To keep changes, use another tool connected to <code>localhost:5433</code> (user and password <code>lab</code>).',
-      atividades: n => n + (n === 1 ? ' activity' : ' activities'),
-      comoUsar: 'how to use', rotCards: 'chapters',
+      title: 'Modern SQL',
+      brand: 'psql · lab',
+      trailSubtitle: 'Lab · PostgreSQL with Snowflake and BigQuery',
+      progressLabel: 'progress',
+      chaptersLabel: 'chapters',
+      progress: (f, t) => f + ' of ' + t + ' activities done',
+      schema: 'Database schema',
+      connecting: 'Connecting…',
+      serverOnly: 'Available with the local server.',
+      searching: 'Looking for the server…',
+      readOnly: 'Read-only. To run queries, open it through Trails Lab: docker compose up -d (see the README)',
+      engineReady: v => 'PostgreSQL ' + v + ' (Docker) · every run is rolled back',
+      engineFailed: m => 'The server answered, but Postgres did not: run "docker compose up -d" and reload. (' + m + ')',
+      noResponse: 'no response',
+      openMenu: 'Open menu', navChapters: 'Chapters', sqlEditor: 'SQL editor', readOnlyEditor: 'Read-only example',
+      execPlan: 'query plan', executed: 'done',
+      rows: n => n + (n === 1 ? ' row' : ' rows'), showing: n => ' (showing ' + n + ')',
+      postgresOnly: 'only PostgreSQL runs in the lab',
+      run: '▶ Run', check: '✓ Check', plan: 'Query plan', restore: '↺ Reset', showSolution: 'Show solution',
+      copy: 'Copy to editor', solution: 'Solution',
+      shortcut: '<kbd>Ctrl</kbd>+<kbd>Enter</kbd> runs', challengeShortcut: '<kbd>Ctrl</kbd>+<kbd>Enter</kbd> runs · <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> checks',
+      running: 'running…', noServer: 'Could not reach the local server. Is it still running?',
+      statement: n => 'Statement ' + n, line: n => 'line ' + n, nothing: 'nothing to run',
+      footer: ms => ms + ' ms · changes rolled back automatically (ROLLBACK)',
+      success: '✓ Same result as expected. Challenge complete!',
+      notYet: m => 'Not yet: ' + m + '.', withError: 'the query ended with an error',
+      confirmSolution: 'Show the solution?',
+      orderChecked: '(row order is checked)',
+      practiceBadge: 'practice without an answer key · say grain, partition and order out loud',
+      example: 'example', challenge: 'challenge', practice: 'practice', chapter: (i, n) => 'chapter ' + i + ' / ' + n,
+      home: 'Home', console: 'Free console', consoleSub: 'A blank SQL editor',
+      consoleText: 'A place for any query against the store database. To keep changes, use another tool connected to <code>localhost:5433</code> (user and password <code>lab</code>).',
+      activities: n => n + (n === 1 ? ' activity' : ' activities'),
+      howToUse: 'how to use', cardsLabel: 'chapters',
       prompt: 'psql -d loja <em>-- ready to query</em>',
-      como: [
+      how: [
         'Every PostgreSQL example is an editor: change it and click <b>▶ Run</b> (<kbd>Ctrl</kbd>+<kbd>Enter</kbd>). Several statements can run at once; each result is shown separately.',
         'The <b>Snowflake</b> and <b>BigQuery</b> tabs show the equivalent syntax for comparison.',
         '<b>Query plan</b> runs <code>EXPLAIN (ANALYZE, BUFFERS)</code> on the last statement.',
@@ -328,64 +1166,52 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line-2)
         'In challenges, <b>✓ Check</b> compares your result with the expected one and explains the difference.',
         'The database schema is in the sidebar, under “Database schema”.'
       ],
-      notas: { NOTA: 'note', 'ATENÇÃO': 'warning', DICA: 'tip', NOVO: 'new' },
-      carregando: 'loading content…',
-      falhaConteudo: 'Could not load the trail content.',
-      abrirHub: 'This page must be opened through Trails Lab',
-      abrirHubTexto: 'Run <code>docker compose up -d</code> in the repository folder and open <code>http://127.0.0.1:8765</code>.',
-      motivos: [
-        [/^a consulta de referência não devolveu resultado \(avise o autor\)$/, () => 'the reference query returned no result (please tell the author)'],
-        [/^sua consulta não devolveu nenhuma tabela$/, () => 'your query did not return any table'],
-        [/^esperava (\d+) coluna\(s\) \((.*)\), veio (\d+)$/, m => 'expected ' + m[1] + ' column(s) (' + m[2] + '), got ' + m[3]],
-        [/^esperava (\d+) linha\(s\), veio (\d+)$/, m => 'expected ' + m[1] + ' row(s), got ' + m[2]],
-        [/^a linha (\d+) difere: esperava ([\s\S]*), veio ([\s\S]*?)( \(a ordem importa neste desafio\))?$/,
-          m => 'row ' + m[1] + ' differs: expected ' + m[2] + ', got ' + m[3] + (m[4] ? ' (order matters in this challenge)' : '')]
-      ],
-      erros: [
-        [/O Postgres não está acessível\. Rode "docker compose up -d" na pasta do repositório e aguarde alguns segundos\./, 'Postgres is not reachable. Run "docker compose up -d" in the repository folder and wait a few seconds.'],
-        [/^A execução passou do tempo limite\.$/, 'The run exceeded the time limit.'],
-        [/^O meta-comando (\S+) não é permitido no laboratório\.$/, 'The meta-command $1 is not allowed in the lab.'],
-        [/^O plano de execução é mostrado para o último comando, que deve ser uma consulta \(SELECT ou WITH\)\.$/, 'The query plan is shown for the last statement, which must be a query (SELECT or WITH).']
-      ]
+      notes: { NOTE: 'note', WARNING: 'warning', TIP: 'tip', NEW: 'new' },
+      loading: 'loading content…',
+      contentFailed: 'Could not load the trail content.',
+      openHub: 'This page must be opened through Trails Lab',
+      openHubText: 'Run <code>docker compose up -d</code> in the repository folder and open <code>http://127.0.0.1:8765</code>.',
+      reasons: null,     // the engine answers in English
+      errors: null
     },
     es: {
       pageTitle: 'SQL Moderno — Laboratorio',
-      titulo: 'SQL Moderno',
-      marca: 'psql · laboratorio',
-      subTrilha: 'Laboratorio · PostgreSQL con Snowflake y BigQuery',
-      rotProgresso: 'progreso',
-      rotCapitulos: 'capítulos',
-      progresso: (f, t) => f + ' de ' + t + ' actividades completadas',
-      esquema: 'Esquema de la base',
-      conectando: 'Conectando…',
-      soServidor: 'Disponible con el servidor local.',
-      procurando: 'Buscando el servidor…',
-      somenteLeitura: 'Solo lectura. Para ejecutar, ábrela desde Trails Lab: docker compose up -d (consulta el README)',
-      motorPronto: v => 'PostgreSQL ' + v + ' (Docker) · cada ejecución se deshace',
-      motorFalhou: m => 'El servidor respondió, pero Postgres no: ejecuta "docker compose up -d" y recarga. (' + m + ')',
-      semResposta: 'sin respuesta',
-      abrirMenu: 'Abrir menú', navCapitulos: 'Capítulos', editorSql: 'Editor SQL', editorLeitura: 'Ejemplo de solo lectura',
-      planoExec: 'plan de ejecución', executado: 'ejecutado',
-      linhas: n => n + (n === 1 ? ' fila' : ' filas'), mostrando: n => ' (se muestran ' + n + ')',
-      soPostgres: 'solo PostgreSQL se ejecuta en el laboratorio',
-      executar: '▶ Ejecutar', verificar: '✓ Verificar', plano: 'Plan de ejecución', restaurar: '↺ Restaurar', verSolucao: 'Ver solución',
-      copiar: 'Copiar al editor', solucao: 'Solución',
-      atalho: '<kbd>Ctrl</kbd>+<kbd>Enter</kbd> ejecuta', atalhoDesafio: '<kbd>Ctrl</kbd>+<kbd>Enter</kbd> ejecuta · <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> verifica',
-      executando: 'ejecutando…', semServidor: 'No se pudo contactar el servidor local. ¿Sigue en ejecución?',
-      comando: n => 'Comando ' + n, linha: n => 'línea ' + n, nada: 'nada que ejecutar',
-      rodape: ms => ms + ' ms · cambios deshechos automáticamente (ROLLBACK)',
-      sucesso: '✓ El resultado coincide con el esperado. ¡Desafío completado!',
-      aindaNao: m => 'Todavía no: ' + m + '.', comErro: 'la consulta terminó con un error',
-      confirmaSol: '¿Mostrar la solución?',
-      ordemVerificada: '(se verifica el orden de las filas)',
-      seloPratica: 'práctica sin solución · di en voz alta el grano, la partición y el orden',
-      exemplo: 'ejemplo', desafio: 'desafío', pratica: 'práctica', capitulo: (i, n) => 'capítulo ' + i + ' / ' + n,
-      inicio: 'Inicio', console: 'Consola libre', consoleSub: 'Un editor SQL en blanco',
-      consoleTexto: 'Un espacio para cualquier consulta sobre la base de la tienda. Para guardar cambios, usa otra herramienta conectada a <code>localhost:5433</code> (usuario y contraseña <code>lab</code>).',
-      atividades: n => n + (n === 1 ? ' actividad' : ' actividades'),
-      comoUsar: 'cómo usarlo', rotCards: 'capítulos',
+      title: 'SQL Moderno',
+      brand: 'psql · laboratorio',
+      trailSubtitle: 'Laboratorio · PostgreSQL con Snowflake y BigQuery',
+      progressLabel: 'progreso',
+      chaptersLabel: 'capítulos',
+      progress: (f, t) => f + ' de ' + t + ' actividades completadas',
+      schema: 'Esquema de la base',
+      connecting: 'Conectando…',
+      serverOnly: 'Disponible con el servidor local.',
+      searching: 'Buscando el servidor…',
+      readOnly: 'Solo lectura. Para ejecutar, ábrela desde Trails Lab: docker compose up -d (consulta el README)',
+      engineReady: v => 'PostgreSQL ' + v + ' (Docker) · cada ejecución se deshace',
+      engineFailed: m => 'El servidor respondió, pero Postgres no: ejecuta "docker compose up -d" y recarga. (' + m + ')',
+      noResponse: 'sin respuesta',
+      openMenu: 'Abrir menú', navChapters: 'Capítulos', sqlEditor: 'Editor SQL', readOnlyEditor: 'Ejemplo de solo lectura',
+      execPlan: 'plan de ejecución', executed: 'ejecutado',
+      rows: n => n + (n === 1 ? ' fila' : ' filas'), showing: n => ' (se muestran ' + n + ')',
+      postgresOnly: 'solo PostgreSQL se ejecuta en el laboratorio',
+      run: '▶ Ejecutar', check: '✓ Verificar', plan: 'Plan de ejecución', restore: '↺ Restaurar', showSolution: 'Ver solución',
+      copy: 'Copiar al editor', solution: 'Solución',
+      shortcut: '<kbd>Ctrl</kbd>+<kbd>Enter</kbd> ejecuta', challengeShortcut: '<kbd>Ctrl</kbd>+<kbd>Enter</kbd> ejecuta · <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> verifica',
+      running: 'ejecutando…', noServer: 'No se pudo contactar el servidor local. ¿Sigue en ejecución?',
+      statement: n => 'Comando ' + n, line: n => 'línea ' + n, nothing: 'nada que ejecutar',
+      footer: ms => ms + ' ms · cambios deshechos automáticamente (ROLLBACK)',
+      success: '✓ El resultado coincide con el esperado. ¡Desafío completado!',
+      notYet: m => 'Todavía no: ' + m + '.', withError: 'la consulta terminó con un error',
+      confirmSolution: '¿Mostrar la solución?',
+      orderChecked: '(se verifica el orden de las filas)',
+      practiceBadge: 'práctica sin solución · di en voz alta el grano, la partición y el orden',
+      example: 'ejemplo', challenge: 'desafío', practice: 'práctica', chapter: (i, n) => 'capítulo ' + i + ' / ' + n,
+      home: 'Inicio', console: 'Consola libre', consoleSub: 'Un editor SQL en blanco',
+      consoleText: 'Un espacio para cualquier consulta sobre la base de la tienda. Para guardar cambios, usa otra herramienta conectada a <code>localhost:5433</code> (usuario y contraseña <code>lab</code>).',
+      activities: n => n + (n === 1 ? ' actividad' : ' actividades'),
+      howToUse: 'cómo usarlo', cardsLabel: 'capítulos',
       prompt: 'psql -d loja <em>-- listo para consultar</em>',
-      como: [
+      how: [
         'Cada ejemplo en PostgreSQL es un editor: modifícalo y haz clic en <b>▶ Ejecutar</b> (<kbd>Ctrl</kbd>+<kbd>Enter</kbd>). Se pueden ejecutar varios comandos a la vez; cada resultado aparece por separado.',
         'Las pestañas <b>Snowflake</b> y <b>BigQuery</b> muestran la sintaxis equivalente para comparar.',
         '<b>Plan de ejecución</b> ejecuta <code>EXPLAIN (ANALYZE, BUFFERS)</code> sobre el último comando.',
@@ -393,74 +1219,82 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line-2)
         'En los desafíos, <b>✓ Verificar</b> compara tu resultado con el esperado y explica la diferencia.',
         'El esquema de la base está en el menú lateral, en “Esquema de la base”.'
       ],
-      notas: { NOTA: 'nota', 'ATENÇÃO': 'atención', DICA: 'consejo', NOVO: 'nuevo' },
-      carregando: 'cargando contenido…',
-      falhaConteudo: 'No se pudo cargar el contenido de la ruta.',
-      abrirHub: 'Esta página debe abrirse desde Trails Lab',
-      abrirHubTexto: 'Ejecuta <code>docker compose up -d</code> en la carpeta del repositorio y abre <code>http://127.0.0.1:8765</code>.',
-      motivos: [
-        [/^a consulta de referência não devolveu resultado \(avise o autor\)$/, () => 'la consulta de referencia no devolvió resultados (avisa al autor)'],
-        [/^sua consulta não devolveu nenhuma tabela$/, () => 'tu consulta no devolvió ninguna tabla'],
-        [/^esperava (\d+) coluna\(s\) \((.*)\), veio (\d+)$/, m => 'se esperaban ' + m[1] + ' columna(s) (' + m[2] + '), llegaron ' + m[3]],
-        [/^esperava (\d+) linha\(s\), veio (\d+)$/, m => 'se esperaban ' + m[1] + ' fila(s), llegaron ' + m[2]],
-        [/^a linha (\d+) difere: esperava ([\s\S]*), veio ([\s\S]*?)( \(a ordem importa neste desafio\))?$/,
+      notes: { NOTE: 'nota', WARNING: 'atención', TIP: 'consejo', NEW: 'nuevo' },
+      loading: 'cargando contenido…',
+      contentFailed: 'No se pudo cargar el contenido de la ruta.',
+      openHub: 'Esta página debe abrirse desde Trails Lab',
+      openHubText: 'Ejecuta <code>docker compose up -d</code> en la carpeta del repositorio y abre <code>http://127.0.0.1:8765</code>.',
+      reasons: [
+        [/^the reference query returned no result \(please tell the author\)$/, () => 'la consulta de referencia no devolvió resultados (avisa al autor)'],
+        [/^your query did not return any table$/, () => 'tu consulta no devolvió ninguna tabla'],
+        [/^expected (\d+) column\(s\) \((.*)\), got (\d+)$/, m => 'se esperaban ' + m[1] + ' columna(s) (' + m[2] + '), llegaron ' + m[3]],
+        [/^expected (\d+) row\(s\), got (\d+)$/, m => 'se esperaban ' + m[1] + ' fila(s), llegaron ' + m[2]],
+        [/^row (\d+) differs: expected ([\s\S]*), got ([\s\S]*?)( \(order matters in this challenge\))?$/,
           m => 'la fila ' + m[1] + ' es distinta: se esperaba ' + m[2] + ', llegó ' + m[3] + (m[4] ? ' (el orden importa en este desafío)' : '')]
       ],
-      erros: [
-        [/O Postgres não está acessível\. Rode "docker compose up -d" na pasta do repositório e aguarde alguns segundos\./, 'Postgres no está accesible. Ejecuta "docker compose up -d" en la carpeta del repositorio y espera unos segundos.'],
-        [/^A execução passou do tempo limite\.$/, 'La ejecución superó el tiempo límite.'],
-        [/^O meta-comando (\S+) não é permitido no laboratório\.$/, 'El metacomando $1 no está permitido en el laboratorio.'],
-        [/^O plano de execução é mostrado para o último comando, que deve ser uma consulta \(SELECT ou WITH\)\.$/, 'El plan de ejecución se muestra para el último comando, que debe ser una consulta (SELECT o WITH).']
+      errors: [
+        [/Postgres is not reachable\. Run "docker compose up -d" in the repository folder and wait a few seconds\./, 'Postgres no está accesible. Ejecuta "docker compose up -d" en la carpeta del repositorio y espera unos segundos.'],
+        [/^The run exceeded the time limit\.$/, 'La ejecución superó el tiempo límite.'],
+        [/^The meta-command (\S+) is not allowed in the lab\.$/, 'El metacomando $1 no está permitido en el laboratorio.'],
+        [/^The query plan is shown for the last statement, which must be a query \(SELECT or WITH\)\.$/, 'El plan de ejecución se muestra para el último comando, que debe ser una consulta (SELECT o WITH).']
       ]
     }
   };
   const L = UI[LANG] || UI.pt;
-  // the engine answers in Portuguese; show its known messages in the selected language
-  function traduzMotivo(m) {
-    for (const [re, f] of (L.motivos || [])) { const r = String(m).match(re); if (r) return f(r); }
+  // the engine answers in English; show its known messages in the selected language
+  function translateReason(m) {
+    for (const [re, f] of (L.reasons || [])) { const r = String(m).match(re); if (r) return f(r); }
     return m;
   }
-  const traduzErro = m => (L.erros || []).reduce((s, [re, t]) => s.replace(re, t), String(m));
+  const translateError = m => (L.errors || []).reduce((s, [re, t]) => s.replace(re, t), String(m));
 
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const $ = id => document.getElementById(id);
 
   // ---------- static interface ----------
   document.title = L.pageTitle;
-  $('marca').textContent = L.marca;
-  $('tituloTrilha').textContent = L.titulo;
-  $('subTrilha').textContent = L.subTrilha;
-  $('rotProgresso').textContent = L.rotProgresso;
-  $('rotCapitulos').textContent = L.rotCapitulos;
-  $('rotEsquema').textContent = L.esquema;
-  $('esqCarregando').textContent = L.conectando;
-  $('motor').querySelector('span').textContent = L.procurando;
-  $('btnMenu').setAttribute('aria-label', L.abrirMenu);
-  $('nav').setAttribute('aria-label', L.navCapitulos);
-  $('tituloMobile').textContent = L.titulo;
-  $('btnMenu').onclick = () => $('menu').classList.toggle('aberto');
-  $('main').addEventListener('click', e => { if (!e.target.closest('#btnMenu')) $('menu').classList.remove('aberto'); });
+  $('brand').textContent = L.brand;
+  $('trailTitle').textContent = L.title;
+  $('trailSubtitle').textContent = L.trailSubtitle;
+  $('progressLabel').textContent = L.progressLabel;
+  $('chaptersLabel').textContent = L.chaptersLabel;
+  $('schemaLabel').textContent = L.schema;
+  $('schemaLoading').textContent = L.connecting;
+  $('engine').querySelector('span').textContent = L.searching;
+  $('btnMenu').setAttribute('aria-label', L.openMenu);
+  $('nav').setAttribute('aria-label', L.navChapters);
+  $('mobileTitle').textContent = L.title;
+  $('btnMenu').onclick = () => $('menu').classList.toggle('open');
+  $('main').addEventListener('click', e => { if (!e.target.closest('#btnMenu')) $('menu').classList.remove('open'); });
 
-  const conteudo = $('conteudo');
+  const content = $('content');
   if (!TRAIL.lang || (!window.LAB_TOKEN && !TRAIL.static)) {   // opened from disk; the static site (GitHub Pages) is read-only below
-    conteudo.innerHTML = '<div class="aviso"><strong>' + esc(L.abrirHub) + '</strong>' + L.abrirHubTexto + '</div>';
-    $('motor').querySelector('span').textContent = L.somenteLeitura;
-    $('motor').className = 'motor falhou';
-    $('esquema').innerHTML = '<small>' + esc(L.soServidor) + '</small>';
+    content.innerHTML = '<div class="notice"><strong>' + esc(L.openHub) + '</strong>' + L.openHubText + '</div>';
+    $('engine').querySelector('span').textContent = L.readOnly;
+    $('engine').className = 'engine failed';
+    $('schema').innerHTML = '<small>' + esc(L.serverOnly) + '</small>';
     return;
   }
 
-  conteudo.innerHTML = '<div class="carregando">' + esc(L.carregando) + '</div>';
-  const pegar = l => fetch('content/' + l + '.json', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
-  pegar(LANG).catch(() => pegar('pt')).then(iniciarTrilha, e => {
-    conteudo.innerHTML = '<div class="aviso"><strong>' + esc(L.falhaConteudo) + '</strong>' + esc(e.message) + '</div>';
+  content.innerHTML = '<div class="loading">' + esc(L.loading) + '</div>';
+  const fetchContent = l => fetch('content/' + l + '.json', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+  fetchContent(LANG).catch(() => fetchContent('pt')).then(startTrail, e => {
+    content.innerHTML = '<div class="notice"><strong>' + esc(L.contentFailed) + '</strong>' + esc(e.message) + '</div>';
   });
 
-  function iniciarTrilha(DADOS) {
-  const CHAVE = 'sql-moderno-v1';
-  let estado = { feitos: {}, codigos: {} };
-  try { const s = localStorage.getItem(CHAVE); if (s) estado = Object.assign(estado, JSON.parse(s)); } catch (e) {}
-  const salvar = () => { try { localStorage.setItem(CHAVE, JSON.stringify(estado)); } catch (e) {} };
+  function startTrail(BOOK) {
+  const STORAGE_KEY = 'sql-moderno-v1';
+  let state = { done: {}, savedCode: {} };
+  try {
+    const s = localStorage.getItem(STORAGE_KEY);
+    if (s) {
+      const saved = JSON.parse(s);
+      // progress saved before the English rename used the keys feitos and codigos
+      state.done = saved.done || saved.feitos || {};
+      state.savedCode = saved.savedCode || saved.codigos || {};
+    }
+  } catch (e) {}
+  const save = () => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {} };
 
   function inline(t) {
     const codes = [];
@@ -469,7 +1303,7 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line-2)
     return t.replace(/\u0000(\d+)\u0000/g, (_, i) => '<code>' + esc(codes[+i]) + '</code>');
   }
   const CIRC = '❶❷❸❹❺❻❼❽❾❿';
-  const NOMES_DIALETO = { sql: 'PostgreSQL', snowflake: 'Snowflake', bigquery: 'BigQuery', text: 'Terminal', dbt: 'dbt (SQL + Jinja)', sqlmesh: 'SQLMesh', yaml: 'YAML' };
+  const DIALECT_NAMES = { sql: 'PostgreSQL', snowflake: 'Snowflake', bigquery: 'BigQuery', text: 'Terminal', dbt: 'dbt (SQL + Jinja)', sqlmesh: 'SQLMesh', yaml: 'YAML' };
 
   // ---------- SQL highlighting ----------
   const KW = new Set(('select from where and or not in is null as on join left right full outer inner cross lateral using group by having order asc desc nulls first last limit offset fetch ' +
@@ -482,218 +1316,218 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line-2)
     'generate_series to_char to_date date_part age abs ceil floor count_if countif iff regexp_like regexp_contains dateadd datediff date_sub date_add ' +
     'generate_date_array json_agg jsonb_build_object grouping split safe_offset format').split(' '));
   const TOKEN = /(--[^\n]*|\/\*[\s\S]*?\*\/)|('(?:[^']|'')*')|("(?:[^"]|"")*")|(\b\d+(?:\.\d+)?\b)|(::\w+)|([A-Za-z_][\w$]*)/g;
-  function realce(code, lang) {
+  function highlight(code, lang) {
     if (lang === 'text' || lang === 'yaml') return esc(code);
-    let out = '', ultimo = 0;
-    code.replace(TOKEN, (m, com, str, ident, num, cast, nome, pos) => {
-      out += esc(code.slice(ultimo, pos));
+    let out = '', lastIndex = 0;
+    code.replace(TOKEN, (m, com, str, ident, num, cast, name, pos) => {
+      out += esc(code.slice(lastIndex, pos));
       let cls = null;
       if (com) cls = 'com'; else if (str) cls = 'str'; else if (num) cls = 'num'; else if (cast) cls = 'bi';
-      else if (nome) { const l = nome.toLowerCase(); if (KW.has(l)) cls = 'kw'; else if (FN.has(l)) cls = 'fn'; }
+      else if (name) { const l = name.toLowerCase(); if (KW.has(l)) cls = 'kw'; else if (FN.has(l)) cls = 'fn'; }
       out += cls ? '<span class="tk-' + cls + '">' + esc(m) + '</span>' : esc(m);
-      ultimo = pos + m.length; return m;
+      lastIndex = pos + m.length; return m;
     });
-    return out + esc(code.slice(ultimo));
+    return out + esc(code.slice(lastIndex));
   }
 
   // ---------- server ----------
-  let pronto = false;
-  const motorEl = $('motor');
-  const statusMotor = (c, t) => { motorEl.className = 'motor ' + c; motorEl.querySelector('span').textContent = t; };
-  async function api(caminho, corpo) {
-    const r = await fetch(caminho, corpo ? { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Lab-Token': window.LAB_TOKEN }, body: JSON.stringify(corpo) }
+  let ready = false;
+  const engineEl = $('engine');
+  const setEngineStatus = (c, t) => { engineEl.className = 'engine ' + c; engineEl.querySelector('span').textContent = t; };
+  async function api(path, body) {
+    const r = await fetch(path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Lab-Token': window.LAB_TOKEN }, body: JSON.stringify(body) }
                                           : { headers: { 'X-Lab-Token': window.LAB_TOKEN } });
     return r.json();
   }
-  async function iniciar() {
+  async function init() {
     if (!window.LAB_TOKEN) {
-      statusMotor('falhou', L.somenteLeitura);
-      $('esquema').innerHTML = '<small>' + esc(L.soServidor) + '</small>';
+      setEngineStatus('failed', L.readOnly);
+      $('schema').innerHTML = '<small>' + esc(L.serverOnly) + '</small>';
       return;
     }
     try {
       const st = await api('api/status');
-      if (!st.postgres) throw new Error(st.erro || L.semResposta);
-      statusMotor('pronto', L.motorPronto(st.postgres));
-      pronto = true;
+      if (!st.postgres) throw new Error(st.error || L.noResponse);
+      setEngineStatus('ready', L.engineReady(st.postgres));
+      ready = true;
       document.querySelectorAll('.btn-run').forEach(b => b.disabled = false);
-      const esq = await api('api/esquema');
-      $('esquema').innerHTML = Object.entries(esq.tabelas || {}).map(([t, cols]) =>
-        '<div class="tab-esq"><b>' + esc(t) + '</b>' + cols.map(([c, tipo]) => '<div><span>' + esc(c) + '</span><em>' + esc(tipo) + '</em></div>').join('') + '</div>').join('');
+      const schema = await api('api/schema');
+      $('schema').innerHTML = Object.entries(schema.tables || {}).map(([t, cols]) =>
+        '<div class="schema-table"><b>' + esc(t) + '</b>' + cols.map(([c, kind]) => '<div><span>' + esc(c) + '</span><em>' + esc(kind) + '</em></div>').join('') + '</div>').join('');
     } catch (e) {
-      statusMotor('falhou', L.motorFalhou(e.message));
+      setEngineStatus('failed', L.engineFailed(e.message));
     }
   }
 
   // ---------- progress ----------
-  const atividades = [];
-  function atualizarProgresso() {
-    const total = atividades.length, feitos = atividades.filter(id => estado.feitos[id]).length;
-    $('barra').style.width = (total ? 100 * feitos / total : 0) + '%';
-    $('txtProgresso').textContent = L.progresso(feitos, total);
-    if (window.TRAIL && window.TRAIL.progress) window.TRAIL.progress(feitos, total);
-    DADOS.capitulos.forEach((cap, i) => {
-      const f = cap.atividades.filter(id => estado.feitos[id]).length;
-      const el = document.querySelector('#nav a[data-cap="' + i + '"] .cnt');
-      if (el) { el.textContent = f + '/' + cap.atividades.length; el.classList.toggle('cheio', f === cap.atividades.length && f > 0); }
+  const activities = [];
+  function updateProgress() {
+    const total = activities.length, done = activities.filter(id => state.done[id]).length;
+    $('progress-bar').style.width = (total ? 100 * done / total : 0) + '%';
+    $('progressText').textContent = L.progress(done, total);
+    if (window.TRAIL && window.TRAIL.progress) window.TRAIL.progress(done, total);
+    BOOK.chapters.forEach((chapter, i) => {
+      const f = chapter.activities.filter(id => state.done[id]).length;
+      const el = document.querySelector('#nav a[data-chapter="' + i + '"] .cnt');
+      if (el) { el.textContent = f + '/' + chapter.activities.length; el.classList.toggle('full', f === chapter.activities.length && f > 0); }
     });
   }
-  const marcar = id => { if (!estado.feitos[id]) { estado.feitos[id] = true; salvar(); atualizarProgresso(); } };
+  const markDone = id => { if (!state.done[id]) { state.done[id] = true; save(); updateProgress(); } };
 
   // ---------- editor ----------
-  function criarEditor(id, inicial, somenteLeitura, lang) {
+  function createEditor(id, starter, readOnly, lang) {
     const box = document.createElement('div'); box.className = 'editor';
     box.innerHTML = '<div class="ed-wrap"><div class="gutter"></div><div class="area"><pre aria-hidden="true"></pre><textarea spellcheck="false" autocapitalize="off" autocomplete="off"></textarea></div></div>';
     const ta = box.querySelector('textarea'), pre = box.querySelector('pre'), gut = box.querySelector('.gutter');
-    ta.setAttribute('aria-label', somenteLeitura ? L.editorLeitura : L.editorSql);
-    const salvo = somenteLeitura ? null : estado.codigos[id];
-    ta.value = salvo != null ? salvo : inicial;
-    ta.readOnly = !!somenteLeitura;
-    let erroLinha = 0;
-    function pintar() {
-      const linhas = ta.value.split('\n');
-      let html = realce(ta.value, lang || 'sql');
-      if (erroLinha) { const p = html.split('\n'); if (p[erroLinha - 1] !== undefined) p[erroLinha - 1] = '<span class="linha-erro">' + (p[erroLinha - 1] || ' ') + '</span>'; html = p.join('\n'); }
+    ta.setAttribute('aria-label', readOnly ? L.readOnlyEditor : L.sqlEditor);
+    const saved = readOnly ? null : state.savedCode[id];
+    ta.value = saved != null ? saved : starter;
+    ta.readOnly = !!readOnly;
+    let errorLine = 0;
+    function paint() {
+      const lines = ta.value.split('\n');
+      let html = highlight(ta.value, lang || 'sql');
+      if (errorLine) { const p = html.split('\n'); if (p[errorLine - 1] !== undefined) p[errorLine - 1] = '<span class="error-line">' + (p[errorLine - 1] || ' ') + '</span>'; html = p.join('\n'); }
       pre.innerHTML = html + '\n';
-      gut.innerHTML = linhas.map((_, i) => i + 1 === erroLinha ? '<span class="erro">' + (i + 1) + '</span>' : (i + 1)).join('\n');
-      pre.style.minWidth = 'calc(' + (Math.max(...linhas.map(l => l.length)) + 2) + 'ch + 28px)';
+      gut.innerHTML = lines.map((_, i) => i + 1 === errorLine ? '<span class="error">' + (i + 1) + '</span>' : (i + 1)).join('\n');
+      pre.style.minWidth = 'calc(' + (Math.max(...lines.map(l => l.length)) + 2) + 'ch + 28px)';
     }
-    ta.addEventListener('input', () => { erroLinha = 0; pintar(); if (!somenteLeitura) { estado.codigos[id] = ta.value; salvar(); } });
+    ta.addEventListener('input', () => { errorLine = 0; paint(); if (!readOnly) { state.savedCode[id] = ta.value; save(); } });
     ta.addEventListener('keydown', e => {
-      if (e.key === 'Tab' && !somenteLeitura) { e.preventDefault(); ta.setRangeText('    ', ta.selectionStart, ta.selectionEnd, 'end'); ta.dispatchEvent(new Event('input')); }
+      if (e.key === 'Tab' && !readOnly) { e.preventDefault(); ta.setRangeText('    ', ta.selectionStart, ta.selectionEnd, 'end'); ta.dispatchEvent(new Event('input')); }
     });
-    pintar();
+    paint();
     return {
-      el: box, ta, valor: () => ta.value,
-      definir: v => { ta.value = v; erroLinha = 0; pintar(); estado.codigos[id] = v; salvar(); },
-      marcarErro: n => { erroLinha = n; pintar(); },
-      irPara: n => { const l = ta.value.split('\n'); let pos = 0; for (let i = 0; i < n - 1 && i < l.length; i++) pos += l[i].length + 1; ta.focus(); ta.setSelectionRange(pos, pos + (l[n - 1] || '').length); }
+      el: box, ta, value: () => ta.value,
+      setValue: v => { ta.value = v; errorLine = 0; paint(); state.savedCode[id] = v; save(); },
+      markError: n => { errorLine = n; paint(); },
+      goToLine: n => { const l = ta.value.split('\n'); let pos = 0; for (let i = 0; i < n - 1 && i < l.length; i++) pos += l[i].length + 1; ta.focus(); ta.setSelectionRange(pos, pos + (l[n - 1] || '').length); }
     };
   }
 
   // ---------- results ----------
-  function tabelaResultado(res, rotulo) {
-    if (res.colunas && res.colunas.length === 1 && res.colunas[0] === 'QUERY PLAN') {
-      return '<div class="res-bloco"><div class="res-cab">' + rotulo + ' · ' + esc(L.planoExec) + '</div><pre class="plano">' + esc(res.linhas.map(l => l[0]).join('\n')) + '</pre></div>';
+  function resultTable(res, label) {
+    if (res.columns && res.columns.length === 1 && res.columns[0] === 'QUERY PLAN') {
+      return '<div class="res-block"><div class="res-head">' + label + ' · ' + esc(L.execPlan) + '</div><pre class="plan">' + esc(res.rows.map(l => l[0]).join('\n')) + '</pre></div>';
     }
-    if (!res.colunas) return '<div class="res-bloco"><div class="res-cab">' + rotulo + ' · ' + esc(res.tag || L.executado) + '</div></div>';
-    const max = 200, linhas = res.linhas.slice(0, max);
-    const numerica = res.colunas.map((_, j) => res.linhas.length > 0 && res.linhas.every(l => l[j] === null || /^-?\d+(\.\d+)?$/.test(l[j])));
-    return '<div class="res-bloco"><div class="res-cab">' + rotulo + ' · ' + esc(L.linhas(res.linhas.length)) +
-      (res.tag ? ' · ' + esc(res.tag) : '') + (res.linhas.length > max ? esc(L.mostrando(max)) : '') + '</div><div class="tabela grade"><table><tr>' +
-      res.colunas.map(c => '<th>' + esc(c) + '</th>').join('') + '</tr>' +
-      linhas.map(l => '<tr>' + l.map((v, j) => '<td' + (numerica[j] ? ' class="num"' : '') + '>' + (v === null ? '<span class="nulo">NULL</span>' : esc(v)) + '</td>').join('') + '</tr>').join('') +
+    if (!res.columns) return '<div class="res-block"><div class="res-head">' + label + ' · ' + esc(res.tag || L.executed) + '</div></div>';
+    const max = 200, rows = res.rows.slice(0, max);
+    const numeric = res.columns.map((_, j) => res.rows.length > 0 && res.rows.every(l => l[j] === null || /^-?\d+(\.\d+)?$/.test(l[j])));
+    return '<div class="res-block"><div class="res-head">' + label + ' · ' + esc(L.rows(res.rows.length)) +
+      (res.tag ? ' · ' + esc(res.tag) : '') + (res.rows.length > max ? esc(L.showing(max)) : '') + '</div><div class="table grid"><table><tr>' +
+      res.columns.map(c => '<th>' + esc(c) + '</th>').join('') + '</tr>' +
+      rows.map(l => '<tr>' + l.map((v, j) => '<td' + (numeric[j] ? ' class="num"' : '') + '>' + (v === null ? '<span class="null-value">NULL</span>' : esc(v)) + '</td>').join('') + '</tr>').join('') +
       '</table></div></div>';
   }
 
-  function celula(opts) {
+  function cell(opts) {
     const frag = document.createElement('div');
-    const variantes = (opts.variantes || []).filter(v => v.lang !== 'sql');
-    let abas = null;
-    if (variantes.length) {
-      abas = document.createElement('div'); abas.className = 'abas';
-      abas.innerHTML = ['sql', ...variantes.map(v => v.lang)].map((l, i) => '<button class="aba' + (i ? '' : ' ativa') + '" data-l="' + l + '">' + NOMES_DIALETO[l] + '</button>').join('') +
-        '<span class="aba-dica">' + esc(L.soPostgres) + '</span>';
-      frag.appendChild(abas);
+    const variants = (opts.variants || []).filter(v => v.lang !== 'sql');
+    let tabs = null;
+    if (variants.length) {
+      tabs = document.createElement('div'); tabs.className = 'tabs';
+      tabs.innerHTML = ['sql', ...variants.map(v => v.lang)].map((l, i) => '<button class="tab' + (i ? '' : ' active') + '" data-l="' + l + '">' + DIALECT_NAMES[l] + '</button>').join('') +
+        '<span class="tab-hint">' + esc(L.postgresOnly) + '</span>';
+      frag.appendChild(tabs);
     }
-    const ed = criarEditor(opts.id, opts.codigo, false, 'sql');
+    const ed = createEditor(opts.id, opts.code, false, 'sql');
     frag.appendChild(ed.el);
-    const outros = {};
-    variantes.forEach(v => {
-      const e = criarEditor(opts.id + '-' + v.lang, v.code, true, 'sql');
-      e.el.style.display = 'none'; e.el.classList.add('variante'); outros[v.lang] = e; frag.appendChild(e.el);
+    const others = {};
+    variants.forEach(v => {
+      const e = createEditor(opts.id + '-' + v.lang, v.code, true, 'sql');
+      e.el.style.display = 'none'; e.el.classList.add('variant'); others[v.lang] = e; frag.appendChild(e.el);
     });
-    const acoes = document.createElement('div'); acoes.className = 'acoes';
-    acoes.innerHTML = '<button class="btn prim btn-run"' + (pronto ? '' : ' disabled') + '>' + esc(L.executar) + '</button>' +
-      (opts.desafio ? '<button class="btn ok btn-run btn-verif"' + (pronto ? '' : ' disabled') + '>' + esc(L.verificar) + '</button>' : '<button class="btn btn-run btn-plano"' + (pronto ? '' : ' disabled') + '>' + esc(L.plano) + '</button>') +
-      '<button class="btn btn-reset">' + esc(L.restaurar) + '</button>' + (opts.desafio ? '<button class="btn btn-sol">' + esc(L.verSolucao) + '</button>' : '') +
-      '<span class="atalho">' + (opts.desafio ? L.atalhoDesafio : L.atalho) + '</span>';
-    frag.appendChild(acoes);
-    const saida = document.createElement('div'); saida.className = 'saida-sql'; frag.appendChild(saida);
-    const resultado = document.createElement('div'); resultado.className = 'resultado'; resultado.setAttribute('role', 'status'); frag.appendChild(resultado);
+    const actions = document.createElement('div'); actions.className = 'actions';
+    actions.innerHTML = '<button class="btn prim btn-run"' + (ready ? '' : ' disabled') + '>' + esc(L.run) + '</button>' +
+      (opts.challenge ? '<button class="btn ok btn-run btn-check"' + (ready ? '' : ' disabled') + '>' + esc(L.check) + '</button>' : '<button class="btn btn-run btn-plan"' + (ready ? '' : ' disabled') + '>' + esc(L.plan) + '</button>') +
+      '<button class="btn btn-reset">' + esc(L.restore) + '</button>' + (opts.challenge ? '<button class="btn btn-sol">' + esc(L.showSolution) + '</button>' : '') +
+      '<span class="shortcut">' + (opts.challenge ? L.challengeShortcut : L.shortcut) + '</span>';
+    frag.appendChild(actions);
+    const output = document.createElement('div'); output.className = 'output-sql'; frag.appendChild(output);
+    const result = document.createElement('div'); result.className = 'result'; result.setAttribute('role', 'status'); frag.appendChild(result);
     let solDiv = null;
-    if (opts.desafio) {
-      solDiv = document.createElement('div'); solDiv.className = 'solucao';
-      solDiv.innerHTML = '<div class="rotulo-sol">' + esc(L.solucao) + '</div><div class="estatico editor"><pre>' + realce(opts.solucao, 'sql') + '</pre></div><div class="acoes"><button class="btn btn-usar">' + esc(L.copiar) + '</button></div>';
+    if (opts.challenge) {
+      solDiv = document.createElement('div'); solDiv.className = 'solution';
+      solDiv.innerHTML = '<div class="solution-label">' + esc(L.solution) + '</div><div class="static-code editor"><pre>' + highlight(opts.solution, 'sql') + '</pre></div><div class="actions"><button class="btn btn-use">' + esc(L.copy) + '</button></div>';
       frag.appendChild(solDiv);
-      solDiv.querySelector('.btn-usar').onclick = () => ed.definir(opts.solucao);
+      solDiv.querySelector('.btn-use').onclick = () => ed.setValue(opts.solution);
     }
-    if (abas) abas.addEventListener('click', e => {
-      const b = e.target.closest('.aba'); if (!b) return;
-      abas.querySelectorAll('.aba').forEach(x => x.classList.toggle('ativa', x === b));
+    if (tabs) tabs.addEventListener('click', e => {
+      const b = e.target.closest('.tab'); if (!b) return;
+      tabs.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === b));
       ed.el.style.display = b.dataset.l === 'sql' ? '' : 'none';
-      Object.entries(outros).forEach(([l, e2]) => e2.el.style.display = l === b.dataset.l ? '' : 'none');
-      acoes.style.display = b.dataset.l === 'sql' ? '' : 'none';
+      Object.entries(others).forEach(([l, e2]) => e2.el.style.display = l === b.dataset.l ? '' : 'none');
+      actions.style.display = b.dataset.l === 'sql' ? '' : 'none';
     });
 
-    async function executar(modo) {
-      if (!pronto) return;
-      const botoes = acoes.querySelectorAll('.btn-run'); botoes.forEach(b => b.disabled = true);
-      saida.innerHTML = '<div class="res-cab">' + esc(L.executando) + '</div>'; saida.classList.add('vis'); resultado.className = 'resultado'; ed.marcarErro(0);
+    async function run(mode) {
+      if (!ready) return;
+      const buttons = actions.querySelectorAll('.btn-run'); buttons.forEach(b => b.disabled = true);
+      output.innerHTML = '<div class="res-head">' + esc(L.running) + '</div>'; output.classList.add('vis'); result.className = 'result'; ed.markError(0);
       const t0 = performance.now();
       let res;
       try {
-        res = await api('api/executar', { sql: ed.valor(), explicar: modo === 'plano',
-          esperado: modo === 'verificar' ? opts.solucao : undefined, ordenado: !!opts.ordenado });
-      } catch (e) { res = { ok: false, resultados: [], erro: { mensagem: L.semServidor } }; }
-      botoes.forEach(b => b.disabled = false);
+        res = await api('api/run', { sql: ed.value(), explain: mode === 'plan',
+          expected: mode === 'check' ? opts.solution : undefined, ordered: !!opts.ordered });
+      } catch (e) { res = { ok: false, results: [], error: { message: L.noServer } }; }
+      buttons.forEach(b => b.disabled = false);
       const ms = Math.round(performance.now() - t0);
-      let html = (res.resultados || []).map(r => tabelaResultado(r, esc(L.comando(r.comando + 1)))).join('');
-      if (res.erro) {
-        html += '<div class="tb">' + (res.erro.linha ? '<a data-l="' + res.erro.linha + '">' + esc(L.linha(res.erro.linha)) + '</a> · ' : '') + esc(traduzErro(res.erro.mensagem)) + '</div>';
-        if (res.erro.linha) ed.marcarErro(res.erro.linha);
+      let html = (res.results || []).map(r => resultTable(r, esc(L.statement(r.statement + 1)))).join('');
+      if (res.error) {
+        html += '<div class="tb">' + (res.error.line ? '<a data-l="' + res.error.line + '">' + esc(L.line(res.error.line)) + '</a> · ' : '') + esc(translateError(res.error.message)) + '</div>';
+        if (res.error.line) ed.markError(res.error.line);
       }
-      saida.innerHTML = (html || '<div class="res-cab">' + esc(L.nada) + '</div>') + '<div class="res-rodape">' + esc(L.rodape(ms)) + '</div>';
-      saida.querySelectorAll('a[data-l]').forEach(a => a.onclick = () => ed.irPara(+a.dataset.l));
-      if (modo === 'verificar') {
-        const v = res.verificacao;
-        if (v && v.ok) { resultado.className = 'resultado vis ok'; resultado.textContent = L.sucesso; marcar(opts.id); }
-        else { resultado.className = 'resultado vis falha'; resultado.textContent = L.aindaNao(v ? traduzMotivo(v.motivo) : L.comErro); }
-      } else if (!opts.desafio && res.ok) marcar(opts.id);
+      output.innerHTML = (html || '<div class="res-head">' + esc(L.nothing) + '</div>') + '<div class="res-footer">' + esc(L.footer(ms)) + '</div>';
+      output.querySelectorAll('a[data-l]').forEach(a => a.onclick = () => ed.goToLine(+a.dataset.l));
+      if (mode === 'check') {
+        const v = res.check;
+        if (v && v.ok) { result.className = 'result vis ok'; result.textContent = L.success; markDone(opts.id); }
+        else { result.className = 'result vis fail'; result.textContent = L.notYet(v ? translateReason(v.reason) : L.withError); }
+      } else if (!opts.challenge && res.ok) markDone(opts.id);
     }
-    acoes.querySelector('.btn-run').onclick = () => executar('normal');
-    if (opts.desafio) acoes.querySelector('.btn-verif').onclick = () => executar('verificar');
-    else acoes.querySelector('.btn-plano').onclick = () => executar('plano');
-    acoes.querySelector('.btn-reset').onclick = () => { ed.definir(opts.codigo); saida.classList.remove('vis'); resultado.className = 'resultado'; };
-    if (solDiv) acoes.querySelector('.btn-sol').onclick = () => { if (solDiv.classList.contains('vis') || confirm(L.confirmaSol)) solDiv.classList.toggle('vis'); };
-    ed.ta.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); executar(opts.desafio && e.shiftKey ? 'verificar' : 'normal'); } });
+    actions.querySelector('.btn-run').onclick = () => run('normal');
+    if (opts.challenge) actions.querySelector('.btn-check').onclick = () => run('check');
+    else actions.querySelector('.btn-plan').onclick = () => run('plan');
+    actions.querySelector('.btn-reset').onclick = () => { ed.setValue(opts.code); output.classList.remove('vis'); result.className = 'result'; };
+    if (solDiv) actions.querySelector('.btn-sol').onclick = () => { if (solDiv.classList.contains('vis') || confirm(L.confirmSolution)) solDiv.classList.toggle('vis'); };
+    ed.ta.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); run(opts.challenge && e.shiftKey ? 'check' : 'normal'); } });
     return frag;
   }
 
   // ---------- rendering ----------
-  function estatico(code, lang) { const d = document.createElement('div'); d.className = 'estatico editor'; d.innerHTML = '<pre>' + realce(code, lang) + '</pre>'; return d; }
-  function renderCapitulo(ci) {
-    const cap = DADOS.capitulos[ci];
-    conteudo.innerHTML = '<div class="kicker">' + esc(L.capitulo(ci + 1, DADOS.capitulos.length)) + '</div><h2 class="cap">' + esc(cap.titulo) + '</h2>';
-    let lista = null;
-    cap.blocos.forEach(b => {
-      if (b.t !== 'bullet') lista = null;
+  function staticBlock(code, lang) { const d = document.createElement('div'); d.className = 'static-code editor'; d.innerHTML = '<pre>' + highlight(code, lang) + '</pre>'; return d; }
+  function renderChapter(ci) {
+    const chapter = BOOK.chapters[ci];
+    content.innerHTML = '<div class="kicker">' + esc(L.chapter(ci + 1, BOOK.chapters.length)) + '</div><h2 class="chapter">' + esc(chapter.title) + '</h2>';
+    let list = null;
+    chapter.blocks.forEach(b => {
+      if (b.t !== 'bullet') list = null;
       let el = null;
       switch (b.t) {
-        case 'h2': el = document.createElement('h3'); el.className = 'sec'; el.id = b.ancora; el.innerHTML = inline(b.text); break;
+        case 'h2': el = document.createElement('h3'); el.className = 'sec'; el.id = b.anchor; el.innerHTML = inline(b.text); break;
         case 'h3': el = document.createElement('h4'); el.innerHTML = inline(b.text); break;
         case 'p': el = document.createElement('p'); el.innerHTML = inline(b.text); break;
         case 'bullet':
-          if (!lista) { lista = document.createElement('ul'); lista.className = 'lista'; conteudo.appendChild(lista); }
-          const li = document.createElement('li'); li.innerHTML = inline(b.text); lista.appendChild(li); return;
+          if (!list) { list = document.createElement('ul'); list.className = 'list'; content.appendChild(list); }
+          const li = document.createElement('li'); li.innerHTML = inline(b.text); list.appendChild(li); return;
         case 'note':
-          el = document.createElement('div'); el.className = 'nota ' + b.kind;
-          el.innerHTML = '<div class="ic">' + esc(L.notas[b.kind] || UI.pt.notas[b.kind] || b.kind) + '</div><div class="tx">' + inline(b.text) + '</div>';
+          el = document.createElement('div'); el.className = 'note ' + b.kind;
+          el.innerHTML = '<div class="note-title">' + esc(L.notes[b.kind] || UI.pt.notes[b.kind] || b.kind) + '</div><div class="tx">' + inline(b.text) + '</div>';
           break;
         case 'table':
-          el = document.createElement('div'); el.className = 'tabela';
+          el = document.createElement('div'); el.className = 'table';
           el.innerHTML = '<table>' + b.rows.map((r, i) => '<tr>' + r.map(c => (i ? '<td>' : '<th>') + inline(c) + (i ? '</td>' : '</th>')).join('') + '</tr>').join('') + '</table>';
           break;
-        case 'code': el = document.createElement('div'); el.style.margin = '0 0 18px'; el.appendChild(b.lang === 'sql' ? celula({ id: 'c-' + ci + '-' + b.code.length, codigo: b.code }) : estatico(b.code, b.lang)); break;
+        case 'code': el = document.createElement('div'); el.style.margin = '0 0 18px'; el.appendChild(b.lang === 'sql' ? cell({ id: 'c-' + ci + '-' + b.code.length, code: b.code }) : staticBlock(b.code, b.lang)); break;
         case 'ex': {
           el = document.createElement('div'); el.className = 'ex';
-          el.innerHTML = '<div class="kicker">' + esc(L.exemplo) + '</div><div class="titulo">' + inline(b.titulo) + '</div><div class="meta"><span class="arquivo">' + esc(b.arquivo) + '</span></div>';
-          if (b.lang === 'sql') el.appendChild(celula({ id: b.id, codigo: b.code, variantes: b.variantes }));
+          el.innerHTML = '<div class="kicker">' + esc(L.example) + '</div><div class="title">' + inline(b.title) + '</div><div class="meta"><span class="file">' + esc(b.file) + '</span></div>';
+          if (b.lang === 'sql') el.appendChild(cell({ id: b.id, code: b.code, variants: b.variants }));
           else {
-            const blocos = [{ lang: b.lang, code: b.code }, ...(b.variantes || [])];
-            blocos.forEach(v => {
-              if (blocos.length > 1) { const r = document.createElement('div'); r.className = 'arquivo rotulo-bloco'; r.textContent = NOMES_DIALETO[v.lang] || v.lang; el.appendChild(r); }
-              el.appendChild(estatico(v.code, v.lang));
+            const blocks = [{ lang: b.lang, code: b.code }, ...(b.variants || [])];
+            blocks.forEach(v => {
+              if (blocks.length > 1) { const r = document.createElement('div'); r.className = 'file block-label'; r.textContent = DIALECT_NAMES[v.lang] || v.lang; el.appendChild(r); }
+              el.appendChild(staticBlock(v.code, v.lang));
             });
           }
           if (b.callouts.length) {
@@ -703,65 +1537,67 @@ kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line-2)
           }
           break;
         }
-        case 'desafio': {
-          const pratica = b.pratica || !b.solucao;
-          el = document.createElement('div'); el.className = 'ex desafio';
-          el.innerHTML = '<div class="kicker">' + esc(pratica ? L.pratica : L.desafio) + '</div><div class="titulo">' + inline(b.titulo) + '</div><div class="enunciado">' + inline(b.enunciado) + (b.ordenado ? ' <i>' + esc(L.ordemVerificada) + '</i>' : '') + '</div>';
-          if (pratica) {
+        case 'challenge': {
+          const practice = b.practice || !b.solution;
+          el = document.createElement('div'); el.className = 'ex challenge';
+          el.innerHTML = '<div class="kicker">' + esc(practice ? L.practice : L.challenge) + '</div><div class="title">' + inline(b.title) + '</div><div class="prompt">' + inline(b.prompt) + (b.ordered ? ' <i>' + esc(L.orderChecked) + '</i>' : '') + '</div>';
+          if (practice) {
             // chapter 8 (the English case study, "Step N") keeps its own English hint in every language
-            const selo = /^Step /.test(b.titulo) ? UI.en.seloPratica : L.seloPratica;
-            el.querySelector('.titulo').insertAdjacentHTML('afterend', '<div class="selo-pratica">' + esc(selo) + '</div>');
-            el.appendChild(celula({ id: b.id, codigo: b.inicial }));
-          } else el.appendChild(celula({ id: b.id, codigo: b.inicial, solucao: b.solucao, ordenado: b.ordenado, desafio: true }));
+            const badge = /^Step /.test(b.title) ? UI.en.practiceBadge : L.practiceBadge;
+            el.querySelector('.title').insertAdjacentHTML('afterend', '<div class="practice-badge">' + esc(badge) + '</div>');
+            el.appendChild(cell({ id: b.id, code: b.starter }));
+          } else el.appendChild(cell({ id: b.id, code: b.starter, solution: b.solution, ordered: b.ordered, challenge: true }));
           break;
         }
       }
-      if (el) conteudo.appendChild(el);
+      if (el) content.appendChild(el);
     });
-    const pag = document.createElement('div'); pag.className = 'paginacao';
-    pag.innerHTML = (ci > 0 ? '<a href="#cap-' + ci + '">← ' + esc(DADOS.capitulos[ci - 1].titulo) + '</a>' : '<a href="#inicio">← ' + esc(L.inicio) + '</a>') +
-      (ci < DADOS.capitulos.length - 1 ? '<a href="#cap-' + (ci + 2) + '">' + esc(DADOS.capitulos[ci + 1].titulo) + ' →</a>' : '<a href="#console">' + esc(L.console) + ' →</a>');
-    conteudo.appendChild(pag);
-    $('tituloMobile').textContent = cap.titulo;
+    const pager = document.createElement('div'); pager.className = 'pagination';
+    pager.innerHTML = (ci > 0 ? '<a href="#chapter-' + ci + '">← ' + esc(BOOK.chapters[ci - 1].title) + '</a>' : '<a href="#home">← ' + esc(L.home) + '</a>') +
+      (ci < BOOK.chapters.length - 1 ? '<a href="#chapter-' + (ci + 2) + '">' + esc(BOOK.chapters[ci + 1].title) + ' →</a>' : '<a href="#console">' + esc(L.console) + ' →</a>');
+    content.appendChild(pager);
+    $('mobileTitle').textContent = chapter.title;
   }
-  function renderInicio() {
-    conteudo.innerHTML = '<div class="inicio"><h2>' + esc(L.titulo) + '</h2><div class="sub">' + esc(DADOS.subtitulo) + '</div>' +
+  function renderHome() {
+    content.innerHTML = '<div class="home"><h2>' + esc(L.title) + '</h2><div class="sub">' + esc(BOOK.subtitle) + '</div>' +
       '<div class="prompt">$ ' + L.prompt + '</div>' +
-      '<div class="label"><span>' + esc(L.comoUsar) + '</span></div>' +
-      '<div class="como"><ul>' + L.como.map(li => '<li>' + li + '</li>').join('') + '</ul></div>' +
-      '<div class="label"><span>' + esc(L.rotCards) + '</span></div><div class="cards">' +
-      DADOS.capitulos.map((c, i) => {
-        const f = c.atividades.filter(id => estado.feitos[id]).length, t = c.atividades.length;
-        return '<a class="card" href="#cap-' + (i + 1) + '"><span class="num-cap">cap-' + (i + 1) + '</span><b>' + esc(c.titulo) + '</b><small>' + f + '/' + esc(L.atividades(t)) + '</small>' +
+      '<div class="label"><span>' + esc(L.howToUse) + '</span></div>' +
+      '<div class="how"><ul>' + L.how.map(li => '<li>' + li + '</li>').join('') + '</ul></div>' +
+      '<div class="label"><span>' + esc(L.cardsLabel) + '</span></div><div class="cards">' +
+      BOOK.chapters.map((c, i) => {
+        const f = c.activities.filter(id => state.done[id]).length, t = c.activities.length;
+        return '<a class="card" href="#chapter-' + (i + 1) + '"><span class="chapter-num">cap-' + (i + 1) + '</span><b>' + esc(c.title) + '</b><small>' + f + '/' + esc(L.activities(t)) + '</small>' +
           '<span class="mini"><span style="width:' + (t ? 100 * f / t : 0) + '%"></span></span></a>';
       }).join('') +
-      '<a class="card" href="#console"><span class="num-cap">console</span><b>' + esc(L.console) + '</b><small>' + esc(L.consoleSub) + '</small></a></div></div>';
-    $('tituloMobile').textContent = L.titulo;
+      '<a class="card" href="#console"><span class="chapter-num">console</span><b>' + esc(L.console) + '</b><small>' + esc(L.consoleSub) + '</small></a></div></div>';
+    $('mobileTitle').textContent = L.title;
   }
   function renderConsole() {
-    conteudo.innerHTML = '<div class="kicker">console</div><h2 class="cap">' + esc(L.console) + '</h2><p>' + L.consoleTexto + '</p>';
+    content.innerHTML = '<div class="kicker">console</div><h2 class="chapter">' + esc(L.console) + '</h2><p>' + L.consoleText + '</p>';
     const d = document.createElement('div'); d.className = 'ex';
-    d.appendChild(celula({ id: 'console', codigo: "SELECT status, count(*) AS pedidos\nFROM pedidos\nGROUP BY status\nORDER BY pedidos DESC;\n" }));
-    conteudo.appendChild(d);
-    $('tituloMobile').textContent = L.console;
+    d.appendChild(cell({ id: 'console', code: "SELECT status, count(*) AS pedidos\nFROM pedidos\nGROUP BY status\nORDER BY pedidos DESC;\n" }));
+    content.appendChild(d);
+    $('mobileTitle').textContent = L.console;
   }
 
   const nav = $('nav');
-  nav.innerHTML = '<a href="#inicio" class="cap">' + esc(L.inicio) + '</a>' + DADOS.capitulos.map((c, i) =>
-    '<a class="cap" data-cap="' + i + '" href="#cap-' + (i + 1) + '"><span>' + esc(c.titulo) + '</span><span class="cnt"></span></a>' +
-    c.secoes.map(s => '<a class="sec" href="#cap-' + (i + 1) + '" data-ancora="' + s.ancora + '">' + inline(s.titulo) + '</a>').join('')).join('') +
-    '<a class="cap" href="#console">' + esc(L.console) + '</a>';
-  DADOS.capitulos.forEach(c => atividades.push(...c.atividades));
-  let ancora = null;
-  nav.addEventListener('click', e => { const a = e.target.closest('a'); if (!a) return; ancora = a.dataset.ancora || null; $('menu').classList.remove('aberto'); if (a.getAttribute('href') === location.hash) { e.preventDefault(); rotear(); } });
-  function rotear() {
-    const h = location.hash.slice(1) || 'inicio', m = h.match(/^cap-(\d+)$/);
-    nav.querySelectorAll('a.cap').forEach(a => a.classList.toggle('ativo', a.getAttribute('href') === '#' + h));
-    if (m && DADOS.capitulos[+m[1] - 1]) renderCapitulo(+m[1] - 1); else if (h === 'console') renderConsole(); else renderInicio();
-    const alvo = ancora && document.getElementById(ancora); if (alvo) alvo.scrollIntoView(); else $('main').scrollTop = 0; ancora = null;
+  nav.innerHTML = '<a href="#home" class="chapter">' + esc(L.home) + '</a>' + BOOK.chapters.map((c, i) =>
+    '<a class="chapter" data-chapter="' + i + '" href="#chapter-' + (i + 1) + '"><span>' + esc(c.title) + '</span><span class="cnt"></span></a>' +
+    c.sections.map(s => '<a class="sec" href="#chapter-' + (i + 1) + '" data-anchor="' + s.anchor + '">' + inline(s.title) + '</a>').join('')).join('') +
+    '<a class="chapter" href="#console">' + esc(L.console) + '</a>';
+  BOOK.chapters.forEach(c => activities.push(...c.activities));
+  let anchor = null;
+  nav.addEventListener('click', e => { const a = e.target.closest('a'); if (!a) return; anchor = a.dataset.anchor || null; $('menu').classList.remove('open'); if (a.getAttribute('href') === location.hash) { e.preventDefault(); route(); } });
+  function route() {
+    // links saved before the English rename used #inicio and #cap-N
+    const h = location.hash.slice(1).replace(/^inicio$/, 'home').replace(/^cap-(?=\d+$)/, 'chapter-') || 'home';
+    const m = h.match(/^chapter-(\d+)$/);
+    nav.querySelectorAll('a.chapter').forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + h));
+    if (m && BOOK.chapters[+m[1] - 1]) renderChapter(+m[1] - 1); else if (h === 'console') renderConsole(); else renderHome();
+    const anchorTarget = anchor && document.getElementById(anchor); if (anchorTarget) anchorTarget.scrollIntoView(); else $('main').scrollTop = 0; anchor = null;
   }
-  window.addEventListener('hashchange', rotear);
-  rotear(); atualizarProgresso(); iniciar();
+  window.addEventListener('hashchange', route);
+  route(); updateProgress(); init();
   }
 })();
 </script>

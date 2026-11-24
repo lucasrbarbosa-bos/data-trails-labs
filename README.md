@@ -112,7 +112,7 @@ says what to start.
 - **One engine, many trails.** A trail is a folder with a `trail.json` and an HTML page.
   The manifest names the engine (`python`, `postgres` or `none`); the hub creates a runner
   for it and mounts the trail at `/t/<id>/`.
-- **Pages talk to the engine through relative URLs** (`api/executar`), so the same page works
+- **Pages talk to the engine through relative URLs** (`api/run`), so the same page works
   under any mount point.
 - **Security:** the hub binds to `127.0.0.1`, generates a secret token at each start, injects it
   into the pages it serves, and rejects API calls without it or from another origin. Code runs
