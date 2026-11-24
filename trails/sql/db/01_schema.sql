@@ -1,4 +1,4 @@
--- Base de exemplo do laboratório SQL Moderno: uma loja de cafés.
+-- Sample database for the Modern SQL lab: a coffee shop.
 CREATE TABLE produtos (
     id         integer PRIMARY KEY,
     nome       text NOT NULL,

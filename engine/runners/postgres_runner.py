@@ -16,10 +16,10 @@ dataset's scripts in one transaction. That makes loading idempotent and lets you
 add a dataset to an existing database without wiping the Docker volume.
 
 API (relative to /t/<trail-id>/):
-  GET  api/status    -> {postgres, erro}
-  GET  api/esquema   -> {ok, tabelas: {table: [[column, type], ...]}, erro}
-  POST api/executar  {sql, explicar?, persistir?, esperado?, ordenado?}
-                     -> {ok, resultados, erro, comandos, verificacao?}
+  GET  api/status  -> {postgres, error}
+  GET  api/schema  -> {ok, tables: {table: [[column, type], ...]}, error}
+  POST api/run     {sql, explain?, persist?, expected?, ordered?}
+                   -> {ok, results, error, statements, check?}
 """
 from __future__ import annotations
 
@@ -133,18 +133,18 @@ def parse_output(stdout: str, stderr: str, total: int) -> dict:
         while text and text[-1] == '':
             text.pop()
         tag = text.pop() if text and COMMAND_TAG.match(text[-1]) else None
-        result = {'comando': current, 'tag': tag}
+        result = {'statement': current, 'tag': tag}
         if text:
             rows = list(csv.reader(io.StringIO('\n'.join(text))))
-            result['colunas'] = rows[0]
-            result['linhas'] = [[None if v == NULL_MARK else v for v in row] for row in rows[1:]]
+            result['columns'] = rows[0]
+            result['rows'] = [[None if v == NULL_MARK else v for v in row] for row in rows[1:]]
         results.append(result)
 
     for line in stdout.split('\n'):
         m = re.fullmatch(r'@@LAB:(\w+)@@', line)
         if m:
             close_block()
-            current = None if m.group(1) == 'fim' else int(m.group(1))
+            current = None if m.group(1) == 'end' else int(m.group(1))
             lines = []
         elif current is not None:
             lines.append(line)
@@ -154,14 +154,14 @@ def parse_output(stdout: str, stderr: str, total: int) -> dict:
     if 'ERROR:' in stderr or 'FATAL:' in stderr or (stderr.strip() and not results and total):
         message = re.sub(r'^psql:<stdin>:\d+:\s*', '', stderr.strip(), flags=re.M)
         m = re.search(r'^LINE (\d+):', message, flags=re.M)
-        failed = results[-1]['comando'] if results else 0
-        if results and 'colunas' not in results[-1] and results[-1]['tag'] is None:
+        failed = results[-1]['statement'] if results else 0
+        if results and 'columns' not in results[-1] and results[-1]['tag'] is None:
             results.pop()                                       # empty block of the failing statement
-        error = {'comando': failed, 'linha_relativa': int(m.group(1)) if m else 1, 'mensagem': message}
+        error = {'statement': failed, 'relative_line': int(m.group(1)) if m else 1, 'message': message}
         if is_unreachable(message):
-            error['mensagem'] += ('\n\nO Postgres não está acessível. Rode "docker compose up -d" na pasta do '
-                                  'repositório e aguarde alguns segundos.')
-    return {'ok': error is None, 'resultados': results, 'erro': error}
+            error['message'] += ('\n\nPostgres is not reachable. Run "docker compose up -d" in the repository '
+                                  'folder and wait a few seconds.')
+    return {'ok': error is None, 'results': results, 'error': error}
 
 
 def is_unreachable(message: str) -> bool:
@@ -170,26 +170,26 @@ def is_unreachable(message: str) -> bool:
 
 def compare_results(mine: dict, expected: dict, ordered: bool) -> dict:
     def last_table(r):
-        tables = [x for x in r.get('resultados', []) if 'colunas' in x]
+        tables = [x for x in r.get('results', []) if 'columns' in x]
         return tables[-1] if tables else None
     a, b = last_table(mine), last_table(expected)
     if b is None:
-        return {'ok': False, 'motivo': 'a consulta de referência não devolveu resultado (avise o autor)'}
+        return {'ok': False, 'reason': 'the reference query returned no result (please tell the author)'}
     if a is None:
-        return {'ok': False, 'motivo': 'sua consulta não devolveu nenhuma tabela'}
-    if len(a['colunas']) != len(b['colunas']):
-        return {'ok': False, 'motivo': f"esperava {len(b['colunas'])} coluna(s) ({', '.join(b['colunas'])}), "
-                                        f"veio {len(a['colunas'])}"}
-    if len(a['linhas']) != len(b['linhas']):
-        return {'ok': False, 'motivo': f"esperava {len(b['linhas'])} linha(s), veio {len(a['linhas'])}"}
-    la, lb = a['linhas'], b['linhas']
+        return {'ok': False, 'reason': 'your query did not return any table'}
+    if len(a['columns']) != len(b['columns']):
+        return {'ok': False, 'reason': f"expected {len(b['columns'])} column(s) ({', '.join(b['columns'])}), "
+                                        f"got {len(a['columns'])}"}
+    if len(a['rows']) != len(b['rows']):
+        return {'ok': False, 'reason': f"expected {len(b['rows'])} row(s), got {len(a['rows'])}"}
+    la, lb = a['rows'], b['rows']
     if not ordered:
         key = lambda row: [('' if v is None else v) for v in row]
         la, lb = sorted(la, key=key), sorted(lb, key=key)
     for i, (x, y) in enumerate(zip(la, lb)):
         if x != y:
-            return {'ok': False, 'motivo': f'a linha {i + 1} difere: esperava {y}, veio {x}'
-                                           + (' (a ordem importa neste desafio)' if ordered else '')}
+            return {'ok': False, 'reason': f'row {i + 1} differs: expected {y}, got {x}'
+                                           + (' (order matters in this challenge)' if ordered else '')}
     return {'ok': True}
 
 
@@ -244,11 +244,11 @@ class PostgresRunner(Runner):
             parts.append('BEGIN;')
         for k, (_, text) in enumerate(statements):
             if BLOCKED_META.match(text):
-                return {'ok': False, 'resultados': [], 'erro': {'comando': k, 'mensagem':
-                        f'O meta-comando {text.split()[0]} não é permitido no laboratório.'}}
+                return {'ok': False, 'results': [], 'error': {'statement': k, 'message':
+                        f'The meta-command {text.split()[0]} is not allowed in the lab.'}}
             parts.append(f'\\echo {MARKER.format(k)}')
             parts.append(text)
-        parts.append(f'\\echo {MARKER.format("fim")}')
+        parts.append(f'\\echo {MARKER.format("end")}')
         if not persist:
             parts.append('ROLLBACK;')
         args = self.base + ['-X', '-v', 'ON_ERROR_STOP=1', '--csv', '-P', f'null={NULL_MARK}']
@@ -256,10 +256,10 @@ class PostgresRunner(Runner):
             proc = subprocess.run(args, input='\n'.join(parts) + '\n', capture_output=True, text=True,
                                   encoding='utf-8', timeout=TIMEOUT)
         except FileNotFoundError:
-            return {'ok': False, 'resultados': [], 'erro': {'mensagem': f'Não encontrei o comando "{args[0]}". '
+            return {'ok': False, 'results': [], 'error': {'message': f'Could not find the command "{args[0]}". '
                                                                        + self._hint()}}
         except subprocess.TimeoutExpired:
-            return {'ok': False, 'resultados': [], 'erro': {'mensagem': 'A execução passou do tempo limite.'}}
+            return {'ok': False, 'results': [], 'error': {'message': 'The run exceeded the time limit.'}}
         return parse_output(proc.stdout, proc.stderr, len(statements))
 
     def load_script_text(self, text: str) -> tuple[bool, str]:
@@ -274,9 +274,9 @@ class PostgresRunner(Runner):
 
     def query_value(self, sql: str) -> tuple[str | None, str | None]:
         res = self.run(split_statements(sql))
-        if res['ok'] and res['resultados'] and res['resultados'][-1].get('linhas'):
-            return res['resultados'][-1]['linhas'][0][0], None
-        return None, (res.get('erro') or {}).get('mensagem', 'sem resposta')
+        if res['ok'] and res['results'] and res['results'][-1].get('rows'):
+            return res['results'][-1]['rows'][0][0], None
+        return None, (res.get('error') or {}).get('message', 'no response')
 
     # ---- datasets
     def ensure_datasets(self) -> str | None:
@@ -297,7 +297,7 @@ class PostgresRunner(Runner):
                 ok, err = self.load_script_text(script)
                 if not ok:
                     print(f'  [{self.trail.id}] failed to load dataset "{name}": {err[:400]}')
-                    return f'falha ao carregar o dataset "{name}": {err[:400]}'
+                    return f'failed to load the dataset "{name}": {err[:400]}'
                 print(f'  [{self.trail.id}] dataset "{name}" loaded from {", ".join(ds["scripts"])}')
             self._datasets_ready = True
         return None
@@ -323,34 +323,34 @@ class PostgresRunner(Runner):
 
     def handle(self, method, action, payload):
         if method == 'GET' and action == 'status':
-            version, err = self.query_value("SELECT split_part(version(), ' ', 2) AS versao;")
+            version, err = self.query_value("SELECT split_part(version(), ' ', 2) AS version;")
             if version is not None:
                 err = self.ensure_datasets()
-            return HTTPStatus.OK, {'postgres': version if not err else None, 'erro': err}
-        if method == 'GET' and action == 'esquema':
+            return HTTPStatus.OK, {'postgres': version if not err else None, 'error': err}
+        if method == 'GET' and action == 'schema':
             return HTTPStatus.OK, self.schema()
-        if method == 'POST' and action == 'executar':
+        if method == 'POST' and action == 'run':
             return HTTPStatus.OK, self.execute(payload or {})
         return super().handle(method, action, payload)
 
     def execute(self, request: dict) -> dict:
         statements = split_statements(request.get('sql', ''))
         if not statements:
-            return {'ok': True, 'resultados': [], 'erro': None, 'comandos': []}
-        if request.get('explicar'):
+            return {'ok': True, 'results': [], 'error': None, 'statements': []}
+        if request.get('explain'):
             line, text = statements[-1]
             if not re.match(r'^(SELECT|WITH|VALUES|TABLE)\b', text, re.I):
-                return {'ok': False, 'resultados': [], 'comandos': [], 'erro': {'mensagem':
-                        'O plano de execução é mostrado para o último comando, que deve ser uma consulta (SELECT ou WITH).'}}
+                return {'ok': False, 'results': [], 'statements': [], 'error': {'message':
+                        'The query plan is shown for the last statement, which must be a query (SELECT or WITH).'}}
             statements[-1] = (line, 'EXPLAIN (ANALYZE, BUFFERS) ' + text)
-        res = self.run(statements, persist=bool(request.get('persistir')))
-        res['comandos'] = [{'linha': l, 'texto': t[:60]} for l, t in statements]
-        err = res.get('erro')
-        if err and 'comando' in err and err['comando'] < len(statements):
-            err['linha'] = statements[err['comando']][0] + err.get('linha_relativa', 1) - 1
-        if request.get('esperado') and res['ok']:
-            expected = self.run(split_statements(request['esperado']))
-            res['verificacao'] = compare_results(res, expected, bool(request.get('ordenado')))
+        res = self.run(statements, persist=bool(request.get('persist')))
+        res['statements'] = [{'line': l, 'text': t[:60]} for l, t in statements]
+        err = res.get('error')
+        if err and 'statement' in err and err['statement'] < len(statements):
+            err['line'] = statements[err['statement']][0] + err.get('relative_line', 1) - 1
+        if request.get('expected') and res['ok']:
+            expected = self.run(split_statements(request['expected']))
+            res['check'] = compare_results(res, expected, bool(request.get('ordered')))
         return res
 
     def schema(self) -> dict:
@@ -365,7 +365,7 @@ class PostgresRunner(Runner):
                            c.table_name, c.ordinal_position;"""
         res = self.run(split_statements(sql))
         tables: dict[str, list] = {}
-        if res['ok'] and res['resultados'] and 'linhas' in res['resultados'][-1]:
-            for table, column, kind in res['resultados'][-1]['linhas']:
+        if res['ok'] and res['results'] and 'rows' in res['results'][-1]:
+            for table, column, kind in res['results'][-1]['rows']:
                 tables.setdefault(table, []).append([column, kind])
-        return {'ok': res['ok'], 'tabelas': tables, 'erro': res.get('erro')}
+        return {'ok': res['ok'], 'tables': tables, 'error': res.get('error')}

@@ -38,9 +38,9 @@ WORK = ROOT / 'i18n-work'             # git-ignored: chunks for translators
 CHUNK = 34_000                        # characters of source text per chunk
 
 CONFIG = {
-    'python': {'kind': 'dados', 'source': 'pt', 'targets': ['en', 'es']},
+    'python': {'kind': 'book', 'source': 'pt', 'targets': ['en', 'es']},
     # chapter "8. Case study: creator marketplace" is written in English and stays English everywhere
-    'sql': {'kind': 'dados', 'source': 'pt', 'targets': ['en', 'es'], 'keep_chapters': ('8.',)},
+    'sql': {'kind': 'book', 'source': 'pt', 'targets': ['en', 'es'], 'keep_chapters': ('8.',)},
     'data-architecture': {'kind': 'chapters', 'source': 'en', 'targets': ['pt', 'es']},
 }
 
@@ -50,17 +50,17 @@ def _item(obj, k):
     return (lambda: obj[k]), (lambda v: obj.__setitem__(k, v))
 
 
-def dados_fields(d: dict, keep_chapters=()):
-    """(key, get, set) for every prose field of a DADOS document (python and sql trails)."""
-    yield ('subtitulo', *_item(d, 'subtitulo'))
-    for ci, c in enumerate(d['capitulos']):
-        if keep_chapters and c['titulo'].startswith(keep_chapters):
+def book_fields(d: dict, keep_chapters=()):
+    """(key, get, set) for every prose field of a book document (python and sql trails)."""
+    yield ('subtitle', *_item(d, 'subtitle'))
+    for ci, c in enumerate(d['chapters']):
+        if keep_chapters and c['title'].startswith(keep_chapters):
             continue
         p = f'c{ci}'
-        yield (f'{p}.titulo', *_item(c, 'titulo'))
-        for si, s in enumerate(c.get('secoes', [])):
-            yield (f'{p}.s{si}', *_item(s, 'titulo'))
-        for bi, b in enumerate(c['blocos']):
+        yield (f'{p}.title', *_item(c, 'title'))
+        for si, s in enumerate(c.get('sections', [])):
+            yield (f'{p}.s{si}', *_item(s, 'title'))
+        for bi, b in enumerate(c['blocks']):
             q, t = f'{p}.b{bi}', b['t']
             if t in ('h2', 'h3', 'p', 'bullet', 'note'):
                 yield (f'{q}.text', *_item(b, 'text'))
@@ -69,12 +69,12 @@ def dados_fields(d: dict, keep_chapters=()):
                     for k in range(len(row)):
                         yield (f'{q}.r{ri}.{k}', *_item(row, k))
             elif t == 'ex':
-                yield (f'{q}.titulo', *_item(b, 'titulo'))
+                yield (f'{q}.title', *_item(b, 'title'))
                 for k in range(len(b.get('callouts') or [])):
                     yield (f'{q}.co{k}', *_item(b['callouts'], k))
-            elif t == 'desafio':
-                yield (f'{q}.titulo', *_item(b, 'titulo'))
-                yield (f'{q}.enunciado', *_item(b, 'enunciado'))
+            elif t == 'challenge':
+                yield (f'{q}.title', *_item(b, 'title'))
+                yield (f'{q}.prompt', *_item(b, 'prompt'))
 
 
 def manifest_fields(m: dict):
@@ -120,13 +120,13 @@ class Doc:
         self.data = None
 
     def path(self) -> Path:
-        return self.folder / (f'{self.lang}.json' if self.cfg['kind'] == 'dados' else self.lang)
+        return self.folder / (f'{self.lang}.json' if self.cfg['kind'] == 'book' else self.lang)
 
     def exists(self) -> bool:
         return self.path().exists()
 
     def load(self) -> 'Doc':
-        if self.cfg['kind'] == 'dados':
+        if self.cfg['kind'] == 'book':
             self.data = json.loads(self.path().read_text(encoding='utf-8'))
         else:
             folder = self.path()
@@ -140,8 +140,8 @@ class Doc:
         return self
 
     def fields(self):
-        if self.cfg['kind'] == 'dados':
-            yield from dados_fields(self.data, self.cfg.get('keep_chapters', ()))
+        if self.cfg['kind'] == 'book':
+            yield from book_fields(self.data, self.cfg.get('keep_chapters', ()))
         else:
             yield from manifest_fields(self.data['manifest'])
             for ch in self.data['chapters'].values():
@@ -159,7 +159,7 @@ class Doc:
 
     def rendered(self) -> dict:
         """{path: text} exactly as `write` would store it."""
-        if self.cfg['kind'] == 'dados':
+        if self.cfg['kind'] == 'book':
             return {self.path(): json.dumps(self.data, ensure_ascii=False)}
         out = {self.path() / 'manifest.json': json.dumps(self.data['manifest'], ensure_ascii=False, indent=2) + '\n'}
         for name, ch in self.data['chapters'].items():

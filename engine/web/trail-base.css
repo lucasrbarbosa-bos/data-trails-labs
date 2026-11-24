@@ -24,120 +24,476 @@
  * The page toggles aside.open to show the sidebar on narrow screens.
  */
 @layer trail-base {
+  /* ---------------------------------------------------------------- 1. base */
+  :where(.tl) {
+    --tl-side-w: 320px;
+  }
+  :where(.tl, .tl *) {
+    box-sizing: border-box;
+  }
+  :where(.tl),
+  :where(.tl) body {
+    height: 100%;
+  }
+  :where(.tl) body {
+    margin: 0;
+    background: var(--th-main, #16161a);
+    color: var(--th-ink, #ececef);
+    font-family: var(--th-mono, ui-monospace, monospace);
+    font-size: 14.5px;
+    line-height: 1.75;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  :where(.tl) button,
+  :where(.tl) input {
+    font-family: inherit;
+  }
+  :where(.tl) a {
+    color: var(--th-link);
+  }
+  :where(.tl) ::selection {
+    background: var(--th-select);
+  }
+  :where(.tl) :focus-visible {
+    outline: 2px solid var(--th-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 
-/* ---------------------------------------------------------------- 1. base */
-:where(.tl) { --tl-side-w: 320px; }
-:where(.tl, .tl *) { box-sizing: border-box; }
-:where(.tl), :where(.tl) body { height: 100%; }
-:where(.tl) body { margin: 0; background: var(--th-main, #16161a); color: var(--th-ink, #ececef); font-family: var(--th-mono, ui-monospace, monospace);
-  font-size: 14.5px; line-height: 1.75; display: flex; flex-direction: column; overflow: hidden; }
-:where(.tl) button, :where(.tl) input { font-family: inherit; }
-:where(.tl) a { color: var(--th-link); }
-:where(.tl) ::selection { background: var(--th-select); }
-:where(.tl) :focus-visible { outline: 2px solid var(--th-accent); outline-offset: 2px; border-radius: 4px; }
+  /* ---------------------------------------------------------------- 2. layout */
+  :where(.tl) .app {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: var(--tl-side-w) 1fr;
+  }
+  :where(.tl) aside {
+    background: var(--th-side);
+    border-right: 1px solid var(--th-line);
+    overflow-y: auto;
+    padding: 20px 16px 40px;
+  }
+  :where(.tl) .side-head {
+    padding: 0 6px;
+  }
+  :where(.tl) aside h1 {
+    font-size: 18px;
+    line-height: 1.3;
+    margin: 6px 0 4px;
+    letter-spacing: -0.01em;
+  }
+  :where(.tl) aside h1 a {
+    color: var(--th-ink);
+    text-decoration: none;
+  }
+  :where(.tl) aside .sub {
+    color: var(--th-ink-2);
+    font-size: 12px;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  :where(.tl) main {
+    overflow-y: auto;
+    min-height: 0;
+    background: var(--th-main);
+  }
+  :where(.tl) .content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 36px 36px 120px;
+  }
+  :where(.tl) .mobile-top {
+    display: none;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--th-side);
+    border-bottom: 1px solid var(--th-line);
+    padding: 8px 14px;
+    align-items: center;
+    gap: 10px;
+  }
+  :where(.tl) .mobile-top button {
+    background: var(--th-surface);
+    border: 1px solid var(--th-line);
+    color: var(--th-ink);
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  :where(.tl) .mobile-top span {
+    font-weight: 700;
+    font-size: 13px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 
-/* ---------------------------------------------------------------- 2. layout */
-:where(.tl) .app { flex: 1; min-height: 0; display: grid; grid-template-columns: var(--tl-side-w) 1fr; }
-:where(.tl) aside { background: var(--th-side); border-right: 1px solid var(--th-line); overflow-y: auto; padding: 20px 16px 40px; }
-:where(.tl) .side-head { padding: 0 6px; }
-:where(.tl) aside h1 { font-size: 18px; line-height: 1.3; margin: 6px 0 4px; letter-spacing: -0.01em; }
-:where(.tl) aside h1 a { color: var(--th-ink); text-decoration: none; }
-:where(.tl) aside .sub { color: var(--th-ink-2); font-size: 12px; margin-bottom: 14px; line-height: 1.5; }
-:where(.tl) main { overflow-y: auto; min-height: 0; background: var(--th-main); }
-:where(.tl) .content { max-width: 900px; margin: 0 auto; padding: 36px 36px 120px; }
-:where(.tl) .mobile-top { display: none; position: sticky; top: 0; z-index: 5; background: var(--th-side); border-bottom: 1px solid var(--th-line); padding: 8px 14px; align-items: center; gap: 10px; }
-:where(.tl) .mobile-top button { background: var(--th-surface); border: 1px solid var(--th-line); color: var(--th-ink); border-radius: 6px; padding: 3px 10px; font-size: 14px; cursor: pointer; }
-:where(.tl) .mobile-top span { font-weight: 700; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* ---------------------------------------------------------------- 3. prose */
+  :where(.tl) h2.title {
+    font-size: 30px;
+    line-height: 1.2;
+    margin: 8px 0 10px;
+    letter-spacing: -0.02em;
+    font-weight: 800;
+  }
+  :where(.tl) .summary {
+    color: var(--th-ink-2);
+    margin: 0 0 8px;
+  }
+  :where(.tl) .meta {
+    font-size: 12px;
+    color: var(--th-ink-3);
+    margin-bottom: 24px;
+  }
+  :where(.tl) .meta .done {
+    color: var(--th-ok);
+    font-weight: 700;
+  }
+  :where(.tl) h3.sec {
+    font-size: 20px;
+    line-height: 1.35;
+    margin: 46px 0 14px;
+    scroll-margin-top: 16px;
+    letter-spacing: -0.01em;
+  }
+  :where(.tl) h3.sec::before {
+    content: "## ";
+    color: var(--th-ink-3);
+    font-weight: 400;
+  }
+  :where(.tl) h4.sub {
+    font-size: 16px;
+    margin: 28px 0 10px;
+  }
+  :where(.tl) h4.sub::before {
+    content: "### ";
+    color: var(--th-ink-3);
+    font-weight: 400;
+  }
+  :where(.tl) p {
+    margin: 0 0 16px;
+  }
+  :where(.tl) ul.list,
+  :where(.tl) ol.list {
+    margin: 0 0 16px;
+    padding-left: 24px;
+  }
+  :where(.tl) ul.list li,
+  :where(.tl) ol.list li {
+    margin-bottom: 6px;
+  }
+  :where(.tl) ul.list li::marker {
+    color: var(--th-ink-3);
+    content: "› ";
+  }
+  :where(.tl) code {
+    font-family: var(--th-mono);
+    font-size: .92em;
+    background: var(--th-surface-2);
+    color: var(--th-ink);
+    padding: 1px 5px;
+    border-radius: 4px;
+    overflow-wrap: anywhere;
+  }
+  :where(.tl) pre code {
+    overflow-wrap: normal;
+  }
+  :where(.tl) b {
+    color: var(--th-ink);
+  }
+  :where(.tl) .table {
+    overflow-x: auto;
+    margin: 0 0 22px;
+    border: 1px solid var(--th-line);
+    border-radius: 8px;
+  }
+  :where(.tl) table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  :where(.tl) th,
+  :where(.tl) td {
+    border-bottom: 1px solid var(--th-line);
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  :where(.tl) td + td,
+  :where(.tl) th + th {
+    border-left: 1px solid var(--th-line);
+  }
+  :where(.tl) tr:last-child td {
+    border-bottom: 0;
+  }
+  :where(.tl) th {
+    background: var(--th-surface);
+    font-weight: 700;
+    color: var(--th-ink);
+  }
+  :where(.tl) tbody tr:nth-child(even) td {
+    background: color-mix(in srgb, var(--th-surface) 45%, transparent);
+  }
 
-/* ---------------------------------------------------------------- 3. prose */
-:where(.tl) h2.title { font-size: 30px; line-height: 1.2; margin: 8px 0 10px; letter-spacing: -0.02em; font-weight: 800; }
-:where(.tl) .summary { color: var(--th-ink-2); margin: 0 0 8px; }
-:where(.tl) .meta { font-size: 12px; color: var(--th-ink-3); margin-bottom: 24px; }
-:where(.tl) .meta .done { color: var(--th-ok); font-weight: 700; }
-:where(.tl) h3.sec { font-size: 20px; line-height: 1.35; margin: 46px 0 14px; scroll-margin-top: 16px; letter-spacing: -0.01em; }
-:where(.tl) h3.sec::before { content: "## "; color: var(--th-ink-3); font-weight: 400; }
-:where(.tl) h4.sub { font-size: 16px; margin: 28px 0 10px; }
-:where(.tl) h4.sub::before { content: "### "; color: var(--th-ink-3); font-weight: 400; }
-:where(.tl) p { margin: 0 0 16px; }
-:where(.tl) ul.list, :where(.tl) ol.list { margin: 0 0 16px; padding-left: 24px; }
-:where(.tl) ul.list li, :where(.tl) ol.list li { margin-bottom: 6px; }
-:where(.tl) ul.list li::marker { color: var(--th-ink-3); content: "› "; }
-:where(.tl) code { font-family: var(--th-mono); font-size: .92em; background: var(--th-surface-2); color: var(--th-ink); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
-:where(.tl) pre code { overflow-wrap: normal; }
-:where(.tl) b { color: var(--th-ink); }
-:where(.tl) .table { overflow-x: auto; margin: 0 0 22px; border: 1px solid var(--th-line); border-radius: 8px; }
-:where(.tl) table { border-collapse: collapse; width: 100%; font-size: 13px; line-height: 1.55; }
-:where(.tl) th, :where(.tl) td { border-bottom: 1px solid var(--th-line); padding: 8px 12px; text-align: left; vertical-align: top; }
-:where(.tl) td + td, :where(.tl) th + th { border-left: 1px solid var(--th-line); }
-:where(.tl) tr:last-child td { border-bottom: 0; }
-:where(.tl) th { background: var(--th-surface); font-weight: 700; color: var(--th-ink); }
-:where(.tl) tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--th-surface) 45%, transparent); }
+  /* ---------------------------------------------------------------- 4. components */
+  /* small uppercase line above a title; .cmd is a "$ command" in the engine colour */
+  :where(.tl) .eyebrow {
+    font: 600 11px/1.3 var(--th-mono);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--th-ink-3);
+  }
+  :where(.tl) .eyebrow .cmd {
+    color: var(--th-none);
+    text-transform: none;
+    letter-spacing: 0;
+  }
 
-/* ---------------------------------------------------------------- 4. components */
-/* small uppercase line above a title; .cmd is a "$ command" in the engine colour */
-:where(.tl) .eyebrow { font: 600 11px/1.3 var(--th-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--th-ink-3); }
-:where(.tl) .eyebrow .cmd { color: var(--th-none); text-transform: none; letter-spacing: 0; }
+  /* progress: <div class="progress"><div class="bar"><div style="width: N%"></div></div><small>…</small></div> */
+  :where(.tl) .progress {
+    margin: 4px 6px 14px;
+  }
+  :where(.tl) .bar {
+    height: 3px;
+    background: var(--th-line);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  :where(.tl) .bar > div {
+    height: 100%;
+    background: var(--th-ok);
+    width: 0;
+    transition: width .4s;
+  }
+  :where(.tl) .progress small {
+    display: block;
+    color: var(--th-ink-3);
+    font-size: 11.5px;
+    margin-top: 6px;
+  }
 
-/* progress: <div class="progress"><div class="bar"><div style="width: N%"></div></div><small>…</small></div> */
-:where(.tl) .progress { margin: 4px 6px 14px; }
-:where(.tl) .bar { height: 3px; background: var(--th-line); border-radius: 2px; overflow: hidden; }
-:where(.tl) .bar > div { height: 100%; background: var(--th-ok); width: 0; transition: width .4s; }
-:where(.tl) .progress small { display: block; color: var(--th-ink-3); font-size: 11.5px; margin-top: 6px; }
+  /* chapter nav: .part headings, links with .n (number), .t (title), .ck (done mark); a.active is the open chapter */
+  :where(.tl) nav .part {
+    font: 600 10.5px/1.3 var(--th-mono);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--th-ink-3);
+    margin: 18px 8px 6px;
+    display: flex;
+    gap: 8px;
+  }
+  :where(.tl) nav .part b {
+    color: var(--th-none);
+    font-weight: 600;
+  }
+  :where(.tl) nav a {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    color: var(--th-ink-2);
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    line-height: 1.45;
+    border-left: 2px solid transparent;
+  }
+  :where(.tl) nav a:hover {
+    background: var(--th-surface);
+    color: var(--th-ink);
+  }
+  :where(.tl) nav a.active {
+    background: var(--th-accent-bg);
+    color: var(--th-ink);
+    border-left-color: var(--th-accent);
+  }
+  :where(.tl) nav a .n {
+    color: var(--th-ink-3);
+    font-size: 11px;
+    min-width: 20px;
+    text-align: right;
+  }
+  :where(.tl) nav a.active .n {
+    color: var(--th-accent);
+  }
+  :where(.tl) nav a .t {
+    flex: 1;
+  }
+  :where(.tl) nav a .ck {
+    color: var(--th-ok);
+    font-size: 12px;
+  }
 
-/* chapter nav: .part headings, links with .n (number), .t (title), .ck (done mark); a.active is the open chapter */
-:where(.tl) nav .part { font: 600 10.5px/1.3 var(--th-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--th-ink-3); margin: 18px 8px 6px; display: flex; gap: 8px; }
-:where(.tl) nav .part b { color: var(--th-none); font-weight: 600; }
-:where(.tl) nav a { display: flex; gap: 8px; align-items: baseline; color: var(--th-ink-2); text-decoration: none; padding: 4px 8px; border-radius: 6px;
-  font-size: 12.5px; line-height: 1.45; border-left: 2px solid transparent; }
-:where(.tl) nav a:hover { background: var(--th-surface); color: var(--th-ink); }
-:where(.tl) nav a.active { background: var(--th-accent-bg); color: var(--th-ink); border-left-color: var(--th-accent); }
-:where(.tl) nav a .n { color: var(--th-ink-3); font-size: 11px; min-width: 20px; text-align: right; }
-:where(.tl) nav a.active .n { color: var(--th-accent); }
-:where(.tl) nav a .t { flex: 1; }
-:where(.tl) nav a .ck { color: var(--th-ok); font-size: 12px; }
+  /* call-outs: <div class="callout note|tip|warn|pitfall"><div><div class="lab">…</div><p>…</p></div></div> */
+  :where(.tl) .callout {
+    display: grid;
+    grid-template-columns: 3px 1fr;
+    gap: 14px;
+    margin: 22px 0;
+    padding: 12px 16px 12px 0;
+    background: var(--th-surface);
+    border-radius: 0 8px 8px 0;
+  }
+  :where(.tl) .callout::before {
+    content: "";
+    background: var(--c);
+  }
+  :where(.tl) .callout .lab {
+    font: 700 11px/1.2 var(--th-mono);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--c);
+    margin-bottom: 6px;
+  }
+  :where(.tl) .callout .lab::before {
+    content: "// ";
+    opacity: .7;
+  }
+  :where(.tl) .callout.note {
+    --c: var(--th-info);
+  }
+  :where(.tl) .callout.tip {
+    --c: var(--th-ok);
+  }
+  :where(.tl) .callout.warn {
+    --c: var(--th-warn);
+  }
+  :where(.tl) .callout.pitfall {
+    --c: var(--th-err);
+  }
+  :where(.tl) .callout p:last-child {
+    margin-bottom: 0;
+  }
 
-/* call-outs: <div class="callout note|tip|warn|pitfall"><div><div class="lab">…</div><p>…</p></div></div> */
-:where(.tl) .callout { display: grid; grid-template-columns: 3px 1fr; gap: 14px; margin: 22px 0; padding: 12px 16px 12px 0; background: var(--th-surface); border-radius: 0 8px 8px 0; }
-:where(.tl) .callout::before { content: ""; background: var(--c); }
-:where(.tl) .callout .lab { font: 700 11px/1.2 var(--th-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--c); margin-bottom: 6px; }
-:where(.tl) .callout .lab::before { content: "// "; opacity: .7; }
-:where(.tl) .callout.note { --c: var(--th-info); }
-:where(.tl) .callout.tip { --c: var(--th-ok); }
-:where(.tl) .callout.warn { --c: var(--th-warn); }
-:where(.tl) .callout.pitfall { --c: var(--th-err); }
-:where(.tl) .callout p:last-child { margin-bottom: 0; }
+  /* previous / next chapter: <div class="pager"><a class="prev">…</a><a class="next">…</a></div> */
+  :where(.tl) .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 48px;
+  }
+  :where(.tl) .pager a {
+    text-decoration: none;
+    font-size: 13px;
+    color: var(--th-ink);
+    border: 1px solid var(--th-line);
+    border-radius: 8px;
+    padding: 12px 14px;
+    background: var(--th-surface);
+  }
+  :where(.tl) .pager a:hover {
+    border-color: var(--th-line-2);
+    background: var(--th-surface-2);
+  }
+  :where(.tl) .pager a small {
+    display: block;
+    color: var(--th-ink-3);
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+  :where(.tl) .pager a.next {
+    text-align: right;
+    grid-column: 2;
+  }
 
-/* previous / next chapter: <div class="pager"><a class="prev">…</a><a class="next">…</a></div> */
-:where(.tl) .pager { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 48px; }
-:where(.tl) .pager a { text-decoration: none; font-size: 13px; color: var(--th-ink); border: 1px solid var(--th-line); border-radius: 8px; padding: 12px 14px; background: var(--th-surface); }
-:where(.tl) .pager a:hover { border-color: var(--th-line-2); background: var(--th-surface-2); }
-:where(.tl) .pager a small { display: block; color: var(--th-ink-3); font-size: 11px; margin-bottom: 2px; }
-:where(.tl) .pager a.next { text-align: right; grid-column: 2; }
+  /* trail home: "$ trail --status" prompt, continue button, ── label ── divider */
+  :where(.tl) .prompt {
+    color: var(--th-ink-3);
+    font-size: 12.5px;
+    margin: 6px 0 22px;
+  }
+  :where(.tl) .prompt em {
+    color: var(--th-ok);
+    font-style: normal;
+  }
+  :where(.tl) .continue {
+    display: inline-block;
+    background: var(--th-accent);
+    color: var(--th-on-accent);
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 13px;
+    margin: 6px 0 30px;
+  }
+  :where(.tl) .label {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 8px 0 18px;
+    color: var(--th-ink-2);
+    font-size: 12px;
+  }
+  :where(.tl) .label::before,
+  :where(.tl) .label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--th-line);
+  }
+  :where(.tl) .label span {
+    border: 1px solid var(--th-line);
+    border-radius: 999px;
+    padding: 3px 12px;
+    background: var(--th-main);
+  }
 
-/* trail home: "$ trail --status" prompt, continue button, ── label ── divider */
-:where(.tl) .prompt { color: var(--th-ink-3); font-size: 12.5px; margin: 6px 0 22px; }
-:where(.tl) .prompt em { color: var(--th-ok); font-style: normal; }
-:where(.tl) .continue { display: inline-block; background: var(--th-accent); color: var(--th-on-accent); text-decoration: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; font-size: 13px; margin: 6px 0 30px; }
-:where(.tl) .label { display: flex; align-items: center; gap: 14px; margin: 8px 0 18px; color: var(--th-ink-2); font-size: 12px; }
-:where(.tl) .label::before, :where(.tl) .label::after { content: ""; flex: 1; height: 1px; background: var(--th-line); }
-:where(.tl) .label span { border: 1px solid var(--th-line); border-radius: 999px; padding: 3px 12px; background: var(--th-main); }
+  /* status lines */
+  :where(.tl) .msg {
+    background: var(--th-warn-bg);
+    color: var(--th-ink);
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+  :where(.tl) .loading {
+    color: var(--th-ink-3);
+  }
+  :where(.tl) .loading::before {
+    content: "$ ";
+  }
 
-/* status lines */
-:where(.tl) .msg { background: var(--th-warn-bg); color: var(--th-ink); border-radius: 8px; padding: 12px 16px; }
-:where(.tl) .loading { color: var(--th-ink-3); }
-:where(.tl) .loading::before { content: "$ "; }
-
-/* ---------------------------------------------------------------- narrow screens */
-@media (max-width: 900px) {
-  :where(.tl) .app { grid-template-columns: 1fr; }
-  :where(.tl) aside { position: fixed; top: var(--th-bar-h, 48px); bottom: 0; left: 0; width: min(330px, 86vw); z-index: 20; transform: translateX(-102%); transition: transform .25s; box-shadow: 4px 0 24px rgba(0,0,0,.3); }
-  :where(.tl) aside.open { transform: none; }
-  :where(.tl) .mobile-top { display: flex; }
-  :where(.tl) .content { padding: 22px 16px 90px; }
-  :where(.tl) h2.title { font-size: 24px; }
-  :where(.tl) h3.sec { font-size: 18px; }
-  :where(.tl) .pager { grid-template-columns: 1fr; }
-  :where(.tl) .pager a.next { grid-column: 1; }
-}
-
+  /* ---------------------------------------------------------------- narrow screens */
+  @media (max-width: 900px) {
+    :where(.tl) .app {
+      grid-template-columns: 1fr;
+    }
+    :where(.tl) aside {
+      position: fixed;
+      top: var(--th-bar-h, 48px);
+      bottom: 0;
+      left: 0;
+      width: min(330px, 86vw);
+      z-index: 20;
+      transform: translateX(-102%);
+      transition: transform .25s;
+      box-shadow: 4px 0 24px rgba(0,0,0,.3);
+    }
+    :where(.tl) aside.open {
+      transform: none;
+    }
+    :where(.tl) .mobile-top {
+      display: flex;
+    }
+    :where(.tl) .content {
+      padding: 22px 16px 90px;
+    }
+    :where(.tl) h2.title {
+      font-size: 24px;
+    }
+    :where(.tl) h3.sec {
+      font-size: 18px;
+    }
+    :where(.tl) .pager {
+      grid-template-columns: 1fr;
+    }
+    :where(.tl) .pager a.next {
+      grid-column: 1;
+    }
+  }
 }

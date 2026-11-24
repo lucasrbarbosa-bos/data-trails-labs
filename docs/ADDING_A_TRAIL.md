@@ -101,12 +101,14 @@ the end of its head element: the shared stylesheet `/hub/theme.css`, the shared 
 `/hub/trail-base.css`, `window.LAB_TOKEN`, `window.TRAIL`, and the top-bar script. The page kit
 (layout, prose, chapter nav, progress bar, call-outs, pager) applies only to pages that opt in with
 `<html class="tl">`, and its rules sit in a CSS layer, so the page's own `<style>` always wins; the
-Data Architecture trail uses it, and the file's header lists the markup it expects. The top bar is added as the first element of `<body>`
-(48px, `var(--th-bar-h)`): brand, "All trails", the trail switcher, the theme picker
-(dark, light, dracula) and the EN | ES | PT language toggle. A page follows five rules:
+Data Architecture trail uses it, and the file's header lists the markup it expects.
 
-1. **Call the engine with relative URLs**: `fetch('api/executar')`, never `fetch('/api/executar')`.
-   The page is served at `/t/<id>/`, so relative URLs reach `/t/<id>/api/executar`.
+The top bar is added as the first element of `<body>` (48px, `var(--th-bar-h)`): brand,
+"All trails", the trail switcher, the theme picker (dark, light, dracula) and the EN | ES | PT
+language toggle. A page follows five rules:
+
+1. **Call the engine with relative URLs**: `fetch('api/run')`, never `fetch('/api/run')`.
+   The page is served at `/t/<id>/`, so relative URLs reach `/t/<id>/api/run`.
 2. **Send the token** on every API call: header `X-Lab-Token: window.LAB_TOKEN`. Without it the
    hub answers 403.
 3. **Report progress** whenever it changes: `window.TRAIL.progress(done, total)`. The home page
@@ -135,29 +137,31 @@ Dotfiles are not served.
 
 ## Engine APIs
 
-All paths are relative to the trail page. Field names are in Portuguese because the first two
-trails were built with them; they are the stable contract.
+All paths are relative to the trail page. Field names are the stable contract. They were renamed
+from Portuguese to English (`api/executar` became `api/run`, `codigo` became `code`, and so on);
+a page written for the old names must be updated.
 
 ### `python`
 
 Runs the code in a new process of the Python that runs the hub (3.15 in Docker), with the trail's
 workspace folder as the current directory and a 15 s limit.
 
-`POST api/executar`
+`POST api/run`
 
 | Request field | Meaning |
 |---|---|
-| `codigo` | the code to run |
-| `verificacao` | optional: code run afterwards in the same namespace, typically `assert`s |
-| `entradas` | optional: list of strings returned by successive `input()` calls |
+| `code` | the code to run |
+| `check` | optional: code run afterwards in the same namespace, typically `assert`s |
+| `inputs` | optional: list of strings returned by successive `input()` calls |
 | `argv` | optional: list placed in `sys.argv[1:]` |
-| `depurar` | optional: `true` records every line for the step debugger |
+| `debug` | optional: `true` records every line for the step debugger |
 
-Response: `status` (`ok`, `erro`, `falhou` when a check failed, `saida` on non-zero exit),
-`assercao` (the failed assertion message), `saida` (list of `[stream, text]`, where stream is
-`out`, `err` or `tb`), `vars` (`[name, type, repr]`), `passos` (debugger steps), `cortado`.
+Response: `status` (`ok`, `error`, `failed` when a check failed, `exit` on non-zero exit),
+`assertion` (the failed assertion message), `output` (list of `[stream, text]`, where stream is
+`out`, `err` or `tb`), `vars` (`[name, type, repr]`), `steps` (debugger steps: `line`, `event`,
+`stack`, `vars`, `output`, and `returned`, `exception` or `globals` when they apply), `truncated`.
 
-`GET api/status` returns `{versao, executavel, pasta}`.
+`GET api/status` returns `{version, executable, folder}`.
 
 ### `postgres`
 
@@ -165,20 +169,20 @@ Runs the SQL through `psql` inside a transaction that is rolled back at the end,
 `INSERT`, `UPDATE` and `DELETE` freely. Statement timeout 15 s. `\d`-style meta-commands work;
 `\!`, `\copy`, `\o`, `\i` and similar are blocked.
 
-`POST api/executar`
+`POST api/run`
 
 | Request field | Meaning |
 |---|---|
 | `sql` | one or more statements |
-| `explicar` | optional: run `EXPLAIN (ANALYZE, BUFFERS)` on the last statement |
-| `esperado` | optional: a reference query; the response then has `verificacao: {ok, motivo}` |
-| `ordenado` | optional: with `esperado`, row order must match too |
-| `persistir` | optional: commit instead of rolling back (avoid in exercises) |
+| `explain` | optional: run `EXPLAIN (ANALYZE, BUFFERS)` on the last statement |
+| `expected` | optional: a reference query; the response then has `check: {ok, reason}` |
+| `ordered` | optional: with `expected`, row order must match too |
+| `persist` | optional: commit instead of rolling back (avoid in exercises) |
 
-Response: `ok`, `resultados` (one per statement: `colunas`, `linhas`, `tag`), `erro`
-(`mensagem`, `linha` in the submitted text), `comandos`, and `verificacao` when requested.
+Response: `ok`, `results` (one per statement: `statement`, `columns`, `rows`, `tag`), `error`
+(`message`, and `line` in the submitted text), `statements`, and `check` when requested.
 
-`GET api/status` returns `{postgres, erro}`. `GET api/esquema` returns the tables and columns of
+`GET api/status` returns `{postgres, error}`. `GET api/schema` returns the tables and columns of
 the schemas listed in `database.schemas`.
 
 ### `none`
@@ -231,11 +235,11 @@ An engine is a `Runner` subclass. To add, for example, a Node.js or SQLite engin
                return {'ready': False, 'label': 'Node offline', 'hint': 'Install Node.js or add it to the Dockerfile.'}
 
        def handle(self, method, action, payload):
-           if method == 'POST' and action == 'executar':
-               proc = subprocess.run(['node', '-e', payload.get('codigo', '')], capture_output=True,
+           if method == 'POST' and action == 'run':
+               proc = subprocess.run(['node', '-e', payload.get('code', '')], capture_output=True,
                                      text=True, timeout=15, cwd=self.settings.workspace)
-               return HTTPStatus.OK, {'status': 'ok' if proc.returncode == 0 else 'erro',
-                                      'saida': [['out', proc.stdout], ['err', proc.stderr]]}
+               return HTTPStatus.OK, {'status': 'ok' if proc.returncode == 0 else 'error',
+                                      'output': [['out', proc.stdout], ['err', proc.stderr]]}
            return super().handle(method, action, payload)
    ```
 

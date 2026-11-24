@@ -4,9 +4,9 @@ In Docker that is the Python in the image (see Dockerfile). Without Docker it is
 whatever Python you used to start engine/hub.py.
 
 API (relative to /t/<trail-id>/):
-  GET  api/status    -> {versao, executavel, pasta}
-  POST api/executar  {codigo, entradas?, argv?, depurar?, verificacao?}
-                     -> {status, assercao, saida, vars, passos, cortado}
+  GET  api/status  -> {version, executable, folder}
+  POST api/run     {code, inputs?, argv?, debug?, check?}
+                   -> {status, assertion, output, vars, steps, truncated}
 """
 from __future__ import annotations
 
@@ -51,9 +51,9 @@ class PythonRunner(Runner):
 
     def handle(self, method, action, payload):
         if method == 'GET' and action == 'status':
-            return HTTPStatus.OK, {'versao': sys.version.split()[0], 'executavel': sys.executable,
-                                   'pasta': str(self.workdir)}
-        if method == 'POST' and action == 'executar':
+            return HTTPStatus.OK, {'version': sys.version.split()[0], 'executable': sys.executable,
+                                   'folder': str(self.workdir)}
+        if method == 'POST' and action == 'run':
             return HTTPStatus.OK, self.execute(payload or {})
         return super().handle(method, action, payload)
 
@@ -66,11 +66,11 @@ class PythonRunner(Runner):
                 cwd=self.workdir, timeout=TIMEOUT, encoding='utf-8',
             )
         except subprocess.TimeoutExpired:
-            return {'status': 'erro', 'vars': [], 'passos': [],
-                    'saida': [['tb', f'TimeoutError: a execução passou de {TIMEOUT}s '
-                                     '(laço infinito?) e foi interrompida.']]}
+            return {'status': 'error', 'vars': [], 'steps': [],
+                    'output': [['tb', f'TimeoutError: the run took longer than {TIMEOUT}s '
+                                     '(infinite loop?) and was stopped.']]}
         try:
             return json.loads(proc.stdout.strip().splitlines()[-1])
         except (IndexError, json.JSONDecodeError):
-            return {'status': 'erro', 'vars': [], 'passos': [],
-                    'saida': [['tb', 'Falha interna do executor:\n' + proc.stderr[-2000:]]]}
+            return {'status': 'error', 'vars': [], 'steps': [],
+                    'output': [['tb', 'Internal executor error:\n' + proc.stderr[-2000:]]]}

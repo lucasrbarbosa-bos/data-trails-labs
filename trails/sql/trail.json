@@ -29,8 +29,8 @@
         "name": "loja",
         "check": "public.itens_pedido",
         "scripts": [
-          "db/01_esquema.sql",
-          "db/02_dados.sql"
+          "db/01_schema.sql",
+          "db/02_data.sql"
         ]
       },
       {

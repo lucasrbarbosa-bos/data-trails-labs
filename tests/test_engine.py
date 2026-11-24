@@ -169,8 +169,8 @@ class SqlSplitTests(unittest.TestCase):
                                  'DO $$ BEGIN PERFORM 1; END $$;', 'SELECT 2;'])
 
     def test_compare_ignores_order_unless_asked(self):
-        a = {'resultados': [{'colunas': ['x'], 'linhas': [['1'], ['2']]}]}
-        b = {'resultados': [{'colunas': ['x'], 'linhas': [['2'], ['1']]}]}
+        a = {'results': [{'columns': ['x'], 'rows': [['1'], ['2']]}]}
+        b = {'results': [{'columns': ['x'], 'rows': [['2'], ['1']]}]}
         self.assertTrue(compare_results(a, b, ordered=False)['ok'])
         self.assertFalse(compare_results(a, b, ordered=True)['ok'])
 
@@ -186,21 +186,21 @@ class PythonRunnerTests(unittest.TestCase):
         shutil.rmtree(self.tmp, ignore_errors=True)
 
     def test_output_and_check(self):
-        res = self.runner.execute({'codigo': 'x = 2\nprint(x * 21)', 'verificacao': 'assert x == 2'})
+        res = self.runner.execute({'code': 'x = 2\nprint(x * 21)', 'check': 'assert x == 2'})
         self.assertEqual(res['status'], 'ok')
-        self.assertEqual(res['saida'], [['out', '42\n']])
+        self.assertEqual(res['output'], [['out', '42\n']])
 
     def test_failed_check(self):
-        res = self.runner.execute({'codigo': 'x = 1', 'verificacao': 'assert x == 2, "x deveria ser 2"'})
-        self.assertEqual((res['status'], res['assercao']), ('falhou', 'x deveria ser 2'))
+        res = self.runner.execute({'code': 'x = 1', 'check': 'assert x == 2, "x should be 2"'})
+        self.assertEqual((res['status'], res['assertion']), ('failed', 'x should be 2'))
 
     def test_files_go_to_the_workspace(self):
-        self.runner.execute({'codigo': 'open("nota.txt", "w").write("oi")'})
-        self.assertTrue((Path(self.tmp) / 'python' / 'nota.txt').exists())
+        self.runner.execute({'code': 'open("note.txt", "w").write("hi")'})
+        self.assertTrue((Path(self.tmp) / 'python' / 'note.txt').exists())
 
     def test_debugger_records_steps(self):
-        res = self.runner.execute({'codigo': 'a = 1\nb = a + 1', 'depurar': True})
-        self.assertGreaterEqual(len(res['passos']), 2)
+        res = self.runner.execute({'code': 'a = 1\nb = a + 1', 'debug': True})
+        self.assertGreaterEqual(len(res['steps']), 2)
 
 
 class HubHttpTests(unittest.TestCase):
@@ -273,8 +273,8 @@ class HubHttpTests(unittest.TestCase):
         self.assertEqual(trails['data-architecture']['i18n']['pt']['title'], 'Arquitetura de Dados')
 
     def test_python_through_http(self):
-        status, body = self.get('/t/python/api/executar', data=json.dumps({'codigo': 'print(7)'}).encode())
-        self.assertEqual(json.loads(body)['saida'], [['out', '7\n']])
+        status, body = self.get('/t/python/api/run', data=json.dumps({'code': 'print(7)'}).encode())
+        self.assertEqual(json.loads(body)['output'], [['out', '7\n']])
 
     def test_static_files_and_traversal(self):
         self.assertEqual(self.get('/t/sql/materials/sql-moderno-parte-1.pdf', token=False)[0], 200)
@@ -298,21 +298,21 @@ class PostgresTests(unittest.TestCase):
     def test_datasets_and_search_path(self):
         res = self.runner.execute({'sql': 'SELECT count(*) FROM creators;'})
         self.assertTrue(res['ok'], res)
-        self.assertEqual(res['resultados'][-1]['linhas'], [['6']])
+        self.assertEqual(res['results'][-1]['rows'], [['6']])
 
     def test_runs_are_rolled_back(self):
         self.runner.execute({'sql': 'DELETE FROM marketplace.creator_payouts;'})
         res = self.runner.execute({'sql': 'SELECT count(*) FROM marketplace.creator_payouts;'})
-        self.assertEqual(res['resultados'][-1]['linhas'], [['8']])
+        self.assertEqual(res['results'][-1]['rows'], [['8']])
 
     def test_challenge_check(self):
-        res = self.runner.execute({'sql': 'SELECT 1 AS x;', 'esperado': 'SELECT 2 AS x;'})
-        self.assertFalse(res['verificacao']['ok'])
+        res = self.runner.execute({'sql': 'SELECT 1 AS x;', 'expected': 'SELECT 2 AS x;'})
+        self.assertFalse(res['check']['ok'])
 
     def test_error_line(self):
         res = self.runner.execute({'sql': 'SELECT 1;\n\nSELEC 2;'})
         self.assertFalse(res['ok'])
-        self.assertEqual(res['erro']['linha'], 3)
+        self.assertEqual(res['error']['line'], 3)
 
 
 if __name__ == '__main__':
