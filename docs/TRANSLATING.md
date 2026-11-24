@@ -1,19 +1,19 @@
-# Translating the trails
+# Translating the courses
 
-Every trail is available in English, Spanish and Portuguese (the EN | ES | PT toggle in the top bar).
-Each trail is written in one **source language**; the other two are generated from translations.
+Every course is available in English, Spanish and Portuguese (the EN | ES | PT toggle in the top bar).
+Each course is written in one **source language**; the other two are generated from translations.
 
-| Trail | Source (edit this) | Generated |
+| Course | Source (edit this) | Generated |
 |---|---|---|
-| `python` | `trails/python/content/pt.json` | `en.json`, `es.json` |
-| `sql` | `trails/sql/content/pt.json` | `en.json`, `es.json` (chapter 8 stays in English in all three) |
-| `data-architecture` | `trails/data-architecture/content/en/*.json` | `content/pt/`, `content/es/` |
+| `python` | `courses/python/content/pt.json` | `en.json`, `es.json` |
+| `sql` | `courses/sql/content/pt.json` | `en.json`, `es.json` (chapter 8 stays in English in all three) |
+| `data-architecture` | `courses/data-architecture/content/en/*.json` | `content/pt/`, `content/es/` |
 
 Never edit the generated files by hand: the next merge rebuilds them from the source.
 
 `tools/i18n.py` does the bookkeeping. Only prose is translated. Code, exercise ids, section anchors and
 checks are copied from the source, so exercises behave the same and progress carries over between
-languages. `i18n/<trail>.<lang>.json` records, for every translated string, a hash of the source text
+languages. `i18n/<course>.<lang>.json` records, for every translated string, a hash of the source text
 it was translated from. When you edit a source string, its hash no longer matches, and only that string
 is sent for translation again.
 
@@ -21,13 +21,13 @@ is sent for translation again.
 
 ```bash
 python tools/i18n.py status            # what is missing or out of date (exit code 1 if anything is)
-python tools/i18n.py extract           # writes i18n-work/<trail>/<lang>/chunkNN.src.json
+python tools/i18n.py extract           # writes i18n-work/<course>/<lang>/chunkNN.src.json
 #   translate every chunkNN.src.json into chunkNN.out.json next to it (rules below)
 python tools/i18n.py check             # keys and markup of the translations
 python tools/i18n.py merge             # rebuilds the generated files and i18n/; then delete i18n-work/
 ```
 
-All commands take trail ids to limit the work, e.g. `python tools/i18n.py extract data-architecture`.
+All commands take course ids to limit the work, e.g. `python tools/i18n.py extract data-architecture`.
 Until a string is translated, the generated file shows the source text in its place.
 
 A chunk is a flat JSON object `{ "key": "source text" }` of about 34 KB. The keys encode where a
@@ -56,9 +56,9 @@ hand to a translator, or to an AI agent with these rules.
    Column names and sample values that the SQL examples use stay as they are, even in table cells.
 8. Where the text is about mistakes or responsibility, refer to teams, never to named people.
 
-## Adding a language or a trail
+## Adding a language or a course
 
-The languages of the toggle are listed in `engine/trails.py` (`LANGUAGES`) and
-`engine/web/trail-hub.js` (`LANGS`). To translate a new trail, add it to `CONFIG` in `tools/i18n.py`
-with its content kind, source language and targets, and make its page load `content/<TRAIL.lang>…`
+The languages of the toggle are listed in `engine/courses.py` (`LANGUAGES`) and
+`engine/web/trail-hub.js` (`LANGS`). To translate a new course, add it to `CONFIG` in `tools/i18n.py`
+with its content kind, source language and targets, and make its page load `content/<COURSE.lang>…`
 (see the Data Architecture page for a reader that falls back to the source language).

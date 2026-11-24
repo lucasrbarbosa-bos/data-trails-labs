@@ -1,10 +1,10 @@
 name: Content
 description: An error, gap or improvement in a chapter, exercise, quiz, dataset or translation.
-title: "content(<trail-id>): "
+title: "content(<course-id>): "
 labels: [content]
 body:
   - type: dropdown
-    id: trail
+    id: course
     attributes:
       label: Trail
       options: [python, sql, data-architecture, other]

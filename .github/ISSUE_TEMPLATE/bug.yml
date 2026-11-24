@@ -7,7 +7,7 @@ body:
     id: area
     attributes:
       label: Where
-      options: [python trail, sql trail, data-architecture trail, home page / top bar, engine / hub, tools, docker setup, other]
+      options: [Python course, SQL course, Data Architecture course, home page / top bar, engine / hub, tools, docker setup, other]
     validations:
       required: true
   - type: textarea

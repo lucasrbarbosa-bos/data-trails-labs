@@ -1,0 +1,15 @@
+{
+  "subtitle": "A starter for a reading-only course.",
+  "chapters": [
+    {
+      "id": "introduction",
+      "title": "Introduction",
+      "paragraphs": ["Describe what readers will learn and why it matters."]
+    },
+    {
+      "id": "first-topic",
+      "title": "First topic",
+      "paragraphs": ["Replace this paragraph with your first explanation or example."]
+    }
+  ]
+}

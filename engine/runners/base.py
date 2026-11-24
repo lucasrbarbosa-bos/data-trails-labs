@@ -1,8 +1,8 @@
 """The contract every engine (runner) implements.
 
-The hub creates one runner per trail. A trail page calls its runner through
-relative URLs, so a page served at /t/<trail-id>/ that fetches "api/executar"
-reaches   POST /t/<trail-id>/api/executar  ->  runner.handle('POST', 'executar', body).
+The hub creates one runner per course. A course page calls its runner through
+relative URLs, so a page served at /t/<course-id>/ that fetches "api/executar"
+reaches   POST /t/<course-id>/api/executar  ->  runner.handle('POST', 'executar', body).
 """
 from __future__ import annotations
 
@@ -12,14 +12,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from trails import Trail
+    from courses import Course
 
 
 @dataclass
 class Settings:
     """Engine-wide settings, filled from command-line flags and environment variables."""
     root: Path                         # repository root
-    workspace: Path                    # where runners may write files (one subfolder per trail)
+    workspace: Path                    # where runners may write files (one subfolder per course)
     pg_url: str | None = None          # psql connection URL, e.g. postgresql://lab:lab@postgres:5432/loja
     pg_container: str = 'sql-lab-postgres'   # used with "docker exec" when pg_url is not set
     pg_command: list[str] | None = None      # full psql command override (used by tests)
@@ -29,8 +29,8 @@ class Runner:
     engine = 'none'
     label = 'Reading only'
 
-    def __init__(self, trail: 'Trail', settings: Settings):
-        self.trail = trail
+    def __init__(self, course: 'Course', settings: Settings):
+        self.course = course
         self.settings = settings
 
     def start(self) -> None:
@@ -46,4 +46,4 @@ class Runner:
 
 
 class StaticRunner(Runner):
-    """For trails that only show content and never execute anything."""
+    """For courses that only show content and never execute anything."""

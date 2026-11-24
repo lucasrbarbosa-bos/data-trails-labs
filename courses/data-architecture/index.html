@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Data Architecture</title>
+<!--
+  Data Architecture trail (engine "none": reading only, nothing runs on the server).
+  Content lives in content/<lang>/ (en, es, pt): manifest.json lists parts and chapters, and each
+  chapter is NN-<id>.json, a list of blocks rendered below (see RENDER in the script).
+  Theme, fonts and the top bar (theme picker, EN | ES | PT) come from the hub: /hub/theme.css and
+  trail-hub.js, injected at the end of <head>. window.COURSE.lang is the chosen language.
+  Page contract (docs/ADDING_A_COURSE.md): relative URLs, TRAIL.progress(done, total), and
+  localStorage keys prefixed with the trail id.
+-->
+<!-- course styles -->
+<link rel="stylesheet" href="course.css">
+</head>
+<body class="course-page">
+<div class="course-layout">
+  <aside class="course-sidebar" id="course-sidebar">
+    <div class="side-head">
+      <div class="eyebrow"><span class="cmd">$ data-architecture</span></div>
+      <h1><a href="#/" id="course-title">Data Architecture</a></h1>
+      <div class="sub" id="course-subtitle"></div>
+    </div>
+    <div class="progress"><div class="course-progress-bar"><div id="bar"></div></div><small id="ptext"></small></div>
+    <div class="search-wrap"><input class="search" id="search" type="search"></div>
+    <div class="results" id="results" hidden></div>
+    <nav id="course-nav"></nav>
+    <div class="tools"><button type="button" id="reset"></button></div>
+  </aside>
+  <main class="course-main" id="course-main">
+    <div class="course-mobile"><button type="button" id="course-menu">☰</button><span id="mobile-title">Data Architecture</span></div>
+    <div class="course-content" id="course-content"><p class="loading">loading…</p></div>
+  </main>
+</div>
+
+<script src="course.js"></script>
+</body>
+</html>

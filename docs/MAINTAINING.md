@@ -41,8 +41,8 @@ their fork, so only the owner (and anyone you later add as a collaborator) can c
 - Work on a branch named per CONTRIBUTING.md (`feature/<area>/<description>`, `fix/…`, `content/…`),
   open a PR, wait for the checks, then merge. As admin you can merge your own PR: GitHub shows the
   bypass option ("Merge without waiting for requirements to be met").
-- When a trail gets its own maintainer, add a line for its folder to `.github/CODEOWNERS` and give that
-  person *Write* access; they can then approve PRs for that trail.
+- When a course gets its own maintainer, add a line for its folder to `.github/CODEOWNERS` and give that
+  person *Write* access; they can then approve PRs for that course.
 - If you rename a job in `pr-checks.yml`, update the required checks in the ruleset at the same time,
   or every PR will wait for a check that never comes.
 
@@ -56,9 +56,9 @@ before merging.
 - **Settings → Pages → Source: GitHub Actions** (already set). Don't add the suggested Jekyll or
   Static HTML workflows.
 - **Settings → Environments → github-pages → Deployment branches:** `main` only.
-- The site is built by `tools/build_static.py` from the same trails the local lab serves; Docker and
+- The site is built by `tools/build_static.py` from the same courses the local lab serves; Docker and
   `engine/hub.py` are not involved. Preview it locally:
   `python tools/build_static.py && python -m http.server -d _site 8000`.
-- What works online: Data Architecture completely; the Python trail runs exercises in the browser with
-  Brython (Python 3.12-compatible; file, database and 3.14+ examples are read-only); the SQL trail is
+- What works online: Data Architecture completely; the Python course runs exercises in the browser with
+  Brython (Python 3.12-compatible; file, database and 3.14+ examples are read-only); the SQL course is
   read-only. The full experience stays the local lab (`docker compose up -d`).

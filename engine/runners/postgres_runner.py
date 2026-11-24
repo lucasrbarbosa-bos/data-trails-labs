@@ -1,4 +1,4 @@
-"""PostgreSQL engine: runs trail SQL with psql against a Postgres server.
+"""PostgreSQL engine: runs course SQL with psql against a Postgres server.
 
 How psql is reached, in order of preference:
   1. LAB_PG_URL / --pg-url   -> `psql <url>` (inside Docker Compose this points at the
@@ -9,13 +9,13 @@ How psql is reached, in order of preference:
 Each run happens inside a transaction that is rolled back at the end, so INSERT,
 UPDATE and DELETE never damage the shared database.
 
-Datasets: a trail lists them in trail.json under "database.datasets". At start-up
+Datasets: a course lists them in course.json under "database.datasets". At start-up
 (and again later if the database was not reachable yet) the runner checks each
 dataset's "check" relation with to_regclass() and, if it is missing, loads the
 dataset's scripts in one transaction. That makes loading idempotent and lets you
 add a dataset to an existing database without wiping the Docker volume.
 
-API (relative to /t/<trail-id>/):
+API (relative to /t/<course-id>/):
   GET  api/status    -> {postgres, erro}
   GET  api/esquema   -> {ok, tabelas: {table: [[column, type], ...]}, erro}
   POST api/executar  {sql, explicar?, persistir?, esperado?, ordenado?}
@@ -204,10 +204,10 @@ def masked(url: str) -> str:
 class PostgresRunner(Runner):
     engine = 'postgres'
 
-    def __init__(self, trail, settings):
-        super().__init__(trail, settings)
-        self.schemas = trail.database.get('schemas') or ['public']
-        self.datasets = trail.database.get('datasets') or []
+    def __init__(self, course, settings):
+        super().__init__(course, settings)
+        self.schemas = course.database.get('schemas') or ['public']
+        self.datasets = course.database.get('datasets') or []
         self._datasets_ready = not self.datasets
         self._lock = threading.Lock()
         if settings.pg_command:
@@ -293,12 +293,12 @@ class PostgresRunner(Runner):
                     return err
                 if exists == 't':
                     continue
-                script = '\n'.join((self.trail.folder / s).read_text(encoding='utf-8') for s in ds['scripts'])
+                script = '\n'.join((self.course.folder / s).read_text(encoding='utf-8') for s in ds['scripts'])
                 ok, err = self.load_script_text(script)
                 if not ok:
-                    print(f'  [{self.trail.id}] failed to load dataset "{name}": {err[:400]}')
+                    print(f'  [{self.course.id}] failed to load dataset "{name}": {err[:400]}')
                     return f'falha ao carregar o dataset "{name}": {err[:400]}'
-                print(f'  [{self.trail.id}] dataset "{name}" loaded from {", ".join(ds["scripts"])}')
+                print(f'  [{self.course.id}] dataset "{name}" loaded from {", ".join(ds["scripts"])}')
             self._datasets_ready = True
         return None
 
@@ -306,10 +306,10 @@ class PostgresRunner(Runner):
     def start(self) -> None:
         version, err = self.query_value("SELECT split_part(version(), ' ', 2);")
         if version is None:
-            print(f'  [{self.trail.id}] PostgreSQL not reachable yet via {self.describe()} '
-                  f'(the trail retries when opened). {self._hint()}')
+            print(f'  [{self.course.id}] PostgreSQL not reachable yet via {self.describe()} '
+                  f'(the course retries when opened). {self._hint()}')
             return
-        print(f'  [{self.trail.id}] PostgreSQL {version} via {self.describe()}')
+        print(f'  [{self.course.id}] PostgreSQL {version} via {self.describe()}')
         self.ensure_datasets()
 
     def health(self) -> dict:

@@ -1,7 +1,7 @@
-"""Engine registry. The "engine" key in a trail.json must be one of these names.
+"""Engine registry. The "engine" key in a course.json must be one of these names.
 
 To add an engine: write a Runner subclass in this folder and register it below.
-See docs/ADDING_A_TRAIL.md, section "Adding a new engine".
+See docs/ADDING_A_COURSE.md, section "Adding a new engine".
 """
 from .base import Runner, Settings, StaticRunner
 from .postgres_runner import PostgresRunner

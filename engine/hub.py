@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Trails Lab hub: one local server for every trail.
+"""Trails Lab hub: one local server for every course.
 
     python engine/hub.py                 # http://127.0.0.1:8765 opens in your browser
 
 Routes
-    /                          home page (pick a trail)
-    /api/trails                trails + engine health, for the home page
+    /                          home page (pick a course)
+    /api/trails                courses + engine health, for the home page
     /hub/<file>                files from engine/web (favicon, etc.)
-    /t/<id>/                   the trail's entry page, with the hub script injected
-    /t/<id>/api/<action>       the trail's engine (see engine/runners)
-    /t/<id>/<file>             any other file in the trail folder (PDFs, images, ...)
+    /t/<id>/                   the course's entry page, with the hub script injected
+    /t/<id>/api/<action>       the course's engine (see engine/runners)
+    /t/<id>/<file>             any other file in the course folder (PDFs, images, ...)
 
 Security: binds to 127.0.0.1 by default, and every API call needs a secret token
 that is generated at start-up and injected into the pages the hub serves, plus a
@@ -24,7 +24,6 @@ import argparse
 import json
 import mimetypes
 import os
-import re
 import secrets
 import sys
 import webbrowser
@@ -38,7 +37,8 @@ ROOT = ENGINE_DIR.parent
 sys.path.insert(0, str(ENGINE_DIR))
 
 from runners import RUNNERS, Settings  # noqa: E402
-from trails import Trail, discover  # noqa: E402
+from courses import Course, discover  # noqa: E402
+from course_page import inject, render_course_page, safe_json  # noqa: E402
 
 WEB = ENGINE_DIR / 'web'
 TOKEN = secrets.token_urlsafe(24)
@@ -46,9 +46,9 @@ MAX_BODY = 1_000_000
 
 
 class Hub:
-    def __init__(self, trails: list[Trail], settings: Settings):
-        self.trails = {t.id: t for t in trails}
-        self.runners = {t.id: RUNNERS[t.engine](t, settings) for t in trails}
+    def __init__(self, courses: list[Course], settings: Settings):
+        self.courses = {t.id: t for t in courses}
+        self.runners = {t.id: RUNNERS[t.engine](t, settings) for t in courses}
 
     def start(self) -> None:
         for runner in self.runners.values():
@@ -56,37 +56,23 @@ class Hub:
 
     def listing(self) -> list[dict]:
         out = []
-        for trail_id, trail in self.trails.items():
-            item = trail.public()
+        for course_id, course in self.courses.items():
+            item = course.public()
             try:
-                item['health'] = self.runners[trail_id].health()
+                item['health'] = self.runners[course_id].health()
             except Exception as e:          # a broken engine must not break the home page
                 item['health'] = {'ready': False, 'label': 'Engine error', 'hint': str(e)[:300]}
             out.append(item)
         return out
 
-    def trail_context(self, trail: Trail) -> dict:
-        """What the injected trail-hub script receives as window.TRAIL."""
+    def course_context(self, course: Course) -> dict:
+        """What the shared navigation script receives as window.COURSE."""
         return {
-            'id': trail.id, 'title': trail.title, 'titles': trail.titles(), 'engine': trail.engine,
-            'language': trail.language, 'home': '/',
-            'trails': [{'id': t.id, 'title': t.title, 'titles': t.titles(), 'url': f'/t/{t.id}/'}
-                       for t in self.trails.values()],
+            'id': course.id, 'title': course.title, 'titles': course.titles(), 'engine': course.engine,
+            'language': course.language, 'home': '/',
+            'courses': [{'id': t.id, 'title': t.title, 'titles': t.titles(), 'url': f'/t/{t.id}/'}
+                       for t in self.courses.values()],
         }
-
-
-def inject(html: str, snippet: str) -> str:
-    """Insert snippet right before the real closing head tag (ignoring any inside <!-- comments -->)."""
-    comments = [m.span() for m in re.finditer(r'<!--.*?-->', html, flags=re.S)]
-    for m in re.finditer(r'</head\s*>', html, flags=re.I):
-        if not any(a <= m.start() < b for a, b in comments):
-            return html[:m.start()] + snippet + '\n' + html[m.start():]
-    return snippet + html
-
-
-def safe_json(value) -> str:
-    """JSON that is safe to place inside a <script> element."""
-    return json.dumps(value, ensure_ascii=False).replace('</', '<\\/')
 
 
 def make_handler(hub: Hub):
@@ -145,20 +131,21 @@ def make_handler(hub: Hub):
                     return self._not_found()
                 html = (WEB / 'home.html').read_text(encoding='utf-8')
                 return self._html(inject(html, f'<script>window.LAB_TOKEN = {safe_json(TOKEN)};</script>'))
-            if path == '/api/trails':
+            if path in ('/api/courses', '/api/trails') and method == 'GET':
                 if not self._authorized():
                     return self._json({'erro': 'não autorizado'}, HTTPStatus.FORBIDDEN)
-                return self._json({'trails': hub.listing()})
+                key = 'courses' if path == '/api/courses' else 'trails'
+                return self._json({key: hub.listing()})
             if path.startswith('/hub/') and method == 'GET':
                 return self._file(WEB, path[len('/hub/'):])
 
             parts = path.split('/', 3)          # ['', 't', id, rest]
-            if len(parts) < 3 or parts[1] != 't' or parts[2] not in hub.trails:
+            if len(parts) < 3 or parts[1] != 't' or parts[2] not in hub.courses:
                 return self._not_found()
-            trail = hub.trails[parts[2]]
+            course = hub.courses[parts[2]]
             if len(parts) == 3:                 # /t/<id>  ->  /t/<id>/
                 self.send_response(HTTPStatus.MOVED_PERMANENTLY)
-                self.send_header('Location', f'/t/{trail.id}/')
+                self.send_header('Location', f'/t/{course.id}/')
                 self.send_header('Content-Length', '0')
                 self.end_headers()
                 return
@@ -176,19 +163,15 @@ def make_handler(hub: Hub):
                         payload = json.loads(self.rfile.read(size) or b'{}')
                     except json.JSONDecodeError:
                         return self._json({'erro': 'JSON inválido'}, HTTPStatus.BAD_REQUEST)
-                status, body = hub.runners[trail.id].handle(method, rest[len('api/'):], payload)
+                status, body = hub.runners[course.id].handle(method, rest[len('api/'):], payload)
                 return self._json(body, status)
 
             if method != 'GET':
                 return self._not_found()
-            if rest in ('', trail.entry):
-                html = trail.entry_path.read_text(encoding='utf-8')
-                snippet = ('<link rel="stylesheet" href="/hub/theme.css">\n'
-                           f'<script>window.LAB_TOKEN = {safe_json(TOKEN)};\n'
-                           f'window.TRAIL = {safe_json(hub.trail_context(trail))};</script>\n'
-                           f'<script>{hub_script}</script>')
-                return self._html(inject(html, snippet))
-            return self._file(trail.folder, rest)
+            if rest in ('', course.entry):
+                html = course.entry_path.read_text(encoding='utf-8')
+                return self._html(render_course_page(html, hub.course_context(course), '/', hub_script, TOKEN))
+            return self._file(course.folder, rest)
 
         def do_GET(self):
             self._route('GET')
@@ -204,41 +187,42 @@ def env_flag(name: str) -> bool:
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(description='Trails Lab: one local server for every trail.')
+    p = argparse.ArgumentParser(description='Trails Lab: one local server for every course.')
     p.add_argument('--host', default=os.environ.get('LAB_HOST', '127.0.0.1'),
                    help='address to bind (default 127.0.0.1; Docker uses 0.0.0.0)')
     p.add_argument('--port', type=int, default=int(os.environ.get('LAB_PORT', 8765)))
     p.add_argument('--no-browser', action='store_true', default=env_flag('LAB_NO_BROWSER'),
                    help='do not open the browser')
-    p.add_argument('--trails-dir', type=Path, default=Path(os.environ.get('LAB_TRAILS_DIR', ROOT / 'trails')))
+    p.add_argument('--courses-dir', '--trails-dir', type=Path,
+                   default=Path(os.environ.get('LAB_COURSES_DIR') or os.environ.get('LAB_TRAILS_DIR') or ROOT / 'courses'))
     p.add_argument('--workspace', type=Path, default=Path(os.environ.get('LAB_WORKSPACE', ROOT / 'workspace')),
-                   help='folder where exercises may create files (one subfolder per trail)')
+                   help='folder where exercises may create files (one subfolder per course)')
     p.add_argument('--pg-url', default=os.environ.get('LAB_PG_URL') or None,
                    help='psql URL for the postgres engine, e.g. postgresql://lab:lab@localhost:5433/loja')
     p.add_argument('--pg-container', default=os.environ.get('LAB_PG_CONTAINER', 'sql-lab-postgres'),
                    help='container used with "docker exec" when --pg-url is not set')
     p.add_argument('--pg-command', help=argparse.SUPPRESS)       # full psql command, for tests
-    p.add_argument('--check', action='store_true', help='validate every trail.json and exit')
+    p.add_argument('--check', action='store_true', help='validate every course.json and exit')
     args = p.parse_args(argv)
 
-    trails_dir = args.trails_dir.resolve()
-    if not trails_dir.is_dir():
-        p.error(f'trails folder not found: {trails_dir}')
-    trails, errors = discover(trails_dir, set(RUNNERS))
+    courses_dir = args.courses_dir.resolve()
+    if not courses_dir.is_dir():
+        p.error(f'courses folder not found: {courses_dir}')
+    courses, errors = discover(courses_dir, set(RUNNERS))
     for e in errors:
         print(f'ERROR {e}', file=sys.stderr)
     if args.check:
-        for t in trails:
+        for t in courses:
             print(f'ok    {t.id:<16} engine={t.engine:<9} {t.title}')
         return 1 if errors else 0
-    if not trails:
-        p.error('no valid trails found (see the errors above)')
+    if not courses:
+        p.error('no valid courses found (see the errors above)')
 
     settings = Settings(root=ROOT, workspace=args.workspace.resolve(), pg_url=args.pg_url,
                         pg_container=args.pg_container,
                         pg_command=args.pg_command.split() if args.pg_command else None)
-    hub = Hub(trails, settings)
-    print(f'Trails Lab - {len(trails)} trail(s): ' + ', '.join(t.id for t in trails))
+    hub = Hub(courses, settings)
+    print(f'Trails Lab - {len(courses)} course(s): ' + ', '.join(t.id for t in courses))
     hub.start()
 
     try:

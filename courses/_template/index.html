@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>New course</title>
+<!-- course styles -->
+<link rel="stylesheet" href="course.css">
+</head>
+<body class="course-page">
+<div class="course-layout">
+  <aside class="course-sidebar" id="course-sidebar">
+    <h1 id="course-title">New course</h1>
+    <p id="course-subtitle"></p>
+    <nav id="course-nav"></nav>
+    <div class="course-progress-bar" aria-hidden="true"><div id="progress-fill"></div></div>
+    <p id="progress-label"></p>
+  </aside>
+  <main class="course-main" id="course-main">
+    <div class="course-mobile">
+      <button type="button" id="course-menu" aria-controls="course-sidebar" aria-expanded="false">☰</button>
+      <strong id="mobile-title"></strong>
+    </div>
+    <article class="course-content" id="course-content"></article>
+  </main>
+</div>
+<script src="course.js"></script>
+</body>
+</html>

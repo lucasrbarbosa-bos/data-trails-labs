@@ -1,8 +1,8 @@
 # Trails Lab engine image: the hub, the Python runner and the PostgreSQL client (psql).
-# Every trail runs through this one image; the database is the "postgres" service
+# Every course runs through this one image; the database is the "postgres" service
 # in docker-compose.yml.
 #
-# The Python trail covers 3.14/3.15 features, so the image uses 3.15 by default.
+# The Python course covers 3.14/3.15 features, so the image uses 3.15 by default.
 # To pin another version:  docker compose build --build-arg PYTHON_VERSION=3.14
 ARG PYTHON_VERSION=3.15
 FROM python:${PYTHON_VERSION}-slim
@@ -11,11 +11,11 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends postgresql-client \
  && rm -rf /var/lib/apt/lists/*
 
-# Trail code runs as an unprivileged user.
+# Course code runs as an unprivileged user.
 RUN useradd --create-home --uid 1000 lab
 WORKDIR /app
 COPY engine ./engine
-COPY trails ./trails
+COPY courses ./courses
 RUN mkdir -p workspace && chown lab:lab workspace
 USER lab
 

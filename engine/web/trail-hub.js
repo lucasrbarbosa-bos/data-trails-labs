@@ -1,20 +1,20 @@
-/* Trails Lab top bar: loaded by the home page and injected by the hub into every trail page,
+/* Trails Lab top bar: loaded by the home page and injected by the hub into every course page,
  * right before </head>, together with engine/web/theme.css.
  *
  * It owns two platform-wide settings, stored in this browser:
  *   theme      dark | light | dracula      ->  <html data-theme="...">        key trails-hub:theme
- *   language   en | es | pt                ->  window.TRAIL.lang, <html lang>  key trails-hub:lang
+ *   language   en | es | pt                ->  window.COURSE.lang, <html lang>  key trails-hub:lang
  * The theme switches live. Changing the language reloads the page, so a page only has to read
- * window.TRAIL.lang once at start-up (window.TRAIL.t({en, es, pt}) picks the right string).
+ * window.COURSE.lang once at start-up (window.COURSE.t({en, es, pt}) picks the right string).
  *
- * On trail pages window.TRAIL = {id, title, titles, engine, language, home, trails} comes from the hub;
- * this script adds TRAIL.progress(done, total) (shown on the home card), remembers the last
- * location.hash of each trail, and renders the bar as the first element of <body>: brand, "All trails",
- * a trail switcher, the theme picker and the EN | ES | PT toggle.
+ * On course pages window.COURSE = {id, title, titles, engine, language, home, courses} comes from the hub.
+ * This script reports progress to the home card, remembers each course's last location.hash and
+ * renders the bar with the course switcher, theme picker and EN | ES | PT toggle.
  */
 (function () {
   'use strict';
-  var ctx = window.TRAIL = window.TRAIL || {};
+  var ctx = window.COURSE = window.COURSE || window.TRAIL || {};
+  window.TRAIL = ctx; // The existing home page still reads this name.
   var PREFIX = 'trails-hub:';
   var THEMES = ['dark', 'light', 'dracula'];
   var LANGS = ['en', 'es', 'pt'];
@@ -44,15 +44,15 @@
   ctx.t = function (map) { return map == null ? '' : typeof map === 'string' ? map : (map[lang] != null ? map[lang] : map.en); };
 
   var T = {
-    all: { en: 'All trails', es: 'Todas las rutas', pt: 'Todas as trilhas' },
-    pick: { en: 'Switch trail', es: 'Cambiar de ruta', pt: 'Trocar de trilha' },
+    all: { en: 'All courses', es: 'Todos los cursos', pt: 'Todos os cursos' },
+    pick: { en: 'Switch course', es: 'Cambiar de curso', pt: 'Trocar de curso' },
     theme: { en: 'theme', es: 'tema', pt: 'tema' },
     lang: { en: 'lang', es: 'idioma', pt: 'idioma' },
     themes: { dark: { en: 'Dark', es: 'Oscuro', pt: 'Escuro' }, light: { en: 'Light', es: 'Claro', pt: 'Claro' }, dracula: { en: 'Dracula', es: 'Dracula', pt: 'Dracula' } },
     langNames: { en: 'English', es: 'Español', pt: 'Português' }
   };
 
-  // ---- progress and last position (trail pages only)
+  // ---- progress and last position (course pages only)
   function key(kind, id) { return kind + ':' + (id || ctx.id); }
   if (ctx.id) {
     ctx.progress = function (done, total) {
@@ -72,13 +72,13 @@
 
   // ---- the bar
   function render() {
-    var trails = ctx.trails || [];
+    var courses = ctx.courses || ctx.trails || [];
     var html = '<a class="th-brand" href="' + esc(ctx.home || '/') + '"><b>tl</b><span>trails-lab</span></a>';
     if (ctx.id) {
-      html += '<nav class="th-crumbs" aria-label="Trails"><span class="th-sep">/</span>' +
+      html += '<nav class="th-crumbs" aria-label="Courses"><span class="th-sep">/</span>' +
         '<a href="' + esc(ctx.home || '/') + '">← <span class="th-home-label">' + esc(ctx.t(T.all)) + '</span></a>';
-      if (trails.length > 1) {
-        html += '<span class="th-sep th-sep-pick">/</span><select id="thTrail" aria-label="' + esc(ctx.t(T.pick)) + '">' + trails.map(function (t) {
+      if (courses.length > 1) {
+        html += '<span class="th-sep th-sep-pick">/</span><select id="thCourse" aria-label="' + esc(ctx.t(T.pick)) + '">' + courses.map(function (t) {
           return '<option value="' + esc(t.id) + '"' + (t.id === ctx.id ? ' selected' : '') + '>' + esc(titleOf(t)) + '</option>';
         }).join('') + '</select>';
       }
@@ -102,9 +102,9 @@
     var slot = document.querySelector('[data-trail-hub]');
     if (slot) slot.hidden = true;
 
-    var pick = bar.querySelector('#thTrail');
+    var pick = bar.querySelector('#thCourse');
     if (pick) pick.addEventListener('change', function () {
-      var target = trails.filter(function (t) { return t.id === pick.value; })[0];
+      var target = courses.find(function (course) { return course.id === pick.value; });
       if (!target) return;
       var last = null;
       try { last = JSON.parse(get(key('last', target.id)) || 'null'); } catch (e) {}

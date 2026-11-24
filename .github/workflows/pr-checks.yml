@@ -32,14 +32,14 @@ jobs:
         run: |
           if [ "$EVENT" != "pull_request" ]; then echo "push to main: nothing to check"; exit 0; fi
           fail=0
-          branch_re='^(feature|trail|content|i18n|fix|bug|docs|ci|refactor|chore)/[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9.-]*[a-z0-9])?)?$'
+          branch_re='^(feature|course|trail|content|i18n|fix|bug|docs|ci|refactor|chore)/[a-z0-9]([a-z0-9-]*[a-z0-9])?(/[a-z0-9]([a-z0-9.-]*[a-z0-9])?)?$'
           if [[ "$AUTHOR" == dependabot* ]]; then
             echo "dependabot branch: name check skipped"
           elif [[ ! "$BRANCH" =~ $branch_re ]]; then
-            echo "::error title=Branch name::'$BRANCH' does not follow <type>/<area>/<description>, e.g. feature/engine/sqlite-runner or fix/mobile-top-bar. Types: feature, trail, content, i18n, fix (or bug), docs, ci, refactor, chore. See CONTRIBUTING.md."
+            echo "::error title=Branch name::'$BRANCH' does not follow <type>/<area>/<description>, e.g. feature/engine/sqlite-runner or fix/mobile-top-bar. Types: feature, course, content, i18n, fix (or bug), docs, ci, refactor, chore. See CONTRIBUTING.md."
             fail=1
           fi
-          title_re='^(feat|fix|trail|content|i18n|docs|ci|refactor|test|chore|perf)(\([a-z0-9][a-z0-9-]*\))?!?: [^ ].{2,}$'
+          title_re='^(feat|fix|course|trail|content|i18n|docs|ci|refactor|test|chore|perf)(\([a-z0-9][a-z0-9-]*\))?!?: [^ ].{2,}$'
           if [[ ! "$TITLE" =~ $title_re ]]; then
             echo "::error title=PR title::'$TITLE' does not follow <type>(<scope>): <summary>, e.g. feat(engine): add a sqlite runner. See CONTRIBUTING.md."
             fail=1
@@ -69,7 +69,7 @@ jobs:
           python-version: "3.12"
       - name: psql is available
         run: psql --version
-      - name: Trail manifests are valid
+      - name: Course manifests are valid
         run: python engine/hub.py --check
       - name: Unit tests (engine, hub, translations, PostgreSQL)
         env:

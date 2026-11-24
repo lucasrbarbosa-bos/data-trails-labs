@@ -1,100 +1,100 @@
-"""Runs ONE piece of trail code in a fresh process and prints the result as JSON.
+"""Runs ONE piece of course code in a fresh process and prints the result as JSON.
 
 The Python runner starts this file's source with `python -X utf8 -c <source>`, with
-the current directory set to the trail's workspace folder, and sends the request
+the current directory set to the course's workspace folder, and sends the request
 as JSON on stdin: {codigo, entradas, argv, depurar, verificacao}.
 
 It prints a single JSON line: {status, assercao, saida, vars, passos, cortado}.
 With "depurar" it also records every line executed (sys.settrace), which powers
-the step-by-step debugger in the Python trail.
+the step-by-step debugger in the Python course.
 """
 import builtins, io, json, linecache, sys, traceback
 
-pedido = json.loads(sys.stdin.read())
-NOME = '<seu código>'
-codigo = pedido['codigo']
-linecache.cache[NOME] = (len(codigo), None, codigo.splitlines(True), NOME)
+request = json.loads(sys.stdin.read())
+FILENAME = '<seu código>'
+source_code = request['codigo']
+linecache.cache[FILENAME] = (len(source_code), None, source_code.splitlines(True), FILENAME)
 
-saida = []                     # pedaços [tipo, texto] na ordem em que aparecem
-def tamanho():
-    return sum(len(t) for _, t in saida)
+output = []                     # [stream type, text] chunks in emission order
+def output_size():
+    return sum(len(t) for _, t in output)
 
-class Fluxo(io.TextIOBase):
-    def __init__(self, tipo): self.tipo = tipo
-    def write(self, texto):
-        texto = str(texto)
-        if saida and saida[-1][0] == self.tipo: saida[-1][1] += texto
-        else: saida.append([self.tipo, texto])
-        return len(texto)
+class OutputStream(io.TextIOBase):
+    def __init__(self, stream_type): self.stream_type = stream_type
+    def write(self, text):
+        text = str(text)
+        if output and output[-1][0] == self.stream_type: output[-1][1] += text
+        else: output.append([self.stream_type, text])
+        return len(text)
     def writable(self): return True
 
-fila = list(pedido.get('entradas') or [])
+pending_inputs = list(request.get('entradas') or [])
 def _input(msg=''):
     sys.stdout.write(str(msg))
-    if not fila:
+    if not pending_inputs:
         raise EOFError('o programa pediu uma entrada, mas o campo Entradas está vazio')
-    valor = fila.pop(0)
-    sys.stdout.write(valor + '\n')
-    return valor
+    value = pending_inputs.pop(0)
+    sys.stdout.write(value + '\n')
+    return value
 
-def resumo(valor, limite=160):
-    try: texto = repr(valor)
-    except Exception: texto = '?'
-    return texto if len(texto) <= limite else texto[:limite - 3] + '...'
+def summarize(value, limit=160):
+    try: text = repr(value)
+    except Exception: text = '?'
+    return text if len(text) <= limit else text[:limit - 3] + '...'
 
-def variaveis(ns):
-    return [[k, type(v).__name__, resumo(v)] for k, v in ns.items()
+def variables(ns):
+    return [[k, type(v).__name__, summarize(v)] for k, v in ns.items()
             if not k.startswith('__') and type(v).__name__ != 'module']
 
-passos, MAX_PASSOS, cortado = [], 2000, False
-def rastrear(frame, evento, arg):
-    global cortado
-    if frame.f_code.co_filename != NOME:
+steps, MAX_STEPS, truncated = [], 2000, False
+def trace_execution(frame, event, arg):
+    global truncated
+    if frame.f_code.co_filename != FILENAME:
         return None
-    if evento in ('line', 'return', 'exception') and not cortado:
-        if len(passos) >= MAX_PASSOS:
-            cortado = True
+    if event in ('line', 'return', 'exception') and not truncated:
+        if len(steps) >= MAX_STEPS:
+            truncated = True
         else:
-            pilha, f = [], frame
-            while f is not None and f.f_code.co_filename == NOME:
-                pilha.append(f.f_code.co_name); f = f.f_back
-            p = {'linha': frame.f_lineno, 'evento': evento,
-                 'pilha': list(reversed(pilha)), 'vars': variaveis(frame.f_locals),
-                 'saida': tamanho()}
-            if evento == 'return': p['retorno'] = resumo(arg)
-            if evento == 'exception': p['excecao'] = f'{arg[0].__name__}: {arg[1]}'
+            stack, f = [], frame
+            while f is not None and f.f_code.co_filename == FILENAME:
+                stack.append(f.f_code.co_name); f = f.f_back
+            p = {'linha': frame.f_lineno, 'evento': event,
+                 'pilha': list(reversed(stack)), 'vars': variables(frame.f_locals),
+                 'saida': output_size()}
+            if event == 'return': p['retorno'] = summarize(arg)
+            if event == 'exception': p['excecao'] = f'{arg[0].__name__}: {arg[1]}'
             if frame.f_code.co_name != '<module>':
-                p['globais'] = variaveis(frame.f_globals)
-            passos.append(p)
-    return rastrear
+                p['globais'] = variables(frame.f_globals)
+            steps.append(p)
+    return trace_execution
 
-ns = {'__name__': '__main__', '__file__': NOME}
-sys.argv = ['programa.py'] + list(pedido.get('argv') or [])
+ns = {'__name__': '__main__', '__file__': FILENAME}
+sys.argv = ['programa.py'] + list(request.get('argv') or [])
 builtins.input = _input
-sys.stdout, sys.stderr = Fluxo('out'), Fluxo('err')
-status, assercao = 'ok', ''
+sys.stdout, sys.stderr = OutputStream('out'), OutputStream('err')
+status, assertion_error = 'ok', ''
 try:
-    compilado = compile(codigo, NOME, 'exec')
-    if pedido.get('depurar'):
-        sys.settrace(rastrear)
+    compiled = compile(source_code, FILENAME, 'exec')
+    if request.get('depurar'):
+        sys.settrace(trace_execution)
     try:
-        exec(compilado, ns)
+        exec(compiled, ns)
     finally:
         sys.settrace(None)
-    if pedido.get('verificacao'):
-        exec(compile(pedido['verificacao'], '<verificação>', 'exec'), ns)
+    if request.get('verificacao'):
+        exec(compile(request['verificacao'], '<verificação>', 'exec'), ns)
 except SystemExit as e:
     if e.code not in (0, None): status = 'saida'
 except AssertionError as e:
-    status, assercao = 'falhou', str(e)
+    status, assertion_error = 'falhou', str(e)
 except BaseException:
     status = 'erro'
-    tipo, valor, tb = sys.exc_info()
-    while tb is not None and tb.tb_frame.f_code.co_filename != NOME:
-        tb = tb.tb_next                      # esconde os quadros internos do executor
-    saida.append(['tb', ''.join(traceback.format_exception(tipo, valor, tb))])
+    error_type, value, tb = sys.exc_info()
+    while tb is not None and tb.tb_frame.f_code.co_filename != FILENAME:
+        tb = tb.tb_next                      # Hide internal executor frames
+    output.append(['tb', ''.join(traceback.format_exception(error_type, value, tb))])
 finally:
     sys.stdout, sys.stderr = sys.__stdout__, sys.__stderr__
 
-print(json.dumps({'status': status, 'assercao': assercao, 'saida': saida,
-                  'vars': variaveis(ns), 'passos': passos, 'cortado': cortado}))
+print(json.dumps({'status': status, 'assercao': assertion_error, 'saida': output,
+                  'vars': variables(ns), 'passos': steps, 'cortado': truncated}))

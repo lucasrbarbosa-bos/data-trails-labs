@@ -1,9 +1,9 @@
-"""Python engine: runs trail code with the same Python that runs the hub.
+"""Python engine: runs course code with the same Python that runs the hub.
 
 In Docker that is the Python in the image (see Dockerfile). Without Docker it is
 whatever Python you used to start engine/hub.py.
 
-API (relative to /t/<trail-id>/):
+API (relative to /t/<course-id>/):
   GET  api/status    -> {versao, executavel, pasta}
   POST api/executar  {codigo, entradas?, argv?, depurar?, verificacao?}
                      -> {status, assercao, saida, vars, passos, cortado}
@@ -26,9 +26,9 @@ TIMEOUT = 15   # seconds per run
 class PythonRunner(Runner):
     engine = 'python'
 
-    def __init__(self, trail, settings):
-        super().__init__(trail, settings)
-        self.workdir = settings.workspace / trail.id
+    def __init__(self, course, settings):
+        super().__init__(course, settings)
+        self.workdir = settings.workspace / course.id
 
     @property
     def label(self) -> str:
@@ -41,9 +41,9 @@ class PythonRunner(Runner):
             probe.write_text('ok')
             probe.unlink()
         except OSError:
-            fallback = Path(tempfile.gettempdir()) / 'trails-lab' / self.trail.id
+            fallback = Path(tempfile.gettempdir()) / 'trails-lab' / self.course.id
             fallback.mkdir(parents=True, exist_ok=True)
-            print(f'  [{self.trail.id}] cannot write to {self.workdir}; exercise files go to {fallback}')
+            print(f'  [{self.course.id}] cannot write to {self.workdir}; exercise files go to {fallback}')
             self.workdir = fallback
 
     def health(self) -> dict:

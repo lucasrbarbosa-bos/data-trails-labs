@@ -1,0 +1,25 @@
+{
+  "subtitle": "Query a sample PostgreSQL dataset.",
+  "chapters": [
+    {
+      "id": "query-notes",
+      "title": "Query a table",
+      "paragraphs": ["SELECT retrieves rows. WHERE filters rows before they are returned."],
+      "exercises": [
+        {
+          "id": "all-notes",
+          "title": "List the notes",
+          "text": "Run the query to see the sample data.",
+          "code": "SELECT * FROM __SCHEMA__.notes ORDER BY id;"
+        },
+        {
+          "id": "long-notes",
+          "title": "Filter the notes",
+          "text": "Return topics that took more than 30 minutes.",
+          "code": "SELECT topic FROM __SCHEMA__.notes;",
+          "check": "SELECT topic FROM __SCHEMA__.notes WHERE minutes > 30;"
+        }
+      ]
+    }
+  ]
+}

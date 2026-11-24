@@ -1,0 +1,51 @@
+/* Shared shell for course entry pages. Load after theme.css and before course-specific styles. */
+:where(.course-page, .course-page *) { box-sizing: border-box; }
+.course-page {
+  margin: 0;
+  background: var(--th-main, #16161a);
+  color: var(--th-ink, #ececef);
+  font: 14.5px/1.75 var(--th-mono, ui-monospace, monospace);
+}
+:where(.course-page) a { color: var(--th-link); }
+:where(.course-page) p { margin: 0 0 16px; }
+.course-layout { display: grid; }
+.course-sidebar {
+  background: var(--th-side);
+  border-right: 1px solid var(--th-line);
+  overflow-y: auto;
+}
+.course-main { background: var(--th-main); overflow-y: auto; }
+.course-content { margin: 0 auto; }
+.course-content table { border-collapse: collapse; width: 100%; font-size: 13px; line-height: 1.55; }
+.course-content :is(th, td) { text-align: left; vertical-align: top; }
+.course-content th { background: var(--th-surface); font-weight: 700; }
+.course-content h3.sec::before { content: "## "; color: var(--th-ink-3); font-weight: 400; }
+.course-mobile {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--th-side);
+  border-bottom: 1px solid var(--th-line);
+  align-items: center;
+  gap: 10px;
+}
+.course-progress-bar {
+  height: 3px;
+  background: var(--th-line);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.course-progress-bar > div {
+  height: 100%;
+  width: 0;
+  background: var(--th-ok);
+  transition: width .4s;
+}
+@media (max-width: 900px) {
+  .course-sidebar { position: fixed; top: var(--th-bar-h, 0px); bottom: 0; left: 0; }
+  .course-mobile { display: flex; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .course-progress-bar > div { transition: none; }
+}

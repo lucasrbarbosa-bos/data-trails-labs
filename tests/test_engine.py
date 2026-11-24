@@ -2,8 +2,8 @@
 
     python -m unittest discover -s tests -v
 
-The PostgreSQL tests run only when LAB_TEST_PG_URL points at a database you can
-write to (the datasets are loaded into it), for example the one from Docker Compose:
+The PostgreSQL tests run when LAB_TEST_PG_URL points at a writable database
+or LAB_TEST_PG_CONTAINER names a running PostgreSQL container.
 
     LAB_TEST_PG_URL=postgresql://lab:lab@localhost:5433/loja python -m unittest discover -s tests -v
 """
@@ -30,45 +30,51 @@ sys.path.insert(0, str(ROOT / 'tools'))
 import build_static  # noqa: E402
 import hub  # noqa: E402
 import i18n  # noqa: E402
-import new_trail  # noqa: E402
+import new_course  # noqa: E402
 from runners import RUNNERS, Settings  # noqa: E402
 from runners.postgres_runner import PostgresRunner, compare_results, split_statements  # noqa: E402
 from runners.python_runner import PythonRunner  # noqa: E402
-from trails import discover, load_trail  # noqa: E402
+from courses import discover, load_course  # noqa: E402
 
-TRAILS = ROOT / 'trails'
+COURSES = ROOT / 'courses'
 PG_URL = os.environ.get('LAB_TEST_PG_URL')
+PG_CONTAINER = os.environ.get('LAB_TEST_PG_CONTAINER')
 
 
 class ManifestTests(unittest.TestCase):
-    def test_shipped_trails_are_valid(self):
-        trails, errors = discover(TRAILS, set(RUNNERS))
+    def test_shipped_courses_are_valid(self):
+        courses, errors = discover(COURSES, set(RUNNERS))
         self.assertEqual(errors, [])
-        self.assertEqual([t.id for t in trails][:2], ['python', 'sql'])
+        self.assertEqual([t.id for t in courses][:2], ['python', 'sql'])
 
     def test_template_is_hidden(self):
-        trails, _ = discover(TRAILS, set(RUNNERS))
-        self.assertNotIn('_template', [t.id for t in trails])
+        courses, _ = discover(COURSES, set(RUNNERS))
+        self.assertNotIn('_template', [t.id for t in courses])
 
-    def test_scaffolder_creates_valid_trails(self):
+    def test_scaffolder_creates_valid_courses(self):
         with tempfile.TemporaryDirectory() as tmp:
-            for trail_id, engine in [('demo-py', 'python'), ('demo-pg', 'postgres'), ('demo-read', 'none')]:
-                self.assertEqual(new_trail.main([trail_id, '--engine', engine, '--trails-dir', tmp]), 0)
-                trail = load_trail(Path(tmp) / trail_id, set(RUNNERS))
-                self.assertEqual(trail.engine, engine)
-                page = trail.entry_path.read_text(encoding='utf-8')
-                self.assertNotIn('__SCHEMA__', page)
-            self.assertEqual(load_trail(Path(tmp) / 'demo-pg', set(RUNNERS)).database['schemas'], ['demo_pg'])
+            for course_id, engine in [('demo-py', 'python'), ('demo-pg', 'postgres'), ('demo-read', 'none')]:
+                self.assertEqual(new_course.main([course_id, '--engine', engine, '--courses-dir', tmp]), 0)
+                course = load_course(Path(tmp) / course_id, set(RUNNERS))
+                self.assertEqual(course.engine, engine)
+                page = course.entry_path.read_text(encoding='utf-8')
+                self.assertIn('<!-- course styles -->', page)
+                self.assertIn('<script src="course.js">', page)
+                content_path = course.folder / 'content/en.json'
+                self.assertNotIn('__SCHEMA__', content_path.read_text(encoding='utf-8'))
+                chapters = json.loads(content_path.read_text(encoding='utf-8'))['chapters']
+                self.assertEqual(bool(chapters[0].get('exercises')), engine != 'none')
+            self.assertEqual(load_course(Path(tmp) / 'demo-pg', set(RUNNERS)).database['schemas'], ['course_demo_pg'])
             self.assertFalse((Path(tmp) / 'demo-py' / 'db').exists())
 
     def test_bad_manifest_is_reported(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp) / 'broken'
             folder.mkdir()
-            (folder / 'trail.json').write_text(json.dumps({'title': 'x', 'engine': 'cobol'}))
+            (folder / 'course.json').write_text(json.dumps({'title': 'x', 'engine': 'cobol'}))
             (folder / 'index.html').write_text('<html></html>')
-            trails, errors = discover(Path(tmp), set(RUNNERS))
-            self.assertEqual(trails, [])
+            courses, errors = discover(Path(tmp), set(RUNNERS))
+            self.assertEqual(courses, [])
             self.assertIn('unknown engine', errors[0])
 
     def test_i18n_is_validated(self):
@@ -77,34 +83,34 @@ class ManifestTests(unittest.TestCase):
             folder.mkdir()
             (folder / 'index.html').write_text('<html></html>')
             manifest = {'title': 'x', 'engine': 'none', 'i18n': {'es': {'title': 'equis'}}}
-            (folder / 'trail.json').write_text(json.dumps(manifest))
-            trail = load_trail(folder, set(RUNNERS))
-            self.assertEqual(trail.titles(), {'en': 'x', 'es': 'equis', 'pt': 'x'})
+            (folder / 'course.json').write_text(json.dumps(manifest))
+            course = load_course(folder, set(RUNNERS))
+            self.assertEqual(course.titles(), {'en': 'x', 'es': 'equis', 'pt': 'x'})
             for bad, message in [({'fr': {'title': 'x'}}, 'is not one of'), ({'es': {'titulo': 'x'}}, 'may only contain')]:
-                (folder / 'trail.json').write_text(json.dumps(dict(manifest, i18n=bad)))
+                (folder / 'course.json').write_text(json.dumps(dict(manifest, i18n=bad)))
                 with self.assertRaisesRegex(Exception, message):
-                    load_trail(folder, set(RUNNERS))
+                    load_course(folder, set(RUNNERS))
 
 
 class TranslationTests(unittest.TestCase):
     """tools/i18n.py: generated languages are reproducible, and an edit is re-translated alone."""
 
     def test_generated_content_matches_a_rebuild(self):
-        for trail, cfg in i18n.CONFIG.items():
+        for course, cfg in i18n.CONFIG.items():
             for lang in cfg['targets']:
-                doc, _ = i18n.build(trail, lang)
+                doc, _ = i18n.build(course, lang)
                 for path, text in doc.rendered().items():
                     self.assertEqual(path.read_text(encoding='utf-8'), text, f'{path} was edited by hand or is stale')
 
     def test_edit_extract_merge_cycle(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp = Path(tmp)
-            shutil.copytree(TRAILS / 'data-architecture' / 'content', tmp / 'trails' / 'data-architecture' / 'content')
+            shutil.copytree(COURSES / 'data-architecture' / 'content', tmp / 'courses' / 'data-architecture' / 'content')
             shutil.copytree(ROOT / 'i18n', tmp / 'i18n')
-            saved = i18n.TRAILS, i18n.STATE, i18n.WORK, i18n.ROOT
-            i18n.TRAILS, i18n.STATE, i18n.WORK, i18n.ROOT = tmp / 'trails', tmp / 'i18n', tmp / 'i18n-work', tmp
+            saved = i18n.COURSES, i18n.STATE, i18n.WORK, i18n.ROOT
+            i18n.COURSES, i18n.STATE, i18n.WORK, i18n.ROOT = tmp / 'courses', tmp / 'i18n', tmp / 'i18n-work', tmp
             try:
-                src = tmp / 'trails' / 'data-architecture' / 'content' / 'en' / '01-what-is-data-architecture.json'
+                src = tmp / 'courses' / 'data-architecture' / 'content' / 'en' / '01-what-is-data-architecture.json'
                 ch = json.loads(src.read_text(encoding='utf-8'))
                 key = next(f'{ch["id"]}.b{i}.text' for i, b in enumerate(ch['blocks']) if b['t'] == 'p')
                 ch['blocks'][int(key.split('.b')[1].split('.')[0])]['text'] = 'A new paragraph with 1,440 rows and `code`.'
@@ -120,11 +126,11 @@ class TranslationTests(unittest.TestCase):
                     self.assertEqual(i18n.main(['check', 'data-architecture']), 0)
                     i18n.main(['merge', 'data-architecture'])
                     self.assertEqual(i18n.main(['status', 'data-architecture']), 0)
-                pt = json.loads((tmp / 'trails/data-architecture/content/pt/01-what-is-data-architecture.json').read_text(encoding='utf-8'))
+                pt = json.loads((tmp / 'courses/data-architecture/content/pt/01-what-is-data-architecture.json').read_text(encoding='utf-8'))
                 texts = [b.get('text') for b in pt['blocks']]
                 self.assertIn('Um novo parágrafo com 1.440 linhas e `code`.', texts)   # separators localised
             finally:
-                i18n.TRAILS, i18n.STATE, i18n.WORK, i18n.ROOT = saved
+                i18n.COURSES, i18n.STATE, i18n.WORK, i18n.ROOT = saved
 
 
 class StaticSiteTests(unittest.TestCase):
@@ -134,16 +140,21 @@ class StaticSiteTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / 'site'
             result = build_static.build(out, '/data-trails-labs/')
-            self.assertEqual(result['trails'][:2], ['python', 'sql'])
+            self.assertEqual(result['courses'][:2], ['python', 'sql'])
             home = (out / 'index.html').read_text(encoding='utf-8')
             self.assertIn('href="/data-trails-labs/hub/theme.css"', home)
             self.assertNotIn('"/hub/', home)                              # nothing points at the site root
-            self.assertIn('"url": "/data-trails-labs/t/sql/"', home)       # trail list baked in, under the base
+            self.assertIn('"url": "/data-trails-labs/t/sql/"', home)       # course list baked in, under the base
             self.assertTrue((out / 'hub' / 'trail-hub.js').is_file())
             self.assertTrue((out / '.nojekyll').is_file())
-            for trail in result['trails']:
-                page = (out / 't' / trail / 'index.html').read_text(encoding='utf-8')
+            for course in result['courses']:
+                page = (out / 't' / course / 'index.html').read_text(encoding='utf-8')
                 self.assertIn('<link rel="stylesheet" href="/data-trails-labs/hub/theme.css">', page)
+                shared = '<link rel="stylesheet" href="/data-trails-labs/hub/course.css">'
+                local = '<link rel="stylesheet" href="course.css">'
+                self.assertLess(page.index(shared), page.index(local))
+                self.assertTrue((out / 't' / course / 'course.css').is_file())
+                self.assertTrue((out / 't' / course / 'course.js').is_file())
                 self.assertIn('"static": true', page)
                 self.assertNotIn('LAB_TOKEN =', page)                      # no engine, no token
             self.assertTrue((out / 't/data-architecture/content/es/manifest.json').is_file())
@@ -176,8 +187,8 @@ class SqlSplitTests(unittest.TestCase):
 class PythonRunnerTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
-        trail = load_trail(TRAILS / 'python', set(RUNNERS))
-        self.runner = PythonRunner(trail, Settings(root=ROOT, workspace=Path(self.tmp)))
+        course = load_course(COURSES / 'python', set(RUNNERS))
+        self.runner = PythonRunner(course, Settings(root=ROOT, workspace=Path(self.tmp)))
         self.runner.start()
 
     def tearDown(self):
@@ -205,10 +216,10 @@ class HubHttpTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.tmp = tempfile.mkdtemp()
-        trails, _ = discover(TRAILS, set(RUNNERS))
+        courses, _ = discover(COURSES, set(RUNNERS))
         settings = Settings(root=ROOT, workspace=Path(cls.tmp),
                             pg_command=[sys.executable, '-c', 'import sys; sys.stderr.write("could not connect"); sys.exit(2)'])
-        cls.hub = hub.Hub(trails, settings)
+        cls.hub = hub.Hub(courses, settings)
         cls.server = ThreadingHTTPServer(('127.0.0.1', 0), hub.make_handler(cls.hub))
         cls.base = f'http://127.0.0.1:{cls.server.server_address[1]}'
         threading.Thread(target=cls.server.serve_forever, daemon=True).start()
@@ -235,15 +246,18 @@ class HubHttpTests(unittest.TestCase):
 
     def test_api_needs_token(self):
         self.assertEqual(self.get('/api/trails', token=False)[0], 403)
+        self.assertEqual(self.get('/api/courses', token=False)[0], 403)
         self.assertEqual(self.get('/t/python/api/status', token=False)[0], 403)
 
     def test_listing_reports_offline_database(self):
         status, body = self.get('/api/trails')
-        trails = {t['id']: t for t in json.loads(body)['trails']}
-        self.assertTrue(trails['python']['health']['ready'])
-        self.assertFalse(trails['sql']['health']['ready'])
+        courses = {t['id']: t for t in json.loads(body)['trails']}
+        self.assertEqual(self.get('/api/courses')[0], 200)
+        self.assertEqual(json.loads(self.get('/api/courses')[1])['courses'], json.loads(body)['trails'])
+        self.assertTrue(courses['python']['health']['ready'])
+        self.assertFalse(courses['sql']['health']['ready'])
 
-    def test_trail_page_gets_context_and_relative_api(self):
+    def test_course_page_gets_context_and_relative_api(self):
         status, body = self.get('/t/sql/', token=False)
         self.assertEqual(status, 200)
         self.assertIn('window.TRAIL = {"id": "sql"', body)
@@ -261,9 +275,9 @@ class HubHttpTests(unittest.TestCase):
         self.assertIn("'trails-hub:'", js)
 
     def test_listing_carries_translations(self):
-        trails = {t['id']: t for t in json.loads(self.get('/api/trails')[1])['trails']}
-        self.assertEqual(trails['python']['i18n']['en']['title'], 'Modern Python')
-        self.assertEqual(trails['data-architecture']['i18n']['pt']['title'], 'Arquitetura de Dados')
+        courses = {t['id']: t for t in json.loads(self.get('/api/trails')[1])['trails']}
+        self.assertEqual(courses['python']['i18n']['en']['title'], 'Modern Python')
+        self.assertEqual(courses['data-architecture']['i18n']['pt']['title'], 'Arquitetura de Dados')
 
     def test_python_through_http(self):
         status, body = self.get('/t/python/api/executar', data=json.dumps({'codigo': 'print(7)'}).encode())
@@ -280,12 +294,14 @@ class HubHttpTests(unittest.TestCase):
         self.assertIn('<title>x</title><script>X</script>', out)
 
 
-@unittest.skipUnless(PG_URL, 'set LAB_TEST_PG_URL to run the PostgreSQL tests')
+@unittest.skipUnless(PG_URL or PG_CONTAINER, 'set LAB_TEST_PG_URL or LAB_TEST_PG_CONTAINER')
 class PostgresTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        trail = load_trail(TRAILS / 'sql', set(RUNNERS))
-        cls.runner = PostgresRunner(trail, Settings(root=ROOT, workspace=Path(tempfile.gettempdir()), pg_url=PG_URL))
+        course = load_course(COURSES / 'sql', set(RUNNERS))
+        settings = Settings(root=ROOT, workspace=Path(tempfile.gettempdir()), pg_url=PG_URL,
+                            pg_container=PG_CONTAINER or 'sql-lab-postgres')
+        cls.runner = PostgresRunner(course, settings)
         cls.runner.start()
 
     def test_datasets_and_search_path(self):

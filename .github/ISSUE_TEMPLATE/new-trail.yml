@@ -1,6 +1,6 @@
-name: New trail
-description: Propose a new learning trail.
-title: "trail(<trail-id>): "
+name: New course
+description: Propose a new learning course.
+title: "course(<course-id>): "
 labels: [new-trail]
 body:
   - type: input

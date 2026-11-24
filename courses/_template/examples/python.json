@@ -1,0 +1,25 @@
+{
+  "subtitle": "Learn by running and editing small Python programs.",
+  "chapters": [
+    {
+      "id": "hello",
+      "title": "A first program",
+      "paragraphs": ["A Python program can display a value using print()."],
+      "exercises": [
+        {
+          "id": "print-greeting",
+          "title": "Print a greeting",
+          "text": "Run the program, then try a different name.",
+          "code": "name = \"world\"\nprint(f\"Hello, {name}!\")"
+        },
+        {
+          "id": "sum-values",
+          "title": "Add a list of numbers",
+          "text": "Define total() so it returns the sum of the values.",
+          "code": "def total(values):\n    ...",
+          "check": "assert total([1, 2, 3]) == 6, 'Expected a total of 6'"
+        }
+      ]
+    }
+  ]
+}
