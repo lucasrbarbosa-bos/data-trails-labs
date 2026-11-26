@@ -7,7 +7,9 @@
  * Everything sits in the layer "trail-base". A page's own <style> is not in a layer, so it always wins
  * over these rules, whatever the order the files load in (the hub injects this file at the end of the
  * head element, after the page's own styles). Selectors keep the specificity of the original rules:
- * the ".tl" scope is wrapped in :where(), which adds nothing.
+ * the ".tl" scope is wrapped in :where(), which adds nothing. The same rule cuts the other way: a page
+ * rule on a generic selector (.btn { border: … }) also beats a kit rule on a specific one
+ * (.btn.prim { border-color: … }), so a page that overrides one has to restate the other.
  *
  * Blocks:
  *   1. base        reset, body, links, focus, selection
@@ -15,6 +17,9 @@
  *   3. prose       chapter title, headings with "#" prefixes, paragraphs, lists, code, tables
  *   4. components  eyebrow, progress bar, chapter nav, call-outs, pager, label divider, prompt,
  *                  continue button, loading and message lines
+ *   5. code        for trails with an engine: engine status, example/challenge box (.ex), code editor,
+ *                  syntax colours (.tk-*), buttons (.btn), shortcut and kbd, check result, solution,
+ *                  chapter cards on the trail home
  *
  * Page skeleton the kit expects:
  *   <div class="app">
@@ -27,6 +32,7 @@
   /* ---------------------------------------------------------------- 1. base */
   :where(.tl) {
     --tl-side-w: 320px;
+    -webkit-text-size-adjust: 100%;
   }
   :where(.tl, .tl *) {
     box-sizing: border-box;
@@ -47,7 +53,9 @@
     overflow: hidden;
   }
   :where(.tl) button,
-  :where(.tl) input {
+  :where(.tl) input,
+  :where(.tl) textarea,
+  :where(.tl) select {
     font-family: inherit;
   }
   :where(.tl) a {
@@ -458,6 +466,309 @@
     content: "$ ";
   }
 
+  /* ---------------------------------------------------------------- 5. code and exercises */
+  /* engine status line in the sidebar: <div class="engine ready|failed"><i></i><span>…</span></div> */
+  :where(.tl) .engine {
+    margin-top: 18px;
+    font-size: 11.5px;
+    color: var(--th-ink-2);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  :where(.tl) .engine i {
+    flex: 0 0 auto;
+    width: 7px;
+    height: 7px;
+    margin-top: 5px;
+    border-radius: 50%;
+    background: var(--th-warn);
+    display: inline-block;
+  }
+  :where(.tl) .engine.ready i {
+    background: var(--th-ok);
+    box-shadow: 0 0 0 3px var(--th-ok-bg);
+  }
+  :where(.tl) .engine.failed i {
+    background: var(--th-err);
+  }
+
+  /* example or challenge box: <div class="ex"> .title · .meta (.file) · .prompt · editor · .actions · .result </div> */
+  :where(.tl) .ex {
+    background: var(--th-surface);
+    border: 1px solid var(--th-line);
+    border-radius: 8px;
+    padding: 16px 20px 16px;
+    margin: 26px 0;
+  }
+  :where(.tl) .ex .title {
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.45;
+    margin-bottom: 4px;
+  }
+  :where(.tl) .ex .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0 8px;
+    flex-wrap: wrap;
+    font-size: inherit;
+    color: inherit;
+  }
+  :where(.tl) .ex .prompt {
+    margin: 8px 0 12px;
+    font-size: inherit;
+    color: inherit;
+  }
+  /* numbered notes under a code block: <ol class="callouts"><li><span class="n">1</span>…</li></ol> */
+  :where(.tl) .callouts {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 0;
+    font-size: 13.5px;
+  }
+  :where(.tl) .callouts li {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  :where(.tl) .callouts .n {
+    color: var(--th-accent);
+  }
+
+  /* code editor: a textarea over a highlighted <pre>, with a line-number gutter
+     <div class="editor"><div class="ed-wrap"><div class="gutter"></div><div class="area"><pre></pre><textarea></textarea></div></div></div> */
+  :where(.tl) .editor {
+    position: relative;
+    border: 1px solid var(--th-line);
+    border-radius: 8px;
+    background: var(--th-code);
+    overflow: hidden;
+  }
+  :where(.tl) .editor:focus-within {
+    border-color: var(--th-accent);
+  }
+  :where(.tl) .ed-wrap {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    overflow-x: auto;
+  }
+  :where(.tl) .gutter {
+    font-family: var(--th-mono);
+    font-size: 13px;
+    line-height: 21px;
+    color: var(--th-ink-3);
+    text-align: right;
+    padding: 12px 8px 12px 10px;
+    user-select: none;
+    border-right: 1px solid var(--th-line);
+    background: var(--th-code);
+    white-space: pre;
+  }
+  :where(.tl) .gutter .error {
+    color: var(--th-err);
+    font-weight: 700;
+  }
+  :where(.tl) .area {
+    position: relative;
+    min-width: 0;
+  }
+  :where(.tl) .area pre,
+  :where(.tl) .area textarea {
+    margin: 0;
+    font-family: var(--th-mono);
+    font-size: 13px;
+    line-height: 21px;
+    padding: 12px 14px;
+    white-space: pre;
+    tab-size: 4;
+    border: 0;
+    letter-spacing: 0;
+    font-variant-ligatures: none;
+  }
+  :where(.tl) .area pre {
+    pointer-events: none;
+    color: var(--th-ink);
+    min-height: 100%;
+  }
+  :where(.tl) .area textarea {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    resize: none;
+    background: transparent;
+    color: transparent;
+    caret-color: var(--th-ink);
+    outline: none;
+    overflow: hidden;
+  }
+  :where(.tl) .area textarea::selection {
+    background: var(--th-select);
+    color: transparent;
+  }
+  /* read-only code: <div class="static-code"><pre>…</pre></div> */
+  :where(.tl) .static-code pre {
+    margin: 0;
+    font-family: var(--th-mono);
+    font-size: 13px;
+    line-height: 21px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    white-space: pre;
+    color: var(--th-ink);
+  }
+  /* syntax colours and the highlighted error line */
+  :where(.tl) .tk-kw {
+    color: var(--th-kw);
+  }
+  :where(.tl) .tk-str {
+    color: var(--th-str);
+  }
+  :where(.tl) .tk-com {
+    color: var(--th-com);
+    font-style: italic;
+  }
+  :where(.tl) .tk-num {
+    color: var(--th-num);
+  }
+  :where(.tl) .tk-bi {
+    color: var(--th-bi);
+  }
+  :where(.tl) .tk-fn {
+    color: var(--th-fn);
+  }
+  :where(.tl) .error-line {
+    background: var(--th-err-bg);
+    display: inline-block;
+    width: 100%;
+  }
+
+  /* buttons: <div class="actions"><button class="btn prim">Run</button><button class="btn">…</button><span class="shortcut">…</span></div> */
+  :where(.tl) .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0 0;
+    align-items: center;
+  }
+  :where(.tl) .btn {
+    border: 1px solid var(--th-line-2);
+    background: var(--th-surface-2);
+    color: var(--th-ink);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    line-height: 1.4;
+  }
+  :where(.tl) .btn:hover {
+    border-color: var(--th-accent);
+  }
+  :where(.tl) .btn.prim {
+    background: var(--th-accent);
+    border-color: var(--th-accent);
+    color: var(--th-on-accent);
+    font-weight: 700;
+  }
+  :where(.tl) .btn.prim:hover {
+    filter: brightness(1.08);
+  }
+  :where(.tl) .btn.ok {
+    background: var(--th-ok-bg);
+    border-color: var(--th-ok);
+    color: var(--th-ok);
+    font-weight: 700;
+  }
+  :where(.tl) .btn:disabled {
+    opacity: .5;
+    cursor: progress;
+  }
+  :where(.tl) .shortcut {
+    font-size: 11px;
+    color: var(--th-ink-3);
+    margin-left: auto;
+  }
+  :where(.tl) kbd {
+    font-family: var(--th-mono);
+    font-size: 11px;
+    border: 1px solid var(--th-line-2);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 0 5px;
+    background: var(--th-surface-2);
+    color: var(--th-ink);
+  }
+
+  /* check result and solution, shown with .vis: <div class="result vis ok|fail">…</div> */
+  :where(.tl) .result {
+    margin-top: 10px;
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    display: none;
+    border: 1px solid transparent;
+  }
+  :where(.tl) .result.vis {
+    display: block;
+  }
+  :where(.tl) .result.ok {
+    background: var(--th-ok-bg);
+    color: var(--th-ok);
+    border-color: var(--th-ok);
+  }
+  :where(.tl) .result.fail {
+    background: var(--th-warn-bg);
+    color: var(--th-warn);
+    border-color: var(--th-warn);
+  }
+  :where(.tl) .solution {
+    margin-top: 12px;
+    display: none;
+  }
+  :where(.tl) .solution.vis {
+    display: block;
+  }
+
+  /* trail home: chapter cards. <div class="cards"><a class="card">… <b>title</b> <small>…</small></a></div> */
+  :where(.tl) .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+    gap: 12px;
+  }
+  :where(.tl) .card {
+    position: relative;
+    border: 1px solid var(--th-line);
+    border-radius: 8px;
+    padding: 12px 14px 16px;
+    text-decoration: none;
+    color: var(--th-ink);
+    background: var(--th-surface);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: border-color .15s, background .15s;
+  }
+  :where(.tl) .card:hover {
+    border-color: var(--th-line-2);
+    background: var(--th-surface-2);
+  }
+  :where(.tl) .card b {
+    display: block;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  :where(.tl) .card small {
+    color: var(--th-ink-3);
+    font-size: 11.5px;
+    margin-top: auto;
+  }
+
   /* ---------------------------------------------------------------- narrow screens */
   @media (max-width: 900px) {
     :where(.tl) .app {
@@ -494,6 +805,19 @@
     }
     :where(.tl) .pager a.next {
       grid-column: 1;
+    }
+    :where(.tl) .ex {
+      padding: 14px 12px;
+    }
+    :where(.tl) .shortcut {
+      display: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :where(.tl) aside,
+    :where(.tl) .bar > div,
+    :where(.tl) .card {
+      transition: none;
     }
   }
 }

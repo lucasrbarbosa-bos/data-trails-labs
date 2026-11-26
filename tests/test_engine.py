@@ -50,6 +50,14 @@ class ManifestTests(unittest.TestCase):
         trails, _ = discover(TRAILS, set(RUNNERS))
         self.assertNotIn('_template', [t.id for t in trails])
 
+    def test_pages_use_the_shared_kit(self):
+        # every shipped page and the template opt in to /hub/trail-base.css with <html class="tl">
+        trails, _ = discover(TRAILS, set(RUNNERS))
+        pages = [t.entry_path for t in trails] + [TRAILS / '_template' / 'index.html']
+        for path in pages:
+            head = path.read_text(encoding='utf-8')[:400]
+            self.assertRegex(head, r'<html[^>]*\bclass="tl"', path)
+
     def test_scaffolder_creates_valid_trails(self):
         with tempfile.TemporaryDirectory() as tmp:
             for trail_id, engine in [('demo-py', 'python'), ('demo-pg', 'postgres'), ('demo-read', 'none')]:

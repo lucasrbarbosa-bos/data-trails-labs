@@ -98,10 +98,23 @@ Unknown keys are rejected, so typos show up in `--check`.
 
 The page can be anything from a single file to a generated book. The hub injects five things at
 the end of its head element: the shared stylesheet `/hub/theme.css`, the shared page kit
-`/hub/trail-base.css`, `window.LAB_TOKEN`, `window.TRAIL`, and the top-bar script. The page kit
-(layout, prose, chapter nav, progress bar, call-outs, pager) applies only to pages that opt in with
-`<html class="tl">`, and its rules sit in a CSS layer, so the page's own `<style>` always wins; the
-Data Architecture trail uses it, and the file's header lists the markup it expects.
+`/hub/trail-base.css`, `window.LAB_TOKEN`, `window.TRAIL`, and the top-bar script.
+
+**The page kit.** `trail-base.css` applies only to pages that opt in with `<html class="tl">`. It
+gives a page:
+
+- the layout: sidebar and reading area, each scrolling on its own, and the drawer on narrow screens;
+- the prose: titles, `##`/`###` headings, lists, `code` and tables;
+- the components: chapter nav, progress bar, call-outs, pager and label divider;
+- for trails with an engine: the exercise box (`.ex`), the code editor, syntax colours, buttons
+  (`.btn`, `.btn.prim`), the check result (`.result`), the solution and the chapter cards.
+
+All four shipped pages use it: the template, Data Architecture, Python and SQL. The file's header
+lists the markup it expects, and `trails/_template/index.html` is a small working example.
+
+Its rules sit in a CSS layer, so the page's own `<style>` always wins, whatever the specificity. The
+other side of that rule: a page's plain `.btn { border: … }` also beats the kit's `.btn.prim { border-color: … }`.
+When you override a property on a generic selector, set it on the more specific ones in the page too.
 
 The top bar is added as the first element of `<body>` (48px, `var(--th-bar-h)`): brand,
 "All trails", the trail switcher, the theme picker (dark, light, dracula) and the EN | ES | PT
@@ -114,10 +127,11 @@ language toggle. A page follows five rules:
 3. **Report progress** whenever it changes: `window.TRAIL.progress(done, total)`. The home page
    shows it on the card. Guard it (`if (window.TRAIL && TRAIL.progress)`) so the page still opens
    from disk.
-4. **Use the shared theme and language.** Colour everything with the `--th-*` tokens from
-   `engine/web/theme.css` (they change with the theme picker) and the font `var(--th-mono)`. Leave room
-   for the top bar: the page sits below it, so a full-height layout uses
-   `calc(100dvh - var(--th-bar-h))`. Read `window.TRAIL.lang` (`'en'`, `'es'` or `'pt'`) once at start-up
+4. **Use the shared kit, theme and language.** Start from `<html class="tl">` and the kit's markup,
+   and keep your own `<style>` for what is particular to the trail. Colour everything with the
+   `--th-*` tokens from `engine/web/theme.css` (they change with the theme picker) and the font
+   `var(--th-mono)`. The kit's layout already leaves room for the top bar; a page that brings its own
+   full-height layout uses `calc(100dvh - var(--th-bar-h))`. Read `window.TRAIL.lang` (`'en'`, `'es'` or `'pt'`) once at start-up
    and show the UI and content in that language; `TRAIL.t({en, es, pt})` picks a string. Changing the
    language reloads the page. The shipped trails keep content per language in `content/`
    (`content/<lang>.json`, or `content/<lang>/` for the Data Architecture chapters).
@@ -267,6 +281,7 @@ on `self`. `self.trail` is the parsed manifest and `self.settings` the engine-wi
 
 - [ ] `python engine/hub.py --check` lists the trail as `ok`
 - [ ] The page opens from the home card, under the top bar, and looks right in dark, light and dracula
+- [ ] A page with its own layout or components uses `<html class="tl">` and the kit's classes before adding new CSS
 - [ ] UI text (and content, if translated) follows the EN | ES | PT toggle
 - [ ] API calls use relative paths and send `X-Lab-Token`
 - [ ] Progress moves on the home card after solving something

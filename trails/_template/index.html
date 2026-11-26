@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="tl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,144 +10,84 @@
     1. Call the engine with RELATIVE urls ("api/run", never "/api/run").
     2. Send the header  X-Lab-Token: window.LAB_TOKEN  on every API call.
     3. Report progress with  window.TRAIL.progress(done, total).
-    4. Use the shared theme tokens (--th-*) from /hub/theme.css, and read window.TRAIL.lang ('en'|'es'|'pt').
+    4. Build on the shared kit: class "tl" on <html> gives the layout, prose and components of
+       /hub/trail-base.css; colours are the --th-* tokens of /hub/theme.css. Read window.TRAIL.lang ('en'|'es'|'pt').
     5. Keep your own localStorage keys prefixed with the trail id.
-  The hub injects /hub/theme.css, window.LAB_TOKEN, window.TRAIL and the top-bar script (theme picker,
-  EN | ES | PT toggle, trail switcher) at the end of the head element.
+  The hub injects /hub/theme.css, /hub/trail-base.css, window.LAB_TOKEN, window.TRAIL and the top-bar
+  script (theme picker, EN | ES | PT toggle, trail switcher) at the end of the head element.
 -->
 <style>
-:root {
-  /* aliases for the shared theme tokens (dark, light and dracula live in /hub/theme.css) */
-  --bg: var(--th-main, #16161a);
-  --bg-2: var(--th-surface, #1d1d22);
-  --line: var(--th-line, #2a2a31);
-  --ink: var(--th-ink, #ececef);
-  --ink-2: var(--th-ink-2, #a1a1aa);
-  --accent: var(--th-accent, #facc15);
-  --on-accent: var(--th-on-accent, #111);
-  --ok: var(--th-ok, #4ade80);
-  --ok-bg: var(--th-ok-bg, #1f3322);
-  --err: var(--th-err, #f87171);
-  --err-bg: var(--th-err-bg, #3b2020);
-  --mono: var(--th-mono, ui-monospace, 'SF Mono', Menlo, Consolas, monospace);
-}
-* {
-  box-sizing: border-box;
-}
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--mono);
-  font-size: 14.5px;
-  line-height: 1.7;
-}
-main {
-  max-width: 820px;
-  margin: 0 auto;
-  padding: 24px 16px 60px;
-}
-h1 {
-  font-size: 30px;
-  margin: 8px 0 4px;
-}
-.lead {
-  color: var(--ink-2);
-  margin: 0 0 8px;
-}
-.progress {
-  font-size: 13px;
-  color: var(--ink-2);
-  margin-bottom: 28px;
-}
-.exercise {
-  background: var(--bg-2);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 18px 20px;
-  margin: 0 0 24px;
-}
-.exercise h2 {
-  font-size: 20px;
-  margin: 0 0 6px;
-}
-.exercise.done h2::after {
-  content: " ✓";
-  color: var(--ok);
-}
-textarea {
+/* Layout (sidebar | reading area), prose, nav, progress, exercise boxes (.ex), buttons (.btn) and
+  check results (.result) come from /hub/trail-base.css. This block only adds what the template
+  needs on top: a plain code box and the output area. It is not in a CSS layer, so it wins over the kit. */
+.ex .code {
+  display: block;
   width: 100%;
   min-height: 130px;
-  font: 14px/1.5 var(--mono);
-  color: var(--ink);
-  background: var(--bg);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 10px 12px;
+  font: 13px/21px var(--th-mono);
+  color: var(--th-ink);
+  background: var(--th-code);
+  border: 1px solid var(--th-line);
+  border-radius: 8px;
+  padding: 12px 14px;
   resize: vertical;
   tab-size: 4;
 }
-button {
-  font: inherit;
-  font-size: 13.5px;
-  font-weight: 700;
-  background: var(--accent);
-  color: var(--on-accent);
-  border: 0;
-  border-radius: 7px;
-  padding: 6px 16px;
-  cursor: pointer;
-  margin-top: 8px;
+.ex .code:focus {
+  border-color: var(--th-accent);
+  outline: none;
 }
-button:disabled {
-  opacity: .5;
-  cursor: default;
+.ex .title .ck {
+  color: var(--th-ok);
 }
 .out {
-  margin-top: 12px;
-  font: 13.5px/1.5 var(--mono);
+  margin: 10px 0 0;
+  font: 13px/1.6 var(--th-mono);
   white-space: pre-wrap;
-  background: var(--bg);
-  border: 1px solid var(--line);
-  border-radius: 6px;
+  background: var(--th-code);
+  border: 1px solid var(--th-line);
+  border-radius: 8px;
   padding: 10px 12px;
   overflow-x: auto;
 }
 .out:empty {
   display: none;
 }
-.out.ok {
-  border-color: var(--ok);
-}
-.out.err {
-  border-color: var(--err);
-  background: var(--err-bg);
-}
 .out table {
-  border-collapse: collapse;
-  font-size: 13px;
+  width: auto;
+  font-size: 12.5px;
 }
 .out th,
 .out td {
-  border: 1px solid var(--line);
-  padding: 3px 10px;
-  text-align: left;
-}
-.offline {
-  background: var(--err-bg);
-  border-radius: 6px;
-  padding: 10px 14px;
-  margin-bottom: 20px;
+  padding: 4px 10px;
 }
 </style>
 </head>
 <body>
-<main>
-  <h1 id="title">My new trail</h1>
-  <p class="lead">Replace this text and the exercises below. Each exercise has starter code and an optional check.</p>
-  <div class="progress" id="progress"></div>
-  <div id="exercises"></div>
-</main>
+<div class="app">
+  <aside id="side">
+    <div class="side-head">
+      <div class="eyebrow"><span class="cmd">$ trail</span></div>
+      <h1 id="title">My new trail</h1>
+      <div class="sub">Replace this text and the exercises in index.html.</div>
+    </div>
+    <div class="progress">
+      <div class="bar"><div id="bar"></div></div>
+      <small id="progress"></small>
+    </div>
+    <nav id="nav" aria-label="Exercises"></nav>
+  </aside>
+  <main>
+    <div class="mobile-top">
+      <button type="button" id="menu" aria-label="Menu" aria-controls="side">☰</button>
+      <span id="mobile-title"></span>
+    </div>
+    <div class="content">
+      <p class="summary">Each exercise has starter code and an optional check.</p>
+      <div id="exercises"></div>
+    </div>
+  </main>
+</div>
 
 <script>
 (function () {
@@ -160,6 +100,8 @@ button:disabled {
     progress: { en: '{d} of {t} exercises done', es: '{d} de {t} ejercicios hechos', pt: '{d} de {t} exercícios feitos' },
     run: { en: 'Run', es: 'Ejecutar', pt: 'Executar' },
     running: { en: 'Running…', es: 'Ejecutando…', pt: 'Executando…' },
+    passed: { en: '✓ Done', es: '✓ Hecho', pt: '✓ Feito' },
+    failed: { en: 'The code ended with an error.', es: 'El código terminó con un error.', pt: 'O código terminou com um erro.' },
     noEngine: { en: 'The engine did not answer: ', es: 'El motor no respondió: ', pt: 'O motor não respondeu: ' },
     openHub: { en: 'Open this trail through the hub (python engine/hub.py) to run the exercises.',
                es: 'Abre esta ruta a través del hub (python engine/hub.py) para ejecutar los ejercicios.',
@@ -195,6 +137,10 @@ button:disabled {
   function updateProgress() {
     var done = EXERCISES.filter(function (x) { return state.done[x.id]; }).length;
     document.getElementById('progress').textContent = t('progress', { d: done, t: EXERCISES.length });
+    document.getElementById('bar').style.width = (100 * done / EXERCISES.length) + '%';
+    EXERCISES.forEach(function (x) {
+      document.querySelectorAll('[data-ck="' + x.id + '"]').forEach(function (ck) { ck.textContent = state.done[x.id] ? ' ✓' : ''; });
+    });
     if (TRAIL.progress) TRAIL.progress(done, EXERCISES.length);
   }
   function markDone(id) {
@@ -215,54 +161,70 @@ button:disabled {
     return api('run', { code: code, check: ex.check || undefined });
   }
 
-  // ---- rendering results
-  function esc(s) { return String(s == null ? 'NULL' : s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
-  function showPython(res, out) {
-    out.innerHTML = (res.output || []).map(function (p) { return esc(p[1]); }).join('') +
-      (res.status === 'failed' ? '\n✗ ' + esc(res.assertion || 'check failed') : '');
-    return res.status === 'ok';
+  // ---- rendering results: each returns { ok, output (HTML), message (when not ok) }
+  function esc(s) { return String(s == null ? 'NULL' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function showPython(res) {
+    var output = (res.output || []).map(function (p) { return esc(p[1]); }).join('');
+    if (res.status === 'ok') return { ok: true, output: output };
+    return { ok: false, output: output, message: res.status === 'failed' ? (res.assertion || 'check failed') : t('failed') };
   }
-  function showSql(res, out) {
-    if (!res.ok) { out.textContent = (res.error && res.error.message) || 'error'; return false; }
+  function showSql(res) {
+    if (!res.ok) return { ok: false, output: '', message: (res.error && res.error.message) || 'error' };
     var tables = (res.results || []).filter(function (r) { return r.columns; });
-    var t = tables[tables.length - 1];
-    out.innerHTML = t ? '<table><tr>' + t.columns.map(function (c) { return '<th>' + esc(c) + '</th>'; }).join('') + '</tr>' +
-      t.rows.map(function (row) { return '<tr>' + row.map(function (v) { return '<td>' + esc(v) + '</td>'; }).join('') + '</tr>'; }).join('') +
-      '</table>' : 'OK';
-    if (res.check && !res.check.ok) { out.innerHTML += '\n✗ ' + esc(res.check.reason); return false; }
-    return true;
+    var last = tables[tables.length - 1];
+    var output = last ? '<table><thead><tr>' + last.columns.map(function (c) { return '<th>' + esc(c) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      last.rows.map(function (row) { return '<tr>' + row.map(function (v) { return '<td>' + esc(v) + '</td>'; }).join('') + '</tr>'; }).join('') +
+      '</tbody></table>' : 'OK';
+    if (res.check && !res.check.ok) return { ok: false, output: output, message: res.check.reason };
+    return { ok: true, output: output };
   }
 
+  // ---- page
+  var side = document.getElementById('side');
   var box = document.getElementById('exercises');
+  var nav = document.getElementById('nav');
   if (!window.LAB_TOKEN && ENGINE !== 'none') {
-    box.insertAdjacentHTML('beforebegin', '<p class="offline">' + t('openHub') + '</p>');
+    box.insertAdjacentHTML('beforebegin', '<p class="msg">' + t('openHub') + '</p>');
   }
-  EXERCISES.forEach(function (ex) {
+  EXERCISES.forEach(function (ex, i) {
+    nav.insertAdjacentHTML('beforeend', '<a href="#ex-' + esc(ex.id) + '"><span class="n">' + (i + 1) + '</span>' +
+      '<span class="t">' + esc(ex.title.replace(/^\d+\.\s*/, '')) + '</span><span class="ck" data-ck="' + esc(ex.id) + '"></span></a>');
     var el = document.createElement('section');
-    el.className = 'exercise' + (state.done[ex.id] ? ' done' : '');
+    el.className = 'ex';
     el.id = 'ex-' + ex.id;
-    el.innerHTML = '<h2>' + esc(ex.title) + '</h2><p>' + esc(ex.text) + '</p>' +
-      '<textarea spellcheck="false" aria-label="Code for ' + esc(ex.title) + '"></textarea>' +
-      '<button type="button">' + t('run') + '</button><div class="out" aria-live="polite"></div>';
-    var area = el.querySelector('textarea'), btn = el.querySelector('button'), out = el.querySelector('.out');
+    el.innerHTML = '<div class="title">' + esc(ex.title) + '<span class="ck" data-ck="' + esc(ex.id) + '"></span></div>' +
+      '<p class="prompt">' + esc(ex.text) + '</p>' +
+      '<textarea class="code" spellcheck="false" aria-label="Code for ' + esc(ex.title) + '"></textarea>' +
+      '<div class="actions"><button type="button" class="btn prim">' + t('run') + '</button></div>' +
+      '<div class="result" aria-live="polite"></div><pre class="out"></pre>';
+    var area = el.querySelector('textarea'), btn = el.querySelector('button');
+    var result = el.querySelector('.result'), out = el.querySelector('.out');
     area.value = ex.code;
     btn.disabled = !window.LAB_TOKEN;
     if (ENGINE === 'none') { btn.hidden = true; area.readOnly = true; }   // reading-only trail: nothing to run
     btn.addEventListener('click', function () {
       btn.disabled = true;
-      out.className = 'out'; out.textContent = t('running');
+      result.className = 'result vis'; result.textContent = t('running'); out.innerHTML = '';
       run(ex, area.value).then(function (res) {
-        var ok = ENGINE === 'postgres' ? showSql(res, out) : showPython(res, out);
-        out.className = 'out ' + (ok ? 'ok' : 'err');
-        if (ok) { el.classList.add('done'); markDone(ex.id); }
+        var shown = ENGINE === 'postgres' ? showSql(res) : showPython(res);
+        out.innerHTML = shown.output;
+        result.className = 'result vis ' + (shown.ok ? 'ok' : 'fail');
+        result.textContent = shown.ok ? t('passed') : '✗ ' + shown.message;
+        if (shown.ok) markDone(ex.id);
       }).catch(function (e) {
-        out.className = 'out err'; out.textContent = t('noEngine') + e.message;
+        result.className = 'result vis fail'; result.textContent = t('noEngine') + e.message;
       }).then(function () { btn.disabled = false; });
     });
     box.appendChild(el);
   });
+
+  // ---- narrow screens: the menu button opens the sidebar, a link closes it
+  document.getElementById('menu').addEventListener('click', function () { side.classList.toggle('open'); });
+  nav.addEventListener('click', function () { side.classList.remove('open'); });
+
   var title = (TRAIL.titles && TRAIL.titles[TRAIL.lang]) || TRAIL.title;
   if (title) { document.getElementById('title').textContent = title; document.title = title; }
+  document.getElementById('mobile-title').textContent = document.getElementById('title').textContent;
   updateProgress();
 })();
 </script>
